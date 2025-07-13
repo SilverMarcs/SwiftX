@@ -20,7 +20,7 @@ struct UnifiedTweetView: View {
                         Rectangle()
                             .fill(.background.secondary)
                     }
-                    .downsampling(size: CGSize(width: 60, height: 60))
+                    .downsampling(size: CGSize(width: 100, height: 100))
                     .serialize(as: .JPEG)
                     .fade(duration: 0.1)
                     .frame(width: 35, height: 35)
