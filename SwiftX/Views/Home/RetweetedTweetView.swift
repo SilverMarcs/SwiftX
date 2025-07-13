@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Kingfisher
 
 struct RetweetedTweetView: View {
     let tweet: Tweet2
@@ -14,16 +15,17 @@ struct RetweetedTweetView: View {
         VStack(alignment: .leading, spacing: 10) {
             // User Info
             HStack {
-                AsyncImage(url: URL(string: tweet.user.profileImageUrl)) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Circle()
-                        .fill(.background.secondary)
-                }
-                .frame(width: 40, height: 40)
-                .clipShape(Circle())
+                KFImage(URL(string: tweet.user.profileImageUrl))
+                    .placeholder {
+                        Rectangle()
+                            .fill(.background.secondary)
+                    }
+                    .downsampling(size: CGSize(width: 60, height: 60))
+                    .serialize(as: .JPEG)
+                    .fade(duration: 0.1)
+                    .frame(width: 32, height: 32)
+                    .aspectRatio(contentMode: .fill)
+                    .clipShape(Circle())
                 
                 VStack(alignment: .leading, spacing: 2) {
                     HStack {

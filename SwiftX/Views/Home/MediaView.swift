@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Kingfisher
 
 struct MediaView: View {
     let media: Media
@@ -13,16 +14,20 @@ struct MediaView: View {
     var body: some View {
         VStack {
             if let photos = media.photos, !photos.isEmpty {
-                AsyncImage(url: URL(string: photos[0].url)) { image in
-                    image
-                        .resizable()
-                        .scaledToFill()
-                } placeholder: {
-                    Rectangle()
-                        .fill(.background.secondary)
-                }
-                .frame(width: 300, height: 300)
-                .clipShape(.rect(cornerRadius: 10))
+                KFImage(URL(string: photos[0].url))
+                    .placeholder {
+                       Rectangle()
+                           .fill(.background.secondary)
+                           .overlay {
+                               ProgressView()
+                           }
+                    }
+                    .downsampling(size: CGSize(width: 1000, height: 1000))
+                    .serialize(as: .JPEG)
+                    .fade(duration: 0.1)
+                    .frame(width: 300, height: 300)
+                    .aspectRatio(contentMode: .fill)
+                    .clipShape(.rect(cornerRadius: 10))
                 
                 // Show indicator if there are more photos
                 if photos.count > 1 {
