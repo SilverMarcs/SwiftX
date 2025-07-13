@@ -10,6 +10,8 @@ import Kingfisher
 
 struct TweetRowView: View {
     let tweet: Tweet
+    @Environment(\.imageNS) private var imageNS
+    @Namespace private var fallbackNS
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {

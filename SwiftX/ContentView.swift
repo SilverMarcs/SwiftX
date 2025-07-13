@@ -8,10 +8,13 @@
 import SwiftUI
 
 struct ContentView: View {
+    @Namespace private var imageNS
+    
     var body: some View {
         TabView {
             Tab("Tweets", systemImage: "bird.fill") {
                 HomeTab()
+                    .environment(\.imageNS, imageNS)
             }
             
             Tab("Settings", systemImage: "gear") {
