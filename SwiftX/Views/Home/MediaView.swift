@@ -13,46 +13,31 @@ struct MediaView: View {
     var body: some View {
         VStack {
             if let photos = media.photos, !photos.isEmpty {
-                ScrollView(.horizontal) {
-                    HStack {
-                        ForEach(photos, id: \.url) { photo in
-                            AsyncImage(url: URL(string: photo.url)) { image in
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                            } placeholder: {
-                                Rectangle()
-                                    .fill(.gray.opacity(0.3))
-                            }
-                            .frame(maxHeight: 200)
-                            .clipShape(.rect(cornerRadius: 8))
-                        }
-                    }
+                AsyncImage(url: URL(string: photos[0].url)) { image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                } placeholder: {
+                    Rectangle()
+                        .fill(.background.secondary)
+                }
+                .frame(width: 300, height: 300)
+                .clipShape(.rect(cornerRadius: 10))
+                
+                // Show indicator if there are more photos
+                if photos.count > 1 {
+                    Text("+\(photos.count - 1)")
                 }
             }
             
             if let videos = media.videos, !videos.isEmpty {
-                ForEach(videos.indices, id: \.self) { index in
-                    AsyncImage(url: URL(string: videos[index].thumbnailUrl)) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .overlay(
-                                Image(systemName: "play.circle.fill")
-                                    .font(.largeTitle)
-                                    .foregroundStyle(.white)
-                            )
-                    } placeholder: {
-                        Rectangle()
-                            .fill(.gray.opacity(0.3))
-                            .overlay(
-                                Image(systemName: "play.circle.fill")
-                                    .font(.largeTitle)
-                                    .foregroundStyle(.white)
-                            )
-                    }
-                    .frame(maxHeight: 200)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                if let videoURL = videos[0].variants.first?.url,
+                   let url = URL(string: videoURL) {
+                    VideoPlayerView(url: url)
+                }
+                
+                if videos.count > 1 {
+                    Text("+\(videos.count - 1)")
                 }
             }
         }

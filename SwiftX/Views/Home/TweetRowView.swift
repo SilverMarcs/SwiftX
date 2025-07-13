@@ -11,7 +11,7 @@ struct TweetRowView: View {
     let tweet: Tweet
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             // User Info
             HStack {
                 AsyncImage(url: URL(string: tweet.user.profileImageUrl)) { image in
@@ -20,7 +20,7 @@ struct TweetRowView: View {
                         .aspectRatio(contentMode: .fill)
                 } placeholder: {
                     Circle()
-                        .fill(.gray.opacity(0.3))
+                        .fill(.background.secondary)
                 }
                 .frame(width: 40, height: 40)
                 .clipShape(Circle())
@@ -46,13 +46,13 @@ struct TweetRowView: View {
                 Spacer()
                 
                 Text(tweet.date.formatDate())
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             
             // Tweet Content
-            Text(tweet.rawContent)
-                .font(.body)
+            Text(LocalizedStringKey(tweet.rawContent))
+                .font(.callout)
             
             // Media Preview
             if let media = tweet.media {
@@ -67,15 +67,18 @@ struct TweetRowView: View {
                 
                 Label("\(tweet.likeCount)", systemImage: "heart")
                 
-                Label("\(tweet.viewCount ?? 0)", systemImage: "eye")
+//                Label("\(tweet.viewCount ?? 0)", systemImage: "eye")
                 
                 Spacer()
                 
-                // three dot contetx menu here maybe
+                // three dot contetx menu here maybe or share button
             }
             .font(.caption)
+            .fontWeight(.semibold)
             .foregroundStyle(.secondary)
             .labelIconToTitleSpacing(5)
+            
+            // Show retweet view
         }
     }
 }
