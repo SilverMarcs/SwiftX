@@ -10,92 +10,22 @@ import Kingfisher
 
 struct TweetRowView: View {
     let tweet: Tweet
-    @Environment(\.imageNS) private var imageNS
-    @Namespace private var fallbackNS
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // User Info
-            HStack {
-                KFImage(URL(string: tweet.user.profileImageUrl))
-                    .placeholder {
-                        Rectangle()
-                            .fill(.background.secondary)
-                    }
-                    .downsampling(size: CGSize(width: 60, height: 60))
-                    .serialize(as: .JPEG)
-                    .fade(duration: 0.1)
-                    .frame(width: 32, height: 32)
-                    .aspectRatio(contentMode: .fill)
-                    .clipShape(Circle())
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack {
-                        Text(tweet.user.displayname)
-                            .font(.headline)
-                            .lineLimit(1)
-                        
-                        if tweet.user.verified == true {
-                            Image(systemName: "checkmark.seal.fill")
-                                .foregroundStyle(.yellow)
-                                .font(.caption)
-                        } else if tweet.user.blue == true {
-                            Image(systemName: "checkmark.seal.fill")
-                                .foregroundStyle(.blue)
-                                .font(.caption)
-                        }
-                    }
-                    
-                    Text("@\(tweet.user.username)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+            UnifiedTweetView(tweet: tweet)
+            
+            Group {
+                if let retweetedTweet = tweet.retweetedTweet {
+                    UnifiedTweetView(tweet: retweetedTweet)
+                } else if let quotedTweet = tweet.quotedTweet {
+                    UnifiedTweetView(tweet: quotedTweet)
                 }
-                
-                Spacer()
-                
-                Text(tweet.date.formatDate())
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
             }
-            
-            // Tweet Content
-            Text(LocalizedStringKey(tweet.rawContent))
-                .font(.default)
-            
-            // Media Preview
-            if let media = tweet.media {
-                MediaView(media: media)
-            }
-            
-            // Engagement Stats
-            HStack(spacing: 20) {
-                Label("\(tweet.replyCount)", systemImage: "bubble.left")
-                
-                Label("\(tweet.retweetCount)", systemImage: "arrow.2.squarepath")
-                
-                Label("\(tweet.likeCount)", systemImage: "heart")
-                
-                Spacer()
-            }
-            .font(.subheadline)
-            .fontWeight(.semibold)
-            .foregroundStyle(.secondary)
-            .labelIconToTitleSpacing(5)
-            
-            if let retweetedTweet = tweet.retweetedTweet {
-                RetweetedTweetView(tweet: retweetedTweet)
-                    .padding(15)
-                    .background {
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(.background.secondary)
-                    }
-            } else if let quotedTweet = tweet.quotedTweet {
-                RetweetedTweetView(tweet: quotedTweet)
-                    .padding(15)
-                    .background {
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(.background.secondary)
-                    }
+            .padding(15)
+            .background {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(.background.secondary)
             }
         }
     }

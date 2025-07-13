@@ -1,15 +1,15 @@
 //
-//  RetweetedTweetView.swift
+//  UnifiedTweetView.swift
 //  SwiftX
 //
-//  Created by Zabir Raihan on 13/07/2025.
+//  Created by Zabir Raihan on 14/07/2025.
 //
 
 import SwiftUI
 import Kingfisher
 
-struct RetweetedTweetView: View {
-    let tweet: Tweet2
+struct UnifiedTweetView: View {
+    let tweet: any TweetDisplayable
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -23,7 +23,7 @@ struct RetweetedTweetView: View {
                     .downsampling(size: CGSize(width: 60, height: 60))
                     .serialize(as: .JPEG)
                     .fade(duration: 0.1)
-                    .frame(width: 32, height: 32)
+                    .frame(width: 35, height: 35)
                     .aspectRatio(contentMode: .fill)
                     .clipShape(Circle())
                 

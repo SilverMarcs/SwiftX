@@ -7,6 +7,21 @@
 
 import Foundation
 
+// MARK: - Tweet Protocol for unified view handling
+protocol TweetDisplayable {
+    var id: Int { get }
+    var url: String { get }
+    var date: String { get }
+    var user: User { get }
+    var rawContent: String { get }
+    var replyCount: Int { get }
+    var retweetCount: Int { get }
+    var likeCount: Int { get }
+    var quoteCount: Int { get }
+    var media: Media? { get }
+    var viewCount: Int? { get }
+}
+
 // MARK: - Main Tweet Response
 struct TweetResponse: Codable {
     let totalTweets: Int
@@ -21,7 +36,7 @@ class TweetReference: Codable {
     }
 }
 
-struct Tweet2: Codable, Identifiable {
+struct Tweet2: Codable, Identifiable, TweetDisplayable {
     let id: Int
     let url: String
     let date: String
@@ -53,7 +68,7 @@ struct Tweet2: Codable, Identifiable {
 
 
 // MARK: - Tweet
-struct Tweet: Codable, Identifiable {
+struct Tweet: Codable, Identifiable, TweetDisplayable {
     let id: Int
     let url: String
     let date: String
