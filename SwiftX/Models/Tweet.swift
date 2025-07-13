@@ -21,6 +21,36 @@ class TweetReference: Codable {
     }
 }
 
+struct Tweet2: Codable, Identifiable {
+    let id: Int
+    let url: String
+    let date: String
+    let user: User
+    let rawContent: String
+    let replyCount: Int
+    let retweetCount: Int
+    let likeCount: Int
+    let quoteCount: Int
+    let conversationId: Int
+    let conversationIdStr: String
+    let hashtags: [String]
+    let mentionedUsers: [MentionedUser]
+    let links: [Link]
+    let media: Media?
+    let viewCount: Int?
+//    var retweetedTweet: TweetReference? = nil
+//    var quotedTweet: TweetReference? = nil
+    let place: Place?
+    let inReplyToTweetId: Int?
+    let inReplyToTweetIdStr: String?
+    let inReplyToUser: InReplyToUser?
+    let source: String?
+    let sourceUrl: String?
+    let sourceLabel: String?
+    let card: Card?
+//    let possiblySensitive: Bool?
+}
+
 
 // MARK: - Tweet
 struct Tweet: Codable, Identifiable {
@@ -40,8 +70,8 @@ struct Tweet: Codable, Identifiable {
     let links: [Link]
     let media: Media?
     let viewCount: Int?
-    var retweetedTweet: TweetReference? = nil
-    var quotedTweet: TweetReference? = nil
+    let retweetedTweet: Tweet2?
+    let quotedTweet: Tweet2?
     let place: Place?
     let inReplyToTweetId: Int?
     let inReplyToTweetIdStr: String?

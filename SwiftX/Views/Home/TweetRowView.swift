@@ -79,7 +79,7 @@ struct TweetRowView: View {
             .labelIconToTitleSpacing(5)
             
             if let retweetedTweet = tweet.retweetedTweet {
-                TweetRowView(tweet: retweetedTweet.tweet)
+                RetweetedTweetView(tweet: retweetedTweet)
                     .padding(15)
                     .background {
                         RoundedRectangle(cornerRadius: 10)

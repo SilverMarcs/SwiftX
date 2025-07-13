@@ -32,6 +32,8 @@ struct HomeTab: View {
                 } else {
                     List(tweets) { tweet in
                         TweetRowView(tweet: tweet)
+                            .listRowSeparator(.visible, edges: .bottom)
+                            .listRowSeparator(.hidden, edges: .top)
                     }
                     .listStyle(.plain)
                 }
