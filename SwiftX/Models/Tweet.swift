@@ -13,6 +13,15 @@ struct TweetResponse: Codable {
     let tweets: [Tweet]
 }
 
+class TweetReference: Codable {
+    let tweet: Tweet
+    
+    init(tweet: Tweet) {
+        self.tweet = tweet
+    }
+}
+
+
 // MARK: - Tweet
 struct Tweet: Codable, Identifiable {
     let id: Int
@@ -31,8 +40,8 @@ struct Tweet: Codable, Identifiable {
     let links: [Link]
     let media: Media?
     let viewCount: Int?
-//    let retweetedTweet: Tweet?
-//    let quotedTweet: Tweet?
+    var retweetedTweet: TweetReference? = nil
+    var quotedTweet: TweetReference? = nil
     let place: Place?
     let inReplyToTweetId: Int?
     let inReplyToTweetIdStr: String?

@@ -36,7 +36,7 @@ struct HomeTab: View {
                     .listStyle(.plain)
                 }
             }
-            .navigationTitle("Home")
+            .navigationTitle("Tweets")
             .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {

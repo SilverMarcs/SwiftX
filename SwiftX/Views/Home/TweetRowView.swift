@@ -35,6 +35,10 @@ struct TweetRowView: View {
                             Image(systemName: "checkmark.seal.fill")
                                 .foregroundStyle(.blue)
                                 .font(.caption)
+                        } else if tweet.user.blue == true {
+                            Image(systemName: "checkmark.seal.fill")
+                                .foregroundStyle(.yellow)
+                                .font(.caption)
                         }
                     }
                     
@@ -52,7 +56,7 @@ struct TweetRowView: View {
             
             // Tweet Content
             Text(LocalizedStringKey(tweet.rawContent))
-                .font(.callout)
+                .font(.default)
             
             // Media Preview
             if let media = tweet.media {
@@ -67,18 +71,21 @@ struct TweetRowView: View {
                 
                 Label("\(tweet.likeCount)", systemImage: "heart")
                 
-//                Label("\(tweet.viewCount ?? 0)", systemImage: "eye")
-                
                 Spacer()
-                
-                // three dot contetx menu here maybe or share button
             }
-            .font(.caption)
+            .font(.subheadline)
             .fontWeight(.semibold)
             .foregroundStyle(.secondary)
             .labelIconToTitleSpacing(5)
             
-            // Show retweet view
+            if let retweetedTweet = tweet.retweetedTweet {
+                TweetRowView(tweet: retweetedTweet.tweet)
+                    .padding(15)
+                    .background {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(.background.secondary)
+                    }
+            }
         }
     }
 }

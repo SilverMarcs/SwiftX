@@ -13,16 +13,20 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("API Endpoint") {
+                Section {
                     Toggle(isOn: $settings.useWebserver) {
                         Label {
                             Text("Use Webserver")
-                            Text(settings.useWebserver ? "https://snscrape-production.up.railway.app" : "http://192.168.0.154:8000")
                         } icon: {
                             Image(systemName: "network")
                         }
                     }
+                } header: {
+                    Text("API Endpoint")
+                } footer: {
+                    Text("Using \(settings.useWebserver ? "https://snscrape-production.up.railway.app" : "http://192.168.0.154:8000")")
                 }
+                
                 Section(header: Text("API Key")) {
                     SecureField("Enter API Key", text: $settings.apiKey)
                 }
