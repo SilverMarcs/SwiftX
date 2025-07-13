@@ -8,10 +8,8 @@
 import Foundation
 
 extension TweetService {
-    func loadSampleTweets() {
-        errorMessage = nil
-        isLoading = false
-        tweets = [
+    static func loadSampleTweets() -> [Tweet] {
+        return[
             Tweet(
                 id: 1,
                 url: "https://twitter.com/user1/status/1",
