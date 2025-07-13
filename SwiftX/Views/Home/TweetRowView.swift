@@ -33,11 +33,11 @@ struct TweetRowView: View {
                         
                         if tweet.user.verified == true {
                             Image(systemName: "checkmark.seal.fill")
-                                .foregroundStyle(.blue)
+                                .foregroundStyle(.yellow)
                                 .font(.caption)
                         } else if tweet.user.blue == true {
                             Image(systemName: "checkmark.seal.fill")
-                                .foregroundStyle(.yellow)
+                                .foregroundStyle(.blue)
                                 .font(.caption)
                         }
                     }
@@ -80,6 +80,13 @@ struct TweetRowView: View {
             
             if let retweetedTweet = tweet.retweetedTweet {
                 RetweetedTweetView(tweet: retweetedTweet)
+                    .padding(15)
+                    .background {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(.background.secondary)
+                    }
+            } else if let quotedTweet = tweet.quotedTweet {
+                RetweetedTweetView(tweet: quotedTweet)
                     .padding(15)
                     .background {
                         RoundedRectangle(cornerRadius: 10)

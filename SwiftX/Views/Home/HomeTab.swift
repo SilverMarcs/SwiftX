@@ -41,20 +41,28 @@ struct HomeTab: View {
             .navigationTitle("Tweets")
             .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {
-                ToolbarItemGroup(placement: .primaryAction) {
-                    Button {
+                ToolbarItem(placement: .primaryAction) {
+                    Menu {
+                        Button {
+                            Task {
+                                await fetchTweets()
+                            }
+                        } label: {
+                            Label("Load", systemImage: "arrow.clockwise")
+                        }
+
+                        Button {
+                            loadSampleTweets()
+                        } label: {
+                            Label("Load Sample", systemImage: "cube.box")
+                        }
+
+                    } label: {
+                        Label("Load", systemImage: "arrow.clockwise")
+                    } primaryAction: {
                         Task {
                             await fetchTweets()
                         }
-                    } label: {
-                        Image(systemName: "arrow.clockwise")
-                    }
-                    .disabled(isLoading)
-
-                    Button {
-                        loadSampleTweets()
-                    } label: {
-                        Image(systemName: "doc.on.doc")
                     }
                     .disabled(isLoading)
                 }

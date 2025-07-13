@@ -33,11 +33,11 @@ struct RetweetedTweetView: View {
                         
                         if tweet.user.verified == true {
                             Image(systemName: "checkmark.seal.fill")
-                                .foregroundStyle(.blue)
+                                .foregroundStyle(.yellow)
                                 .font(.caption)
                         } else if tweet.user.blue == true {
                             Image(systemName: "checkmark.seal.fill")
-                                .foregroundStyle(.yellow)
+                                .foregroundStyle(.blue)
                                 .font(.caption)
                         }
                     }
