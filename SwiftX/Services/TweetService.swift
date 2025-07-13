@@ -16,10 +16,10 @@ class TweetService {
     var errorMessage: String?
     
     func fetchTweets() async {
-        await MainActor.run {
-            isLoading = true
-            errorMessage = nil
-        }
+        errorMessage = nil
+        
+        isLoading = true
+        defer { isLoading = false }
         
         do {
             let url = URL(string: "\(baseURL)/tweets")!
@@ -27,26 +27,17 @@ class TweetService {
             
             guard let httpResponse = response as? HTTPURLResponse,
                   httpResponse.statusCode == 200 else {
-                await MainActor.run {
-                    errorMessage = "Failed to fetch tweets"
-                    isLoading = false
-                }
+                errorMessage = "Failed to fetch tweets"
                 return
             }
             
             let decoder = JSONDecoder()
             let tweetResponse = try decoder.decode(TweetResponse.self, from: data)
             
-            await MainActor.run {
-                tweets = tweetResponse.tweets
-                isLoading = false
-            }
+            tweets = tweetResponse.tweets
             
         } catch {
-            await MainActor.run {
-                errorMessage = "Error: \(error.localizedDescription)"
-                isLoading = false
-            }
+            errorMessage = "Error: \(error.localizedDescription)"
         }
     }
 }

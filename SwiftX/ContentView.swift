@@ -14,38 +14,18 @@ struct ContentView: View {
         NavigationStack {
             Group {
                 if tweetService.isLoading {
-                    VStack {
-                        ProgressView()
-                        Text("Loading tweets...")
-                            .foregroundStyle(.secondary)
-                    }
+                    ProgressView()
                 } else if let errorMessage = tweetService.errorMessage {
-                    VStack {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.largeTitle)
-                            .foregroundStyle(.red)
+                    ContentUnavailableView {
+                        Label("Error", systemImage: "exclamationmark.triangle")
+                    } description: {
                         Text(errorMessage)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                        
-                        Button("Retry") {
-                            Task {
-                                await tweetService.fetchTweets()
-                            }
-                        }
-                        .buttonStyle(.bordered)
                     }
-                    .padding()
                 } else if tweetService.tweets.isEmpty {
-                    VStack {
-                        Image(systemName: "bird")
-                            .font(.largeTitle)
-                            .foregroundStyle(.secondary)
-                        Text("No tweets yet")
-                            .foregroundStyle(.secondary)
+                    ContentUnavailableView {
+                        Label("No tweets yet", systemImage: "bird.fill")
+                    } description: {
                         Text("Tap the refresh button to fetch tweets")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
                     }
                 } else {
                     List(tweetService.tweets) { tweet in
@@ -55,15 +35,23 @@ struct ContentView: View {
                     .listStyle(.plain)
                 }
             }
-            .navigationTitle("Tweets")
+            .navigationTitle("Home")
+            .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .primaryAction) {
                     Button {
                         Task {
                             await tweetService.fetchTweets()
                         }
                     } label: {
                         Image(systemName: "arrow.clockwise")
+                    }
+                    .disabled(tweetService.isLoading)
+                    
+                    Button {
+                        tweetService.loadSampleTweets()
+                    } label: {
+                        Image(systemName: "doc.on.doc")
                     }
                     .disabled(tweetService.isLoading)
                 }
