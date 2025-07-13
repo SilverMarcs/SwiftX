@@ -17,7 +17,6 @@ struct VideoPlayerView: View {
             .frame(width: 300, height: 300)
             .clipShape(.rect(cornerRadius: 10))
             .task {
-                try? AVAudioSession.sharedInstance().setCategory(.playback, options: [.mixWithOthers])
                 player = AVPlayer(url: url)
                 player?.isMuted = true
                 player?.play()

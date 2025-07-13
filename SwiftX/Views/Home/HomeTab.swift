@@ -17,6 +17,7 @@ struct HomeTab: View {
             Group {
                 if isLoading {
                     ProgressView()
+                        .controlSize(.large)
                 } else if let errorMessage {
                     ContentUnavailableView {
                         Label("Error", systemImage: "exclamationmark.triangle")
@@ -38,35 +39,20 @@ struct HomeTab: View {
                     .listStyle(.plain)
                 }
             }
-            .navigationTitle("Tweets")
-            .toolbarTitleDisplayMode(.inlineLarge)
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Menu {
-                        Button {
-                            Task {
-                                await fetchTweets()
-                            }
-                        } label: {
-                            Label("Load", systemImage: "arrow.clockwise")
-                        }
+            .task {
+                if tweets.isEmpty {
+                    await fetchTweets()
 
-                        Button {
-                            loadSampleTweets()
-                        } label: {
-                            Label("Load Sample", systemImage: "cube.box")
-                        }
-
-                    } label: {
-                        Label("Load", systemImage: "arrow.clockwise")
-                    } primaryAction: {
-                        Task {
-                            await fetchTweets()
-                        }
-                    }
-                    .disabled(isLoading)
                 }
             }
+            .refreshable {
+                await fetchTweets()
+            }
+            .navigationTitle("Tweets")
+            .toolbarTitleDisplayMode(.inlineLarge)
+//            .toolbar {
+//              ProfleButton()
+//            }
         }
     }
 
@@ -81,11 +67,6 @@ struct HomeTab: View {
         } catch {
             errorMessage = "Error: \(error.localizedDescription)"
         }
-    }
-
-    private func loadSampleTweets() {
-        tweets = TweetService.loadSampleTweets()
-        errorMessage = nil
     }
 }
 

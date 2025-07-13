@@ -66,6 +66,9 @@ struct SettingsView: View {
                     }
                 }
             }
+            .task {
+                calculateCacheSize()
+            }
             .formStyle(.grouped)
             .navigationTitle("Settings")
             .toolbarTitleDisplayMode(.inline)
