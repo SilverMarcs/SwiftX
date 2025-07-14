@@ -10,10 +10,7 @@ struct UserDetailView: View {
         ScrollView {
             if let banner = user.profileBannerUrl, let url = URL(string: banner) {
                 KFImage(url)
-                    .placeholder {
-                        Rectangle()
-                            .fill(.background.secondary)
-                    }
+//
                     .downsampling(size: CGSize(width: 800, height: 250))
                     .serialize(as: .JPEG)
                     .fade(duration: 0.1)
@@ -21,10 +18,6 @@ struct UserDetailView: View {
 //                    .frame(height: 200)
                     .aspectRatio(contentMode: .fit)
                     .backgroundExtensionEffect()
-            } else {
-                Rectangle()
-                    .fill(.background.secondary)
-                    .frame(height: 120)
             }
             
             VStack(alignment: .leading, spacing: 15) {

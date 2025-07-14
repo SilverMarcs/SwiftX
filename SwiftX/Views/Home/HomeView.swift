@@ -10,7 +10,6 @@ import SwiftUI
 struct HomeView: View {
     @State private var tweets: [Tweet] = []
     @State private var isLoading = false
-    @State private var errorMessage: String? = nil
     
     @Environment(\.appendToPath) private var appendToPath
 
@@ -19,12 +18,6 @@ struct HomeView: View {
             if isLoading {
                 ProgressView()
                     .controlSize(.large)
-            } else if let errorMessage {
-                ContentUnavailableView {
-                    Label("Error", systemImage: "exclamationmark.triangle")
-                } description: {
-                    Text(errorMessage)
-                }
             } else if tweets.isEmpty {
                 ContentUnavailableView {
                     Label("No tweets yet", systemImage: "bird.fill")
@@ -66,14 +59,13 @@ struct HomeView: View {
     
     
     private func fetchTweets() async {
-        errorMessage = nil
         isLoading = true
         
         do {
             let fetched = try await TweetService.fetchTweets()
             tweets = fetched
         } catch {
-            errorMessage = "Error: \(error.localizedDescription)"
+            print(error.localizedDescription)
         }
         
         isLoading = false

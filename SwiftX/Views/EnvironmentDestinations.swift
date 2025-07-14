@@ -22,6 +22,7 @@ struct EnvironmentDestinations: ViewModifier {
             .navigationDestination(for: Tweet.self) { tweet in
                 TweetDetailView(tweet: tweet)
                     .environmentDestinations(path: $path)
+                    // this shwos an error. fix it. easy to fix
             }
             .navigationDestination(for: ImageModalData.self) { data in
                 ImageModal(data: data)
