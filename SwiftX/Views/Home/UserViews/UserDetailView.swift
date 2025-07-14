@@ -109,8 +109,8 @@ struct UserDetailView: View {
                     }
                     
                     HStack(spacing: 24) {
-                        Label("\(user.friendsCount.formatCount) Following", systemImage: "person.crop.circle.badge.checkmark")
-                        Label("\(user.followersCount.formatCount) Followers", systemImage: "person.2.fill")
+                        Label("\(user.formattedFriendsCount) Following", systemImage: "person.crop.circle.badge.checkmark")
+                        Label("\(user.formattedFollowersCount) Followers", systemImage: "person.2.fill")
                     }
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
@@ -121,31 +121,5 @@ struct UserDetailView: View {
         .ignoresSafeArea(edges: .top)
         .navigationTitle(user.displayname)
         .toolbarTitleDisplayMode(.inline)
-    }
-}
-
-#Preview {
-    NavigationStack {
-        UserDetailView(user: User(
-            id: 1001,
-            url: "https://example.com/user/1001",
-            username: "techvision",
-            displayname: "Tech Vision",
-            rawDescription: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-            created: "2020-06-15T09:30:00Z",
-            followersCount: 15234,
-            friendsCount: 892,
-            statusesCount: 3456,
-            location: "San Francisco, CA",
-            profileImageUrl: "https://picsum.photos/seed/user1001/200/200",
-            profileBannerUrl: "https://picsum.photos/seed/banner1001/1500/500",
-            verified: true,
-            blue: true,
-            descriptionLinks: [
-                Link(url: "https://techvision.blog", text: nil, tcourl: nil),
-                Link(url: "https://github.com/techvision", text: nil, tcourl: nil)
-            ],
-            pinnedIds: [123456, 123457, 123458]
-        ),)
     }
 }

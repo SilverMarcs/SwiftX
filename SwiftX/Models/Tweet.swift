@@ -45,9 +45,59 @@ struct Retweet: Codable, Hashable, Identifiable {
     let card: Card?
 //    let possiblySensitive: Bool?
     
+    // Pre-computed formatted values
+    let formattedDate: String
+    let formattedReplyCount: String
+    let formattedRetweetCount: String
+    let formattedLikeCount: String
+    let formattedQuoteCount: String
+    
     var twitterWebUrl: URL? {
         return URL(string: "https://twitter.com/x/status/\(id)")
     }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // Decode all the original properties
+        id = try container.decode(Int.self, forKey: .id)
+        url = try container.decode(String.self, forKey: .url)
+        date = try container.decode(String.self, forKey: .date)
+        user = try container.decode(User.self, forKey: .user)
+        rawContent = try container.decode(String.self, forKey: .rawContent)
+        replyCount = try container.decode(Int.self, forKey: .replyCount)
+        retweetCount = try container.decode(Int.self, forKey: .retweetCount)
+        likeCount = try container.decode(Int.self, forKey: .likeCount)
+        quoteCount = try container.decode(Int.self, forKey: .quoteCount)
+        conversationId = try container.decode(Int.self, forKey: .conversationId)
+        conversationIdStr = try container.decode(String.self, forKey: .conversationIdStr)
+        hashtags = try container.decode([String].self, forKey: .hashtags)
+        mentionedUsers = try container.decode([MentionedUser].self, forKey: .mentionedUsers)
+        links = try container.decode([Link].self, forKey: .links)
+        media = try container.decodeIfPresent(Media.self, forKey: .media)
+        viewCount = try container.decodeIfPresent(Int.self, forKey: .viewCount)
+        place = try container.decodeIfPresent(Place.self, forKey: .place)
+        inReplyToTweetId = try container.decodeIfPresent(Int.self, forKey: .inReplyToTweetId)
+        inReplyToTweetIdStr = try container.decodeIfPresent(String.self, forKey: .inReplyToTweetIdStr)
+        inReplyToUser = try container.decodeIfPresent(InReplyToUser.self, forKey: .inReplyToUser)
+        source = try container.decodeIfPresent(String.self, forKey: .source)
+        sourceUrl = try container.decodeIfPresent(String.self, forKey: .sourceUrl)
+        sourceLabel = try container.decodeIfPresent(String.self, forKey: .sourceLabel)
+        card = try container.decodeIfPresent(Card.self, forKey: .card)
+        
+        // Pre-compute formatted values
+        formattedDate = date.formattedRelativeDate()
+        formattedReplyCount = replyCount.formattedCount()
+        formattedRetweetCount = retweetCount.formattedCount()
+        formattedLikeCount = likeCount.formattedCount()
+        formattedQuoteCount = quoteCount.formattedCount()
+    }
+    
+//    private enum CodingKeys: String, CodingKey {
+//        case id, url, date, user, rawContent, replyCount, retweetCount, likeCount, quoteCount
+//        case conversationId, conversationIdStr, hashtags, mentionedUsers, links, media, viewCount
+//        case place, inReplyToTweetId, inReplyToTweetIdStr, inReplyToUser, source, sourceUrl, sourceLabel, card
+//    }
 }
 
 struct Tweet: Hashable, Codable, Identifiable {
@@ -87,147 +137,96 @@ struct Tweet: Hashable, Codable, Identifiable {
     let card: Card?
 //    let possiblySensitive: Bool?
     
+    // Pre-computed formatted values
+    let formattedDate: String
+    let formattedReplyCount: String
+    let formattedRetweetCount: String
+    let formattedLikeCount: String
+    let formattedQuoteCount: String
+    
     var twitterWebUrl: URL? {
         return URL(string: "https://twitter.com/x/status/\(id)")
     }
     
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // Decode all the original properties
+        id = try container.decode(Int.self, forKey: .id)
+        url = try container.decode(String.self, forKey: .url)
+        date = try container.decode(String.self, forKey: .date)
+        user = try container.decode(User.self, forKey: .user)
+        rawContent = try container.decode(String.self, forKey: .rawContent)
+        replyCount = try container.decode(Int.self, forKey: .replyCount)
+        retweetCount = try container.decode(Int.self, forKey: .retweetCount)
+        likeCount = try container.decode(Int.self, forKey: .likeCount)
+        quoteCount = try container.decode(Int.self, forKey: .quoteCount)
+        conversationId = try container.decode(Int.self, forKey: .conversationId)
+        conversationIdStr = try container.decode(String.self, forKey: .conversationIdStr)
+        hashtags = try container.decode([String].self, forKey: .hashtags)
+        mentionedUsers = try container.decode([MentionedUser].self, forKey: .mentionedUsers)
+        links = try container.decode([Link].self, forKey: .links)
+        media = try container.decodeIfPresent(Media.self, forKey: .media)
+        viewCount = try container.decodeIfPresent(Int.self, forKey: .viewCount)
+        retweetedTweet = try container.decodeIfPresent(Retweet.self, forKey: .retweetedTweet)
+        quotedTweet = try container.decodeIfPresent(Retweet.self, forKey: .quotedTweet)
+        place = try container.decodeIfPresent(Place.self, forKey: .place)
+        inReplyToTweetId = try container.decodeIfPresent(Int.self, forKey: .inReplyToTweetId)
+        inReplyToTweetIdStr = try container.decodeIfPresent(String.self, forKey: .inReplyToTweetIdStr)
+        inReplyToUser = try container.decodeIfPresent(InReplyToUser.self, forKey: .inReplyToUser)
+        source = try container.decodeIfPresent(String.self, forKey: .source)
+        sourceUrl = try container.decodeIfPresent(String.self, forKey: .sourceUrl)
+        sourceLabel = try container.decodeIfPresent(String.self, forKey: .sourceLabel)
+        card = try container.decodeIfPresent(Card.self, forKey: .card)
+        
+        // Pre-compute formatted values
+        formattedDate = date.formattedRelativeDate()
+        formattedReplyCount = replyCount.formattedCount()
+        formattedRetweetCount = retweetCount.formattedCount()
+        formattedLikeCount = likeCount.formattedCount()
+        formattedQuoteCount = quoteCount.formattedCount()
+    }
+    
     init(from retweet: Retweet) {
-          self.id = retweet.id
-          self.url = retweet.url
-          self.date = retweet.date
-          self.user = retweet.user
-          self.rawContent = retweet.rawContent
-          self.replyCount = retweet.replyCount
-          self.retweetCount = retweet.retweetCount
-          self.likeCount = retweet.likeCount
-          self.quoteCount = retweet.quoteCount
-          self.conversationId = retweet.conversationId
-          self.conversationIdStr = retweet.conversationIdStr
-          self.hashtags = retweet.hashtags
-          self.mentionedUsers = retweet.mentionedUsers
-          self.links = retweet.links
-          self.media = retweet.media
-          self.viewCount = retweet.viewCount
-          self.retweetedTweet = nil  // Since Retweet doesn't have these properties
-          self.quotedTweet = nil     // Since Retweet doesn't have these properties
-          self.place = retweet.place
-          self.inReplyToTweetId = retweet.inReplyToTweetId
-          self.inReplyToTweetIdStr = retweet.inReplyToTweetIdStr
-          self.inReplyToUser = retweet.inReplyToUser
-          self.source = retweet.source
-          self.sourceUrl = retweet.sourceUrl
-          self.sourceLabel = retweet.sourceLabel
-          self.card = retweet.card
-      }
-}
-
-// MARK: - User
-struct User: Codable, Hashable {
-    static func == (lhs: User, rhs: User) -> Bool {
-        lhs.id == rhs.id
+        self.id = retweet.id
+        self.url = retweet.url
+        self.date = retweet.date
+        self.user = retweet.user
+        self.rawContent = retweet.rawContent
+        self.replyCount = retweet.replyCount
+        self.retweetCount = retweet.retweetCount
+        self.likeCount = retweet.likeCount
+        self.quoteCount = retweet.quoteCount
+        self.conversationId = retweet.conversationId
+        self.conversationIdStr = retweet.conversationIdStr
+        self.hashtags = retweet.hashtags
+        self.mentionedUsers = retweet.mentionedUsers
+        self.links = retweet.links
+        self.media = retweet.media
+        self.viewCount = retweet.viewCount
+        self.retweetedTweet = nil  // Since Retweet doesn't have these properties
+        self.quotedTweet = nil     // Since Retweet doesn't have these properties
+        self.place = retweet.place
+        self.inReplyToTweetId = retweet.inReplyToTweetId
+        self.inReplyToTweetIdStr = retweet.inReplyToTweetIdStr
+        self.inReplyToUser = retweet.inReplyToUser
+        self.source = retweet.source
+        self.sourceUrl = retweet.sourceUrl
+        self.sourceLabel = retweet.sourceLabel
+        self.card = retweet.card
+        
+        // Pre-compute formatted values
+        self.formattedDate = retweet.formattedDate
+        self.formattedReplyCount = retweet.formattedReplyCount
+        self.formattedRetweetCount = retweet.formattedRetweetCount
+        self.formattedLikeCount = retweet.formattedLikeCount
+        self.formattedQuoteCount = retweet.formattedQuoteCount
     }
     
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-    
-    let id: Int
-    let url: String
-    let username: String
-    let displayname: String
-    let rawDescription: String
-    let created: String
-    let followersCount: Int
-    let friendsCount: Int
-    let statusesCount: Int
-    let location: String?
-    let profileImageUrl: String
-    let profileBannerUrl: String?
-    let verified: Bool?
-    let blue: Bool?
-    let descriptionLinks: [Link]
-    let pinnedIds: [Int]
-}
-
-// MARK: - MentionedUser
-struct MentionedUser: Codable {
-    let id: Int
-    let username: String
-    let displayname: String
-}
-
-// MARK: - Link
-struct Link: Codable {
-    let url: String
-    let text: String?
-    let tcourl: String?
-}
-
-// MARK: - Media
-struct Media: Codable {
-    let photos: [Photo]?
-    let videos: [Video]?
-    let animated: [AnimatedMedia]?
-}
-
-// MARK: - Photo
-struct Photo: Codable {
-    let url: String
-}
-
-// MARK: - Video
-struct Video: Codable {
-    let thumbnailUrl: String
-    let variants: [VideoVariant]
-    let duration: Int
-    let views: Int?
-}
-
-// MARK: - VideoVariant
-struct VideoVariant: Codable {
-    let contentType: String
-    let bitrate: Int?
-    let url: String
-}
-
-// MARK: - AnimatedMedia
-struct AnimatedMedia: Codable {
-    let thumbnailUrl: String
-    let videoUrl: String
-}
-
-// MARK: - Place
-struct Place: Codable {
-    let id: String
-    let fullName: String
-    let name: String
-    let type: String
-    let country: String
-    let countryCode: String
-}
-
-// MARK: - InReplyToUser
-struct InReplyToUser: Codable {
-    let id: Int
-    let username: String
-    let displayname: String
-}
-
-// MARK: - Card
-struct Card: Codable {
-    let type: String?
-    let title: String?
-    let description: String?
-    let vanityUrl: String?
-    let url: String?
-    let photo: Photo?
-    let video: Video?
-    let options: [PollOption]?
-    let finished: Bool?
-}
-
-// MARK: - PollOption
-struct PollOption: Codable {
-    let label: String
-    let votesCount: Int
+//    private enum CodingKeys: String, CodingKey {
+//        case id, url, date, user, rawContent, replyCount, retweetCount, likeCount, quoteCount
+//        case conversationId, conversationIdStr, hashtags, mentionedUsers, links, media, viewCount
+//        case retweetedTweet, quotedTweet, place, inReplyToTweetId, inReplyToTweetIdStr, inReplyToUser
+//        case source, sourceUrl, sourceLabel, card
+//    }
 }

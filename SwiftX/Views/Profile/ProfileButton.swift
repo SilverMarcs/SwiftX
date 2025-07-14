@@ -55,6 +55,35 @@ extension User {
     )
 }
 
+extension User {
+    init(id: Int, url: String, username: String, displayname: String,
+         rawDescription: String, created: String, followersCount: Int,
+         friendsCount: Int, statusesCount: Int, location: String?,
+         profileImageUrl: String, profileBannerUrl: String?,
+         verified: Bool?, blue: Bool?, descriptionLinks: [Link], pinnedIds: [Int]) {
+        self.id = id
+        self.url = url
+        self.username = username
+        self.displayname = displayname
+        self.rawDescription = rawDescription
+        self.created = created
+        self.followersCount = followersCount
+        self.friendsCount = friendsCount
+        self.statusesCount = statusesCount
+        self.location = location
+        self.profileImageUrl = profileImageUrl
+        self.profileBannerUrl = profileBannerUrl
+        self.verified = verified
+        self.blue = blue
+        self.descriptionLinks = descriptionLinks
+        self.pinnedIds = pinnedIds
+        
+        // Pre-compute formatted values
+        self.formattedFollowersCount = "10"
+        self.formattedFriendsCount = "146"
+    }
+}
+
 #Preview {
     ProfileButton()
 }

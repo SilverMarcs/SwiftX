@@ -1,22 +1,35 @@
 //
-//  String++.swift
+//  FormatExtensions.swift
 //  SwiftX
 //
-//  Created by Zabir Raihan on 13/07/2025.
+//  Created by Zabir Raihan on 14/07/2025.
 //
 
-import SwiftUI
+import Foundation
+
+extension Int {
+    /// Formats a count with K/M suffixes for readability
+    /// Examples: 1000 -> "1.0K", 1500000 -> "1.5M"
+    func formattedCount() -> String {
+        if self >= 1_000_000 {
+            let divided = Double(self) / 1_000_000
+            return String(format: "%.1fM", divided)
+        } else if self >= 1_000 {
+            let divided = Double(self) / 1_000
+            return String(format: "%.1fK", divided)
+        }
+        return String(self)
+    }
+}
 
 extension String {
+    /// Formats a date string to relative time format
+    /// Examples: "2h", "3d", "now"
+    static let backupFormatter = DateFormatter()
+    static let iso8601Formatter = ISO8601DateFormatter()
     
-    private static let iso8601Formatter: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
-        return formatter
-    }()
-    
-    func formatDate() -> String {
-        Self.iso8601Formatter.formatOptions = [.withInternetDateTime] // This is important for your format
+    func formattedRelativeDate() -> String {
+        Self.iso8601Formatter.formatOptions = [.withInternetDateTime]
         
         if let date = Self.iso8601Formatter.date(from: self) {
             let now = Date()
@@ -33,11 +46,11 @@ extension String {
             }
         }
         
-        // If the above fails, try DateFormatter as fallback
-        let backupFormatter = DateFormatter()
-        backupFormatter.dateFormat = "yyyy-MM-dd HH:mm:ssZ"
+        // Fallback formatter
+
+        Self.backupFormatter.dateFormat = "yyyy-MM-dd HH:mm:ssZ"
         
-        if let date = backupFormatter.date(from: self) {
+        if let date = Self.backupFormatter.date(from: self) {
             let now = Date()
             let timeInterval = now.timeIntervalSince(date)
             

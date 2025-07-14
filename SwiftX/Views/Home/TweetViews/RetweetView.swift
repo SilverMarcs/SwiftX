@@ -16,7 +16,7 @@ struct RetweetView: View {
             HStack {
                 UserButton(user: tweet.user)
                 Spacer()
-                Text(tweet.date.formatDate())
+                Text(tweet.formattedDate)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -33,11 +33,11 @@ struct RetweetView: View {
             
             // Engagement Stats
             HStack(spacing: 20) {
-                Label("\(tweet.replyCount.formatCount)", systemImage: "message")
+                Label(tweet.formattedReplyCount, systemImage: "message")
                 
-                Label("\(tweet.retweetCount.formatCount)", systemImage: "arrow.2.squarepath")
+                Label(tweet.formattedRetweetCount, systemImage: "arrow.2.squarepath")
                 
-                Label("\(tweet.likeCount.formatCount)", systemImage: "heart")
+                Label(tweet.formattedLikeCount, systemImage: "heart")
                 
                 Spacer()
                 
@@ -63,5 +63,6 @@ struct RetweetView: View {
             RoundedRectangle(cornerRadius: 10)
                 .fill(.background.secondary)
         }
+        .contentShape(.rect)
     }
 }
