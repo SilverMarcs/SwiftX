@@ -53,7 +53,7 @@ struct UnifiedTweetView: View {
                 .padding(10)
                 .glassEffect()
             }
-            .font(.subheadline)
+            .labelStyle(CustomLabelStyle())
             .fontWeight(.semibold)
             .foregroundStyle(.secondary)
             .labelIconToTitleSpacing(5)
