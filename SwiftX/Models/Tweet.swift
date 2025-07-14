@@ -92,12 +92,6 @@ struct Retweet: Codable, Hashable, Identifiable {
         formattedLikeCount = likeCount.formattedCount()
         formattedQuoteCount = quoteCount.formattedCount()
     }
-    
-//    private enum CodingKeys: String, CodingKey {
-//        case id, url, date, user, rawContent, replyCount, retweetCount, likeCount, quoteCount
-//        case conversationId, conversationIdStr, hashtags, mentionedUsers, links, media, viewCount
-//        case place, inReplyToTweetId, inReplyToTweetIdStr, inReplyToUser, source, sourceUrl, sourceLabel, card
-//    }
 }
 
 struct Tweet: Hashable, Codable, Identifiable {
@@ -222,11 +216,4 @@ struct Tweet: Hashable, Codable, Identifiable {
         self.formattedLikeCount = retweet.formattedLikeCount
         self.formattedQuoteCount = retweet.formattedQuoteCount
     }
-    
-//    private enum CodingKeys: String, CodingKey {
-//        case id, url, date, user, rawContent, replyCount, retweetCount, likeCount, quoteCount
-//        case conversationId, conversationIdStr, hashtags, mentionedUsers, links, media, viewCount
-//        case retweetedTweet, quotedTweet, place, inReplyToTweetId, inReplyToTweetIdStr, inReplyToUser
-//        case source, sourceUrl, sourceLabel, card
-//    }
 }
