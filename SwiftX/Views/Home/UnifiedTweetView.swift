@@ -15,42 +15,8 @@ struct UnifiedTweetView: View {
         VStack(alignment: .leading, spacing: 10) {
             // User Info
             HStack {
-                KFImage(URL(string: tweet.user.profileImageUrl))
-                    .placeholder {
-                        Rectangle()
-                            .fill(.background.secondary)
-                    }
-                    .downsampling(size: CGSize(width: 250, height: 250))
-                    .serialize(as: .JPEG)
-                    .fade(duration: 0.1)
-                    .frame(width: 40, height: 40)
-                    .aspectRatio(contentMode: .fill)
-                    .clipShape(Circle())
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack {
-                        Text(tweet.user.displayname)
-                            .font(.headline)
-                            .lineLimit(1)
-                        
-                        if tweet.user.verified == true {
-                            Image(systemName: "checkmark.seal.fill")
-                                .foregroundStyle(.yellow)
-                                .font(.caption)
-                        } else if tweet.user.blue == true {
-                            Image(systemName: "checkmark.seal.fill")
-                                .foregroundStyle(.blue)
-                                .font(.caption)
-                        }
-                    }
-                    
-                    Text("@\(tweet.user.username)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                
+                UserButton(user: tweet.user)
                 Spacer()
-                
                 Text(tweet.date.formatDate())
                     .font(.subheadline)
                     .foregroundStyle(.secondary)

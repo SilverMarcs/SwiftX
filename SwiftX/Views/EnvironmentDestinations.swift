@@ -1,5 +1,5 @@
 //
-//  CommonNavigationModifier.swift
+//  EnvironmentDestinations.swift
 //  SwiftX
 //
 //  Created by Zabir Raihan on 14/07/2025.
@@ -25,6 +25,9 @@ struct EnvironmentDestinations: ViewModifier {
             }
             .navigationDestination(for: ImageModalData.self) { data in
                 ImageModal(data: data)
+            }
+            .navigationDestination(for: User.self) { user in
+                UserDetailView(user: user)
             }
     }
 }

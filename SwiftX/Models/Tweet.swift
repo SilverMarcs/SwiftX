@@ -103,7 +103,15 @@ struct Tweet: Hashable, Codable, Identifiable, TweetDisplayable {
 }
 
 // MARK: - User
-struct User: Codable {
+struct User: Codable, Hashable {
+    static func == (lhs: User, rhs: User) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
     let id: Int
     let url: String
     let username: String
