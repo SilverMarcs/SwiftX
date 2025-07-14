@@ -1,5 +1,7 @@
 {
-  "fill" : "automatic",
+  "fill" : {
+    "automatic-gradient" : "srgb:0.25490,0.61176,1.00000,1.00000"
+  },
   "groups" : [
     {
       "blend-mode" : "normal",
@@ -8,6 +10,23 @@
       "layers" : [
         {
           "blend-mode" : "normal",
+          "glass" : true,
+          "hidden" : true,
+          "image-name" : "pngwing.com.png",
+          "name" : "pngwing.com",
+          "position" : {
+            "scale" : 0.17,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "blend-mode" : "normal",
+          "fill" : {
+            "solid" : "extended-gray:1.00000,1.00000"
+          },
           "glass" : true,
           "image-name" : "pngwing.com.png",
           "name" : "pngwing.com",

@@ -14,18 +14,14 @@ struct HomeView: View {
     @Environment(\.appendToPath) private var appendToPath
 
     var body: some View {
-        Group {
+        List {
             if isLoading {
                 ProgressView()
                     .controlSize(.large)
-            } else if tweets.isEmpty {
-                ContentUnavailableView {
-                    Label("No tweets yet", systemImage: "bird.fill")
-                } description: {
-                    Text("Tap the refresh button to fetch tweets")
-                }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .listRowSeparator(.hidden)
             } else {
-                List(tweets) { tweet in
+                ForEach(tweets) { tweet in
                     Button {
                         appendToPath(tweet)
                     } label: {
@@ -36,9 +32,9 @@ struct HomeView: View {
                     .listRowSeparator(.hidden, edges: .top)
                     .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
                 }
-                .listStyle(.plain)
             }
         }
+        .listStyle(.plain)
         .task {
             if tweets.isEmpty {
                 await fetchTweets()
