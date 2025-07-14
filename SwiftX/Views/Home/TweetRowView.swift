@@ -13,16 +13,16 @@ struct TweetRowView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            UnifiedTweetView(tweet: tweet)
+            TweetView(tweet: tweet)
             
             Group {
                 if let retweetedTweet = tweet.retweetedTweet {
-                    UnifiedTweetView(tweet: retweetedTweet)
+                    TweetView(tweet: retweetedTweet)
                 } else if let quotedTweet = tweet.quotedTweet {
-                    UnifiedTweetView(tweet: quotedTweet)
+                    TweetView(tweet: quotedTweet)
                 }
             }
-            .padding(15)
+            .padding(10)
             .background {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(.background.secondary)

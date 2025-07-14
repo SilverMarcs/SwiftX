@@ -8,7 +8,7 @@
 import SwiftUI
 import Kingfisher
 
-struct UnifiedTweetView: View {
+struct TweetView: View {
     let tweet: any TweetDisplayable
     
     var body: some View {
