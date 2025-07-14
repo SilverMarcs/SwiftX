@@ -32,9 +32,15 @@ struct HomeTab: View {
                     }
                 } else {
                     List(tweets) { tweet in
-                        TweetRowView(tweet: tweet)
-                            .listRowSeparator(.visible, edges: .bottom)
-                            .listRowSeparator(.hidden, edges: .top)
+                        NavigationLink {
+                            TweetDetailView(tweet: tweet)
+                        } label: {
+                            TweetRowView(tweet: tweet)
+                        }
+                        .buttonStyle(.plain)
+                        .navigationLinkIndicatorVisibility(.hidden)
+                        .listRowSeparator(.visible, edges: .bottom)
+                        .listRowSeparator(.hidden, edges: .top)
                     }
                     .listStyle(.plain)
                 }

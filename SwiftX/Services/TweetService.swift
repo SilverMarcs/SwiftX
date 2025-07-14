@@ -52,16 +52,9 @@ struct TweetService {
         
         return filteredTweets
     }
-}
-
-enum NetworkError: Error {
-    case invalidURL
-    case badServerResponse
-    case decodingError
-}
-
-struct RefreshResponse: Decodable {
-    let message: String
-    let status: String
-    let note: String
+    
+    static func fetchReplies(for tweetId: Int) async throws -> [Tweet] {
+        let response: RepliesResponse = try await makeRequest(endpoint: "replies/\(tweetId)")
+        return response.replies
+    }
 }

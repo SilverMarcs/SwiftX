@@ -22,20 +22,7 @@ protocol TweetDisplayable {
     var viewCount: Int? { get }
 }
 
-// MARK: - Main Tweet Response
-struct TweetResponse: Codable {
-    let totalTweets: Int
-    let tweets: [Tweet]
-}
-
-class TweetReference: Codable {
-    let tweet: Tweet
-    
-    init(tweet: Tweet) {
-        self.tweet = tweet
-    }
-}
-
+// MARK: - Tweet
 struct Tweet2: Codable, Identifiable, TweetDisplayable {
     let id: Int
     let url: String
@@ -66,8 +53,6 @@ struct Tweet2: Codable, Identifiable, TweetDisplayable {
 //    let possiblySensitive: Bool?
 }
 
-
-// MARK: - Tweet
 struct Tweet: Codable, Identifiable, TweetDisplayable {
     let id: Int
     let url: String
