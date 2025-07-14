@@ -28,8 +28,8 @@ struct MediaView: View {
                         .downsampling(size: CGSize(width: 1000, height: 1000))
                         .serialize(as: .JPEG)
                         .fade(duration: 0.1)
-                        .frame(width: 300, height: 300)
-                        .aspectRatio(contentMode: .fill)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
                         .clipShape(.rect(cornerRadius: 10))
                         .matchedTransitionSource(id: photos[0].url, in: imageNS ?? fallbackNS)
                 }

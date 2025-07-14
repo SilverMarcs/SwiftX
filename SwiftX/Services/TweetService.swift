@@ -40,7 +40,17 @@ struct TweetService {
     
     static func fetchTweets() async throws -> [Tweet] {
         let response: TweetResponse = try await makeRequest(endpoint: "tweets")
-        return response.tweets
+        
+        // Filter tweets to only include:
+        // 1. Top-level tweets (not replies)
+        // 2. Tweets that aren't quoted by other tweets
+        let filteredTweets = response.tweets.filter { tweet in
+            // Check if it's not a reply AND not quoted in any other tweet
+            tweet.inReplyToTweetId == nil &&
+            !response.tweets.contains { $0.quotedTweet?.id == tweet.id }
+        }
+        
+        return filteredTweets
     }
 }
 
