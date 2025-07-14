@@ -28,6 +28,38 @@ struct SettingsView: View {
                             Image(systemName: "network")
                         }
                     }
+                    
+                    Button {
+                        Task {
+                            isRefreshing = true
+                            refreshError = nil
+                            do {
+                                try await TweetService.refreshTweetCache()
+                                refreshAlertPresented = true
+                            } catch {
+                                refreshError = error.localizedDescription
+                                refreshAlertPresented = true
+                            }
+                            isRefreshing = false
+                        }
+                    } label: {
+                        if isRefreshing {
+                            HStack {
+                                ProgressView()
+                                Text("Refreshing")
+                            }
+                        } else {
+                            Label("Refresh Tweet Cache", systemImage: "arrow.clockwise")
+                        }
+                    }
+                    .disabled(isRefreshing)
+                    .alert(isPresented: $refreshAlertPresented) {
+                        if let error = refreshError {
+                            return Alert(title: Text("Error"), message: Text(error), dismissButton: .default(Text("OK")))
+                        } else {
+                            return Alert(title: Text("Success"), message: Text("Tweet cache refresh initiated. Check tweets in a few moments."), dismissButton: .default(Text("OK")))
+                        }
+                    }
                 } header: {
                     Text("API Endpoint")
                 } footer: {
@@ -64,35 +96,6 @@ struct SettingsView: View {
                         Button("Cancel", role: .cancel) { }
                     } message: {
                         Text("This will clear all cached images, freeing up storage space.")
-                    }
-
-                    Button {
-                        Task {
-                            isRefreshing = true
-                            refreshError = nil
-                            do {
-                                try await TweetService.refreshTweetCache()
-                                refreshAlertPresented = true
-                            } catch {
-                                refreshError = error.localizedDescription
-                                refreshAlertPresented = true
-                            }
-                            isRefreshing = false
-                        }
-                    } label: {
-                        if isRefreshing {
-                            ProgressView()
-                        } else {
-                            Label("Refresh Tweet Cache", systemImage: "arrow.clockwise")
-                        }
-                    }
-                    .disabled(isRefreshing)
-                    .alert(isPresented: $refreshAlertPresented) {
-                        if let error = refreshError {
-                            return Alert(title: Text("Error"), message: Text(error), dismissButton: .default(Text("OK")))
-                        } else {
-                            return Alert(title: Text("Success"), message: Text("Tweet cache refresh initiated. Check tweets in a few moments."), dismissButton: .default(Text("OK")))
-                        }
                     }
                 }
             }
