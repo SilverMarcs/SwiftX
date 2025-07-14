@@ -35,7 +35,8 @@ struct ImageModal: View {
                     .downsampling(size: CGSize(width: 1000, height: 1000))
                     .serialize(as: .JPEG)
                     .fade(duration: 0.1)
-//                    .resizable()
+                    .resizable()
+                    .zoomable()
                     .aspectRatio(contentMode: .fit)
                     .tag(index)
             }
