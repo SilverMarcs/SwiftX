@@ -56,9 +56,12 @@ struct HomeView: View {
         }
         .navigationTitle("Tweets")
         .toolbarTitleDisplayMode(.inlineLarge)
-//        .toolbar {
-//            ProfileButton()
-//        }
+        .toolbar {
+            ToolbarItem {
+                ProfileButton()
+            }
+//            .sharedBackgroundVisibility(.hidden)
+        }
     }
     
     

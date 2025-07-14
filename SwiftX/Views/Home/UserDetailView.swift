@@ -21,6 +21,10 @@ struct UserDetailView: View {
 //                    .frame(height: 200)
                     .aspectRatio(contentMode: .fit)
                     .backgroundExtensionEffect()
+            } else {
+                Rectangle()
+                    .fill(.background.secondary)
+                    .frame(height: 120)
             }
             
             VStack(alignment: .leading, spacing: 15) {
@@ -57,6 +61,7 @@ struct UserDetailView: View {
                                     Label("Links", systemImage: "link")
                                         .labelStyle(.iconOnly)
                                 }
+                                .buttonStyle(.borderless)
                                 .padding(10)
                                 .glassEffect()
                             }
