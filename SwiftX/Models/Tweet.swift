@@ -91,7 +91,34 @@ struct Tweet: Hashable, Codable, Identifiable {
         return URL(string: "https://twitter.com/x/status/\(id)")
     }
     
-    
+    init(from retweet: Retweet) {
+          self.id = retweet.id
+          self.url = retweet.url
+          self.date = retweet.date
+          self.user = retweet.user
+          self.rawContent = retweet.rawContent
+          self.replyCount = retweet.replyCount
+          self.retweetCount = retweet.retweetCount
+          self.likeCount = retweet.likeCount
+          self.quoteCount = retweet.quoteCount
+          self.conversationId = retweet.conversationId
+          self.conversationIdStr = retweet.conversationIdStr
+          self.hashtags = retweet.hashtags
+          self.mentionedUsers = retweet.mentionedUsers
+          self.links = retweet.links
+          self.media = retweet.media
+          self.viewCount = retweet.viewCount
+          self.retweetedTweet = nil  // Since Retweet doesn't have these properties
+          self.quotedTweet = nil     // Since Retweet doesn't have these properties
+          self.place = retweet.place
+          self.inReplyToTweetId = retweet.inReplyToTweetId
+          self.inReplyToTweetIdStr = retweet.inReplyToTweetIdStr
+          self.inReplyToUser = retweet.inReplyToUser
+          self.source = retweet.source
+          self.sourceUrl = retweet.sourceUrl
+          self.sourceLabel = retweet.sourceLabel
+          self.card = retweet.card
+      }
 }
 
 // MARK: - User

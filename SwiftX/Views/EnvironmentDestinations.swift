@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-// Custom ViewModifier to handle common navigation settings
-struct EnvironmentDestinations: ViewModifier {
+// First modifier for environments
+struct EnvironmentActions: ViewModifier {
     @Binding var path: NavigationPath
     
     func body(content: Content) -> some View {
@@ -19,23 +19,40 @@ struct EnvironmentDestinations: ViewModifier {
             .environment(\.appendToPath, { value in
                 path.append(value)
             })
+    }
+}
+
+// Second modifier for navigation destinations
+struct NavigationDestinations: ViewModifier {
+    @Binding var path: NavigationPath
+    
+    func body(content: Content) -> some View {
+        content
             .navigationDestination(for: Tweet.self) { tweet in
                 TweetDetailView(tweet: tweet)
-                    .environmentDestinations(path: $path)
-                    // this shwos an error. fix it. easy to fix
+                    .environmentActions(path: $path)
+            }
+            .navigationDestination(for: Retweet.self) { retweet in
+                TweetDetailView(tweet: Tweet(from: retweet))
+                    .environmentActions(path: $path)
+            }
+            .navigationDestination(for: User.self) { user in
+                UserDetailView(user: user)
+                    .environmentActions(path: $path)
             }
             .navigationDestination(for: ImageModalData.self) { data in
                 ImageModal(data: data)
             }
-            .navigationDestination(for: User.self) { user in
-                UserDetailView(user: user)
-            }
     }
 }
 
-// View extension to make it easier to use the modifier
+// Extension methods for easier usage
 extension View {
-    func environmentDestinations(path: Binding<NavigationPath>) -> some View {
-        modifier(EnvironmentDestinations(path: path))
+    func environmentActions(path: Binding<NavigationPath>) -> some View {
+        modifier(EnvironmentActions(path: path))
+    }
+    
+    func navigationDestinations(path: Binding<NavigationPath>) -> some View {
+        modifier(NavigationDestinations(path: path))
     }
 }

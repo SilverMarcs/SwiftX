@@ -8,11 +8,17 @@
 import SwiftUI
 
 extension String {
-    func formatDate() -> String {
+    
+    private static let iso8601Formatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime] // This is important for your format
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
+    }()
+    
+    func formatDate() -> String {
+        Self.iso8601Formatter.formatOptions = [.withInternetDateTime] // This is important for your format
         
-        if let date = formatter.date(from: self) {
+        if let date = Self.iso8601Formatter.date(from: self) {
             let now = Date()
             let timeInterval = now.timeIntervalSince(date)
             

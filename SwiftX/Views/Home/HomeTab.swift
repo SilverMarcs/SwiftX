@@ -13,7 +13,8 @@ struct HomeTab: View {
     var body: some View {
         NavigationStack(path: $path) {
             HomeView()
-                .environmentDestinations(path: $path)
+                .environmentActions(path: $path)
+                .navigationDestinations(path: $path)
         }
     }
 }
