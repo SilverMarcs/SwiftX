@@ -25,6 +25,7 @@ struct UnifiedTweetView: View {
             // Tweet Content
             Text(LocalizedStringKey(tweet.rawContent))
                 .font(.default)
+                .opacity(0.9)
             
             // Media Preview
             if let media = tweet.media {
@@ -33,11 +34,11 @@ struct UnifiedTweetView: View {
             
             // Engagement Stats
             HStack(spacing: 20) {
-                Label("\(tweet.replyCount)", systemImage: "bubble.left")
+                Label("\(tweet.replyCount.formatCount)", systemImage: "message")
                 
-                Label("\(tweet.retweetCount)", systemImage: "arrow.2.squarepath")
+                Label("\(tweet.retweetCount.formatCount)", systemImage: "arrow.2.squarepath")
                 
-                Label("\(tweet.likeCount)", systemImage: "heart")
+                Label("\(tweet.likeCount.formatCount)", systemImage: "heart")
                 
                 Spacer()
                 
@@ -56,7 +57,7 @@ struct UnifiedTweetView: View {
             .labelStyle(CustomLabelStyle())
             .fontWeight(.semibold)
             .foregroundStyle(.secondary)
-            .labelIconToTitleSpacing(5)
+            .labelIconToTitleSpacing(4)
         }
     }
 }

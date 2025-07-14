@@ -9,7 +9,7 @@ struct UserButton: View {
         Button {
             appendToPath(user)
         } label: {
-            HStack(spacing: 8) {
+            HStack(alignment: .center, spacing: 8) {
                 KFImage(URL(string: user.profileImageUrl))
                     .placeholder {
                         Rectangle()
@@ -18,7 +18,7 @@ struct UserButton: View {
                     .downsampling(size: CGSize(width: 400, height: 400))
                     .serialize(as: .JPEG)
                     .fade(duration: 0.1)
-                    .frame(width: 40, height: 40)
+                    .frame(width: 45, height: 45)
                     .aspectRatio(contentMode: .fill)
                     .clipShape(Circle())
 
@@ -40,7 +40,7 @@ struct UserButton: View {
                     }
 
                     Text("@\(user.username)")
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
             }

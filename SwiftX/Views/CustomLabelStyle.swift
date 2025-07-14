@@ -12,10 +12,11 @@ struct CustomLabelStyle: LabelStyle {
         HStack {
             configuration.icon
                 .font(.subheadline)
-                .scaleEffect(0.9)
+//                .scaleEffect(0.9)
             
             configuration.title
-                .font(.subheadline)
+                .font(.callout)
+                .fontWeight(.semibold)
         }
     }
 }
