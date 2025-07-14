@@ -15,7 +15,7 @@ struct UserButton: View {
                         Rectangle()
                             .fill(.background.secondary)
                     }
-                    .downsampling(size: CGSize(width: 250, height: 250))
+                    .downsampling(size: CGSize(width: 400, height: 400))
                     .serialize(as: .JPEG)
                     .fade(duration: 0.1)
                     .frame(width: 40, height: 40)

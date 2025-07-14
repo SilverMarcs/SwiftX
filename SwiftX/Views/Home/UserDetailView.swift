@@ -18,66 +18,108 @@ struct UserDetailView: View {
                     .serialize(as: .JPEG)
                     .fade(duration: 0.1)
                     .resizable()
-                    .frame(height: 200)
+//                    .frame(height: 200)
                     .aspectRatio(contentMode: .fit)
                     .backgroundExtensionEffect()
             }
             
-            VStack(alignment: .leading, spacing: 16) {
-                HStack(alignment: .top, spacing: 16) {
-                    KFImage(URL(string: user.profileImageUrl))
-                        .placeholder {
-                            Rectangle()
-                                .fill(.background.secondary)
+            VStack(alignment: .leading, spacing: 15) {
+                VStack(alignment: .leading) {
+                    HStack(alignment: .center) {
+                        KFImage(URL(string: user.profileImageUrl))
+                            .placeholder {
+                                Rectangle()
+                                    .fill(.background.secondary)
+                            }
+                            .downsampling(size: CGSize(width: 400, height: 400))
+                            .serialize(as: .JPEG)
+                            .fade(duration: 0.1)
+                            .resizable()
+                            .frame(width: 80, height: 80)
+                            .aspectRatio(contentMode: .fill)
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .stroke(.primary, lineWidth: 2)
+                            )
+                        
+                        Spacer()
+                        
+                        HStack {
+                            if !user.descriptionLinks.isEmpty {
+                                Menu {
+                                    ForEach(user.descriptionLinks, id: \.url) { link in
+                                        SwiftUI.Link(destination: URL(string: link.url)!) {
+                                            Label(link.text ?? "Link", systemImage: "link")
+                                        }
+                                    }
+                                } label: {
+                                    Label("Links", systemImage: "link")
+                                        .labelStyle(.iconOnly)
+                                }
+                                .padding(10)
+                                .glassEffect()
+                            }
                         }
-                        .downsampling(size: CGSize(width: 250, height: 250))
-                        .serialize(as: .JPEG)
-                        .fade(duration: 0.1)
-                        .frame(width: 80, height: 80)
-                        .aspectRatio(contentMode: .fill)
-                        .clipShape(Circle())
+                        
+                        if let url = URL(string: user.url) {
+                            SwiftUI.Link(destination: url) {
+                                Label("Profile", systemImage: "bird")
+                                    .labelStyle(.iconOnly)
+                            }
+                            .buttonStyle(.glassProminent)
+                        }
+                    }
                     
-                    VStack(alignment: .leading, spacing: 4) {
+                    HStack {
                         Text(user.displayname)
                             .font(.title2.bold())
-                        Text("@\(user.username)")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        if let location = user.location, !location.isEmpty {
-                            Label(location, systemImage: "mappin.and.ellipse")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                        
+                        Group {
+                            if user.verified == true {
+                                Label("Verified", systemImage: "checkmark.seal.fill")
+                                    .foregroundStyle(.yellow)
+                                    .font(.caption)
+                            } else if user.blue == true {
+                                Label("Blue Verified", systemImage: "checkmark.seal.fill")
+                                    .foregroundStyle(.blue)
+                                    .font(.caption)
+                            }
                         }
-                        if user.verified == true {
-                            Label("Verified", systemImage: "checkmark.seal.fill")
-                                .foregroundStyle(.yellow)
-                                .font(.caption)
-                        } else if user.blue == true {
-                            Label("Blue Verified", systemImage: "checkmark.seal.fill")
-                                .foregroundStyle(.blue)
-                                .font(.caption)
-                        }
+                        .imageScale(.large)
+                        .labelStyle(.iconOnly)
+                        
+                        Spacer()
                     }
+                    
+                    Text("@\(user.username)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, -5)
                 }
+                .padding(.top, -20)
+                
                 
                 Text(user.rawDescription)
-                    .font(.body)
+                    .font(.callout)
+                    .lineLimit(3)
                 
-                HStack(spacing: 24) {
-                    Label("\(user.followersCount) Followers", systemImage: "person.2.fill")
-                    Label("\(user.friendsCount) Following", systemImage: "person.crop.circle.badge.checkmark")
-                    Label("\(user.statusesCount) Tweets", systemImage: "text.bubble.fill")
-                }
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                
-                if let url = URL(string: user.url) {
-                    SwiftUI.Link(destination: url) {
-                        Label("Profile", systemImage: "link")
+                VStack(alignment: .leading, spacing: 10) {
+                    if let location = user.location, !location.isEmpty {
+                        Label(location, systemImage: "mappin.and.ellipse")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                     }
+                    
+                    HStack(spacing: 24) {
+                        Label("\(user.friendsCount.formatCount) Following", systemImage: "person.crop.circle.badge.checkmark")
+                        Label("\(user.followersCount.formatCount) Followers", systemImage: "person.2.fill")
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
                 }
             }
-                .scenePadding()
+            .padding([.horizontal, .bottom])
         }
         .ignoresSafeArea(edges: .top)
         .navigationTitle(user.displayname)

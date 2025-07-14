@@ -48,9 +48,10 @@ struct UnifiedTweetView: View {
                         
                     ShareLink("Share URL", item: tweet.twitterWebUrl!)
                 } label: {
-                    Label("Meny", systemImage: "ellipsis.circle")
-                        .labelStyle(.iconOnly)
+                    Image(systemName: "ellipsis")
                 }
+                .padding(10)
+                .glassEffect()
             }
             .font(.subheadline)
             .fontWeight(.semibold)
