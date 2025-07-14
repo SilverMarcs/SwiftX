@@ -9,7 +9,8 @@ import SwiftUI
 import Kingfisher
 
 struct TweetView: View {
-    let tweet: any TweetDisplayable
+    let tweet: Tweet
+    @Environment(\.appendToPath) private var appendToPath
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -58,6 +59,15 @@ struct TweetView: View {
             .fontWeight(.semibold)
             .foregroundStyle(.secondary)
             .labelIconToTitleSpacing(4)
+            
+            if let quotedTweet = tweet.quotedTweet {
+                Button {
+                    appendToPath(quotedTweet)
+                } label: {
+                   RetweetView(tweet: quotedTweet)
+               }
+               .buttonStyle(.plain)
+           }
         }
     }
 }

@@ -10,7 +10,6 @@ struct UserDetailView: View {
         ScrollView {
             if let banner = user.profileBannerUrl, let url = URL(string: banner) {
                 KFImage(url)
-//
                     .downsampling(size: CGSize(width: 800, height: 250))
                     .serialize(as: .JPEG)
                     .fade(duration: 0.1)

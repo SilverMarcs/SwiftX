@@ -14,7 +14,7 @@ struct TweetDetailView: View {
 
     var body: some View {
         List {
-            TweetRowView(tweet: tweet)
+            TweetView(tweet: tweet)
                 .listRowSeparator(.hidden, edges: .top)
                 .listRowSeparator(.visible, edges: .bottom)
                 .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
@@ -31,7 +31,7 @@ struct TweetDetailView: View {
                     .listRowSeparator(.hidden)
                 
                 ForEach(replies) { reply in
-                    TweetRowView(tweet: reply)
+                    TweetView(tweet: reply)
                 }
             }
         }

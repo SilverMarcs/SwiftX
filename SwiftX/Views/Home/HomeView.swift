@@ -25,7 +25,7 @@ struct HomeView: View {
                     Button {
                         appendToPath(tweet)
                     } label: {
-                        TweetRowView(tweet: tweet)
+                        TweetView(tweet: tweet)
                     }
                     .buttonStyle(.plain)
                     .listRowSeparator(.visible, edges: .bottom)

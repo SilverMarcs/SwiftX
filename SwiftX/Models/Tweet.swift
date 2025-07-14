@@ -7,24 +7,16 @@
 
 import Foundation
 
-// MARK: - Tweet Protocol for unified view handling
-protocol TweetDisplayable {
-    var id: Int { get }
-    var url: String { get }
-    var date: String { get }
-    var user: User { get }
-    var rawContent: String { get }
-    var replyCount: Int { get }
-    var retweetCount: Int { get }
-    var likeCount: Int { get }
-    var quoteCount: Int { get }
-    var media: Media? { get }
-    var viewCount: Int? { get }
-    var twitterWebUrl: URL? { get }
-}
-
 // MARK: - Tweet
-struct Tweet2: Codable, Identifiable, TweetDisplayable {
+struct Retweet: Codable, Hashable, Identifiable {
+    static func == (lhs: Retweet, rhs: Retweet) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
     let id: Int
     let url: String
     let date: String
@@ -41,8 +33,8 @@ struct Tweet2: Codable, Identifiable, TweetDisplayable {
     let links: [Link]
     let media: Media?
     let viewCount: Int?
-//    var retweetedTweet: TweetReference? = nil
-//    var quotedTweet: TweetReference? = nil
+//    var retweetedTweet: Tweet? = nil
+//    var quotedTweet: Tweet? = nil
     let place: Place?
     let inReplyToTweetId: Int?
     let inReplyToTweetIdStr: String?
@@ -58,7 +50,7 @@ struct Tweet2: Codable, Identifiable, TweetDisplayable {
     }
 }
 
-struct Tweet: Hashable, Codable, Identifiable, TweetDisplayable {
+struct Tweet: Hashable, Codable, Identifiable {
     static func == (lhs: Tweet, rhs: Tweet) -> Bool {
         lhs.id == rhs.id
     }
@@ -83,8 +75,8 @@ struct Tweet: Hashable, Codable, Identifiable, TweetDisplayable {
     let links: [Link]
     let media: Media?
     let viewCount: Int?
-    let retweetedTweet: Tweet2?
-    let quotedTweet: Tweet2?
+    let retweetedTweet: Retweet?
+    let quotedTweet: Retweet?
     let place: Place?
     let inReplyToTweetId: Int?
     let inReplyToTweetIdStr: String?
