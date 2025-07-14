@@ -30,6 +30,7 @@ struct ProfileButton: View {
 //                    .clipShape(Circle())
             Image(systemName: "person.fill")
         }
+        .tint(.accentColor)
     }
 }
 
