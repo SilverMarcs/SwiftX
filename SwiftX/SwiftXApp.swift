@@ -22,8 +22,9 @@ struct SwiftXApp: App {
         ImageCache.default.diskStorage.config.sizeLimit = 1024 * 1024 * 200 // 200 MB
         ImageCache.default.diskStorage.config.expiration = .days(2) // 3 day
         
-    #if !os(macOS)
-    try? AVAudioSession.sharedInstance().setCategory(.playback, options: [.mixWithOthers])
-    #endif
+        #if !os(macOS)
+        try? AVAudioSession.sharedInstance().setCategory(.playback, options: [.mixWithOthers])
+        try? AVAudioSession.sharedInstance().setActive(true)
+        #endif
     }
 }
