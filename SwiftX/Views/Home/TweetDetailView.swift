@@ -17,6 +17,7 @@ struct TweetDetailView: View {
             TweetRowView(tweet: tweet)
                 .listRowSeparator(.hidden, edges: .top)
                 .listRowSeparator(.visible, edges: .bottom)
+                .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
 
             if isLoading {
                 ProgressView()
@@ -43,9 +44,7 @@ struct TweetDetailView: View {
     }
 
     private func loadReplies() async {
-        
         isLoading = true
-        defer { isLoading = false }
         
         do {
             let fetched = try await TweetService.fetchReplies(for: tweet.id)
@@ -53,5 +52,6 @@ struct TweetDetailView: View {
         } catch {
             print("Failed to load replies.")
         }
+        isLoading = false
     }
 }

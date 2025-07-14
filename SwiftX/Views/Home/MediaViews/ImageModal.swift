@@ -9,24 +9,24 @@ import SwiftUI
 import Kingfisher
 
 struct ImageModal: View {
-    let images: [String]
+    let data: ImageModalData
     @Environment(\.imageNS) private var imageNS
     @Namespace private var fallbackNS
     @State private var currentIndex: Int = 0
     
     private var sourceID: String {
-        guard currentIndex < images.count else { return images.first ?? "" }
-        return images[currentIndex]
+        guard currentIndex < data.images.count else { return data.images.first ?? "" }
+        return data.images[currentIndex]
     }
     
-    init(images: [String], startIndex: Int = 0) {
-        self.images = images
-        self._currentIndex = State(initialValue: startIndex)
+    init(data: ImageModalData) {
+        self.data = data
+        self._currentIndex = State(initialValue: data.startIndex)
     }
     
     var body: some View {
         TabView(selection: $currentIndex) {
-            ForEach(Array(images.enumerated()), id: \.offset) { index, imageURL in
+            ForEach(Array(data.images.enumerated()), id: \.offset) { index, imageURL in
                 KFImage(URL(string: imageURL))
                     .placeholder {
                         Rectangle()

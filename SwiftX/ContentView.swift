@@ -21,9 +21,9 @@ struct ContentView: View {
                 SettingsView()
             }
             
-            Tab(role: .search) {
-                Text("TBI")
-            }
+            // Tab(role: .search) {
+            //     Text("TBI")
+            // }
         }
         .tabViewStyle(.sidebarAdaptable)
         #if !os(macOS)

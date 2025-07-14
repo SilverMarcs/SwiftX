@@ -20,6 +20,7 @@ protocol TweetDisplayable {
     var quoteCount: Int { get }
     var media: Media? { get }
     var viewCount: Int? { get }
+    var twitterWebUrl: URL? { get }
 }
 
 // MARK: - Tweet
@@ -51,9 +52,21 @@ struct Tweet2: Codable, Identifiable, TweetDisplayable {
     let sourceLabel: String?
     let card: Card?
 //    let possiblySensitive: Bool?
+    
+    var twitterWebUrl: URL? {
+        return URL(string: "https://twitter.com/x/status/\(id)")
+    }
 }
 
-struct Tweet: Codable, Identifiable, TweetDisplayable {
+struct Tweet: Hashable, Codable, Identifiable, TweetDisplayable {
+    static func == (lhs: Tweet, rhs: Tweet) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
     let id: Int
     let url: String
     let date: String
@@ -81,6 +94,12 @@ struct Tweet: Codable, Identifiable, TweetDisplayable {
     let sourceLabel: String?
     let card: Card?
 //    let possiblySensitive: Bool?
+    
+    var twitterWebUrl: URL? {
+        return URL(string: "https://twitter.com/x/status/\(id)")
+    }
+    
+    
 }
 
 // MARK: - User

@@ -13,17 +13,21 @@ struct MediaView: View {
     @Environment(\.imageNS) private var imageNS
     @Namespace private var fallbackNS
     
+    @Environment(\.appendToPath) private var appendToPath
+
     var body: some View {
         VStack {
-            if let photos = media.photos, !photos.isEmpty {
-                NavigationLink(destination: ImageModal(images: photos.map { $0.url })) {
-                    KFImage(URL(string: photos[0].url))
+            if let photos = media.photos, let photo1 = media.photos?.first {
+                Button {
+                    appendToPath(ImageModalData(images: photos.map { $0.url }))
+                } label: {
+                    KFImage(URL(string: photo1.url))
                         .placeholder {
-                           Rectangle()
-                               .fill(.background.secondary)
-                               .overlay {
-                                   ProgressView()
-                               }
+                            Rectangle()
+                                .fill(.background.secondary)
+                                .overlay {
+                                    ProgressView()
+                                }
                         }
                         .downsampling(size: CGSize(width: 1000, height: 1000))
                         .serialize(as: .JPEG)
@@ -31,23 +35,22 @@ struct MediaView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .clipShape(.rect(cornerRadius: 10))
-                        .matchedTransitionSource(id: photos[0].url, in: imageNS ?? fallbackNS)
+                        .matchedTransitionSource(id: photo1.url, in: imageNS ?? fallbackNS)
                 }
-                .navigationLinkIndicatorVisibility(.hidden)
                 .buttonStyle(.plain)
-                
+
                 // Show indicator if there are more photos
                 if photos.count > 1 {
                     Text("+\(photos.count - 1)")
                 }
             }
-            
+
             if let videos = media.videos, !videos.isEmpty {
                 if let videoURL = videos[0].variants.first?.url,
                    let url = URL(string: videoURL) {
                     VideoPlayerView(url: url)
                 }
-                
+
                 if videos.count > 1 {
                     Text("+\(videos.count - 1)")
                 }

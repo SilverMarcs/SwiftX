@@ -74,6 +74,17 @@ struct UnifiedTweetView: View {
                 Label("\(tweet.likeCount)", systemImage: "heart")
                 
                 Spacer()
+                
+                Menu {
+                    SwiftUI.Link(destination: tweet.twitterWebUrl!) {
+                        Label("Open in X", systemImage: "bird")
+                    }
+                        
+                    ShareLink("Share URL", item: tweet.twitterWebUrl!)
+                } label: {
+                    Label("Meny", systemImage: "ellipsis.circle")
+                        .labelStyle(.iconOnly)
+                }
             }
             .font(.subheadline)
             .fontWeight(.semibold)

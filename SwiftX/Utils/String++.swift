@@ -10,6 +10,8 @@ import SwiftUI
 extension String {
     func formatDate() -> String {
         let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime] // This is important for your format
+        
         if let date = formatter.date(from: self) {
             let now = Date()
             let timeInterval = now.timeIntervalSince(date)
@@ -24,7 +26,26 @@ extension String {
                 return "\(Int(timeInterval / 86400))d"
             }
         }
+        
+        // If the above fails, try DateFormatter as fallback
+        let backupFormatter = DateFormatter()
+        backupFormatter.dateFormat = "yyyy-MM-dd HH:mm:ssZ"
+        
+        if let date = backupFormatter.date(from: self) {
+            let now = Date()
+            let timeInterval = now.timeIntervalSince(date)
+            
+            if timeInterval < 60 {
+                return "now"
+            } else if timeInterval < 3600 {
+                return "\(Int(timeInterval / 60))m"
+            } else if timeInterval < 86400 {
+                return "\(Int(timeInterval / 3600))h"
+            } else {
+                return "\(Int(timeInterval / 86400))d"
+            }
+        }
+        
         return ""
     }
 }
-
