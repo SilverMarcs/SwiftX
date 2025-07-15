@@ -10,6 +10,7 @@ import SwiftUI
 struct TweetContentView: View {
     let tweet: any TweetContentProtocol
     var hideHeader: Bool = false
+    @Environment(\.openURL) private var openURL
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -24,8 +25,13 @@ struct TweetContentView: View {
                 .opacity(0.9)
             
             ForEach(tweet.links, id: \.url) { url in
-                SwiftUI.Link(destination: URL(string: url.url)!) {
+                Button {
+                    openURL(URL(string: url.url)!, prefersInApp: true)
+                } label: {
                     Label(url.text ?? "Link", systemImage: "link")
+                        .labelStyle(RetweetLabel())
+                        .foregroundStyle(.blue)
+                        .brightness(1.2)
                 }
             }
             

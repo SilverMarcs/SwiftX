@@ -92,7 +92,7 @@ struct Retweet: Codable, Hashable, Identifiable {
         formattedRetweetCount = retweetCount.formattedCount()
         formattedLikeCount = likeCount.formattedCount()
         formattedQuoteCount = quoteCount.formattedCount()
-        parsedContent = String.parseContent(rawContent, links: links)
+        parsedContent = String.parseContent(rawContent)
     }
 }
 
@@ -182,7 +182,7 @@ struct Tweet: Hashable, Codable, Identifiable {
         formattedRetweetCount = retweetCount.formattedCount()
         formattedLikeCount = likeCount.formattedCount()
         formattedQuoteCount = quoteCount.formattedCount()
-        parsedContent = String.parseContent(rawContent, links: links)
+        parsedContent = String.parseContent(rawContent)
     }
     
     init(from retweet: Retweet) {
