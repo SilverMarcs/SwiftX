@@ -23,9 +23,9 @@ struct MediaView: View {
 
             if let videos = media.videos, !videos.isEmpty {
                 VideoView(video: videos[0])
-                if videos.count > 1 {
-                    Text("+\(videos.count - 1)")
-                }
+//                if videos.count > 1 {
+//                    Text("+\(videos.count - 1)")
+//                }
             }
         }
     }

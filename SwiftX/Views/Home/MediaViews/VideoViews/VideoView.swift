@@ -16,7 +16,8 @@ struct VideoView: View {
     var body: some View {
         if let url = URL(string: video.variants.first?.url ?? "") {
             VideoPlayer(player: player)
-                .aspectRatio(16/9, contentMode: .fit)
+//                .aspectRatio(16/9, contentMode: .fit)
+                .aspectRatio(contentMode: .fit)
                 .matchedGeometryEffect(id: video.variants.first?.url ?? "videoPlayer", in: videoNS ?? fallbackNS)
                 .cornerRadius(12)
                 .clipped()
