@@ -58,8 +58,8 @@ struct TweetContentView: View {
                     ShareLink("Share URL", item: tweet.twitterWebUrl!)
                 } label: {
                     Image(systemName: "ellipsis")
+                        .padding(10)
                 }
-                .padding(10)
                 .glassEffect()
             }
             .labelStyle(CustomLabelStyle())
