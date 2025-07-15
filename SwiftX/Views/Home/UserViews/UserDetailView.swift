@@ -1,32 +1,33 @@
 import SwiftUI
-
-import SwiftUI
 import Kingfisher
 
 struct UserDetailView: View {
     let user: User
-    
+    @State private var tweets: [Tweet] = []
+    @State private var isLoading = false
+
     var body: some View {
-        ScrollView {
-            if let banner = user.profileBannerUrl, let url = URL(string: banner) {
-                KFImage(url)
-                    .downsampling(size: CGSize(width: 800, height: 250))
-                    .placeholder {
-                        Rectangle()
-                            .fill(.background.secondary)
-                            .frame(height: 120)
-                    }
-                    .serialize(as: .JPEG)
-                    .fade(duration: 0.1)
-                    .resizable()
-//                    .frame(height: 200)
-                    .aspectRatio(contentMode: .fit)
-                    .backgroundExtensionEffect()
-            }
-            
+        List {
             VStack(alignment: .leading, spacing: 15) {
+                if let banner = user.profileBannerUrl, let url = URL(string: banner) {
+                    KFImage(url)
+                        .downsampling(size: CGSize(width: 800, height: 250))
+                        .placeholder {
+                            Rectangle()
+                                .fill(.background.secondary)
+                                .frame(height: 120)
+                        }
+                        .serialize(as: .JPEG)
+                        .fade(duration: 0.1)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .cornerRadius(12)
+                        .clipped()
+                        .backgroundExtensionEffect()
+                }
+
                 VStack(alignment: .leading) {
-                    HStack(alignment: .center) {
+                    HStack(alignment: .bottom) {
                         KFImage(URL(string: user.profileImageUrl))
                             .placeholder {
                                 Rectangle()
@@ -43,13 +44,13 @@ struct UserDetailView: View {
                                 Circle()
                                     .stroke(.primary, lineWidth: 2)
                             )
-                        
+
                         Spacer()
-                        
+
                         HStack {
                             if !user.descriptionLinks.isEmpty {
                                 Menu {
-                                    ForEach(user.descriptionLinks, id: \.url) { link in
+                                    ForEach(user.descriptionLinks, id: \ .url) { link in
                                         SwiftUI.Link(destination: URL(string: link.url)!) {
                                             Label(link.text ?? "Link", systemImage: "link")
                                         }
@@ -63,7 +64,7 @@ struct UserDetailView: View {
                                 .glassEffect()
                             }
                         }
-                        
+
                         if let url = URL(string: user.url) {
                             SwiftUI.Link(destination: url) {
                                 Label("Profile", systemImage: "bird")
@@ -76,7 +77,7 @@ struct UserDetailView: View {
                     HStack {
                         Text(user.displayname)
                             .font(.title2.bold())
-                        
+
                         Group {
                             if user.verified == true {
                                 Label("Verified", systemImage: "checkmark.seal.fill")
@@ -90,29 +91,28 @@ struct UserDetailView: View {
                         }
                         .imageScale(.large)
                         .labelStyle(.iconOnly)
-                        
+
                         Spacer()
                     }
-                    
+
                     Text("@\(user.username)")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .padding(.top, -5)
                 }
-                .padding(.top, (user.profileBannerUrl == nil) ? 0 : -20)
-                
-                
+                .padding(.top, (user.profileBannerUrl == nil) ? 0 : -45)
+
                 Text(user.rawDescription)
                     .font(.callout)
                     .lineLimit(3)
-                
+
                 VStack(alignment: .leading, spacing: 10) {
                     if let location = user.location, !location.isEmpty {
                         Label(location, systemImage: "mappin.and.ellipse")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
-                    
+
                     HStack(spacing: 24) {
                         Label("\(user.formattedFriendsCount) Following", systemImage: "person.crop.circle.badge.checkmark")
                         Label("\(user.formattedFollowersCount) Followers", systemImage: "person.2.fill")
@@ -121,10 +121,40 @@ struct UserDetailView: View {
                     .foregroundStyle(.secondary)
                 }
             }
-            .padding([.horizontal, .bottom])
+            .listRowSeparator(.hidden, edges: .top)
+            .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
+
+            if isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .listRowSeparator(.hidden)
+            }
+            
+            ForEach(tweets) { tweet in
+                TweetView(tweet: tweet)
+            }
         }
-        .ignoresSafeArea(edges: (user.profileBannerUrl == nil) ? .bottom : .top)
+        .listStyle(.plain)
         .navigationTitle(user.displayname)
         .toolbarTitleDisplayMode(.inline)
+        .task {
+            if tweets.isEmpty {
+                await fetchUserTweets()
+            }
+        }
+        .refreshable {
+            await fetchUserTweets()
+        }
+    }
+
+    private func fetchUserTweets() async {
+        isLoading = true
+        do {
+            let fetchTweets = try await TweetService.fetchUserTweets(userId: user.id)
+            tweets = fetchTweets
+        } catch {
+            print(error.localizedDescription)
+        }
+        isLoading = false
     }
 }

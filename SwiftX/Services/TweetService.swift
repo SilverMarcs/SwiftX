@@ -62,4 +62,9 @@ struct TweetService {
         let response: RepliesResponse = try await makeRequest(endpoint: "replies/\(tweetId)")
         return response.replies
     }
+    
+    static func fetchUserTweets(userId: Int) async throws -> [Tweet] {
+        let response: TweetResponse = try await makeRequest(endpoint: "user/\(userId)/tweets")
+        return response.tweets
+    }
 }
