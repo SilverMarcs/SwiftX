@@ -13,6 +13,7 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 APIServerSettingsView()
+                VideoPlaybackSettingsView()
                 ImageCacheSettingsView()
             }
             .formStyle(.grouped)

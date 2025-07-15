@@ -22,11 +22,7 @@ struct MediaView: View {
             }
 
             if let videos = media.videos, !videos.isEmpty {
-                if let videoURL = videos[0].variants.first?.url,
-                   let url = URL(string: videoURL) {
-                    VideoPlayerView(url: url)
-                }
-
+                VideoView(video: videos[0])
                 if videos.count > 1 {
                     Text("+\(videos.count - 1)")
                 }
