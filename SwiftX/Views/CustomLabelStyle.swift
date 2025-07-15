@@ -21,7 +21,7 @@ struct CustomLabelStyle: LabelStyle {
 
 struct RetweetLabel: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
-        HStack {
+        HStack(spacing: 5) {
             configuration.icon
                 .font(.caption)
                 .fontWeight(.semibold)

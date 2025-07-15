@@ -80,7 +80,6 @@ struct TweetView: View {
             if let retweet = tweet.retweetedTweet {
                 Label("Retweeted", systemImage: "arrow.2.squarepath")
                     .labelStyle(RetweetLabel())
-                    .labelIconToTitleSpacing(2)
                 
                 Button {
                     appendToPath(retweet)
