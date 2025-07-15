@@ -222,3 +222,23 @@ struct Tweet: Hashable, Codable, Identifiable {
         self.parsedContent = retweet.parsedContent
     }
 }
+
+// Protocol to unify Tweet and Retweet data access
+protocol TweetContentProtocol {
+    var id: Int { get }
+    var user: User { get }
+    var formattedDate: String { get }
+    var parsedContent: String { get }
+    var links: [Link] { get }
+    var media: Media? { get }
+    var formattedReplyCount: String { get }
+    var formattedRetweetCount: String { get }
+    var formattedLikeCount: String { get }
+    var twitterWebUrl: URL? { get }
+}
+
+// Extend Tweet to conform to the protocol
+extension Tweet: TweetContentProtocol {}
+
+// Extend Retweet to conform to the protocol
+extension Retweet: TweetContentProtocol {}

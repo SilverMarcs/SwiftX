@@ -14,58 +14,10 @@ struct TweetView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // User Info
-            HStack {
-                UserButton(user: tweet.user)
-                Spacer()
-                Text(tweet.formattedDate)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
+            TweetHeader(tweet: tweet)
             
-            // Dont shwo original tweet details if this is a repost/retweet
             if tweet.retweetedTweet == nil {
-                Text(LocalizedStringKey(tweet.parsedContent))
-                    .font(.default)
-                    .opacity(0.9)
-                
-                ForEach(tweet.links, id: \.url) { url in
-                    SwiftUI.Link(destination: URL(string: url.url)!) {
-                        Label(url.text ?? "Link", systemImage: "link")
-                    }
-                }
-                
-                // Media Preview
-                if let media = tweet.media {
-                    MediaView(media: media)
-                }
-                
-                // Engagement Stats
-                HStack(spacing: 20) {
-                    Label(tweet.formattedReplyCount, systemImage: "message")
-                    
-                    Label(tweet.formattedRetweetCount, systemImage: "arrow.2.squarepath")
-                    
-                    Label(tweet.formattedLikeCount, systemImage: "heart")
-                    
-                    Spacer()
-                    
-                    Menu {
-                        SwiftUI.Link(destination: tweet.twitterWebUrl!) {
-                            Label("Open in X", systemImage: "bird")
-                        }
-                        
-                        ShareLink("Share URL", item: tweet.twitterWebUrl!)
-                    } label: {
-                        Image(systemName: "ellipsis")
-                    }
-                    .padding(10)
-                    .glassEffect()
-                }
-                .labelStyle(CustomLabelStyle())
-                .fontWeight(.semibold)
-                .foregroundStyle(.secondary)
-                .labelIconToTitleSpacing(4)
+                TweetContentView(tweet: tweet, hideHeader: true)
             }
             
             if let quotedTweet = tweet.quotedTweet {
