@@ -27,17 +27,9 @@ struct ImageModal: View {
     var body: some View {
         TabView(selection: $currentIndex) {
             ForEach(Array(data.images.enumerated()), id: \.offset) { index, imageURL in
-                KFImage(URL(string: imageURL))
-                    .placeholder {
-                        Rectangle()
-                            .fill(.background.secondary)
-                    }
-                    .downsampling(size: CGSize(width: 1000, height: 1000))
-                    .serialize(as: .JPEG)
-                    .fade(duration: 0.1)
-                    .resizable()
-                    .zoomable()
+                GalleryKFImage(url: imageURL)
                     .aspectRatio(contentMode: .fit)
+                    .zoomable()
                     .tag(index)
             }
         }

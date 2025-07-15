@@ -14,11 +14,21 @@ struct EnvironmentActions: ViewModifier {
     func body(content: Content) -> some View {
         content
             .environment(\.openURL, OpenURLAction { url in
-                return .systemAction(prefersInApp: true)
+                // Check if the URL is a YouTube URL
+                if isYouTubeURL(url) {
+                    return .systemAction(prefersInApp: false) // Open in YouTube app
+                }
+                return .systemAction(prefersInApp: true) // Other URLs open in-app
             })
             .environment(\.appendToPath, { value in
                 path.append(value)
             })
+    }
+    
+    // Helper function to check if URL is from YouTube
+    private func isYouTubeURL(_ url: URL) -> Bool {
+        let urlString = url.absoluteString.lowercased()
+        return urlString.contains("youtube.com") || urlString.contains("youtu.be")
     }
 }
 

@@ -17,33 +17,8 @@ struct MediaView: View {
 
     var body: some View {
         VStack {
-            if let photos = media.photos, let photo1 = media.photos?.first {
-                Button {
-                    appendToPath(ImageModalData(images: photos.map { $0.url }))
-                } label: {
-                    KFImage(URL(string: photo1.url))
-                        .placeholder {
-                            Rectangle()
-                                .fill(.background.secondary)
-                                .overlay {
-                                    ProgressView()
-                                }
-                        }
-                        .downsampling(size: CGSize(width: 1000, height: 1000))
-                        .serialize(as: .JPEG)
-                        .fade(duration: 0.1)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .clipShape(.rect(cornerRadius: 10))
-                        .matchedTransitionSource(id: photo1.url, in: imageNS ?? fallbackNS)
-                }
-                .buttonStyle(.plain)
-
-                // Show indicator if there are more photos
-                if photos.count > 1 {
-                    Text("+\(photos.count - 1)")
-                        .font(.largeTitle)
-                }
+            if let photos = media.photos, !photos.isEmpty {
+                PhotoGalleryView(photos: photos)
             }
 
             if let videos = media.videos, !videos.isEmpty {

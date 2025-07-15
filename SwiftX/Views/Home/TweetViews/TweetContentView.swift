@@ -26,13 +26,14 @@ struct TweetContentView: View {
             
             ForEach(tweet.links, id: \.url) { url in
                 Button {
-                    openURL(URL(string: url.url)!, prefersInApp: true)
+                    openURL(URL(string: url.url)!)
                 } label: {
                     Label(url.text ?? "Link", systemImage: "link")
                         .labelStyle(RetweetLabel())
                         .foregroundStyle(.blue)
                         .brightness(1.1)
                 }
+                .buttonStyle(.plain)
             }
             
             // Media Preview

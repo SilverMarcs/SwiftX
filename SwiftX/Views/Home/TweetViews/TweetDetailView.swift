@@ -25,9 +25,9 @@ struct TweetDetailView: View {
                     .listRowSeparator(.hidden)
             } else if !replies.isEmpty {
                 Text("Replies")
-                    .font(.title)
+                    .font(.title2)
                     .fontWeight(.semibold)
-                    .padding(.vertical, 4)
+//                    .padding(.vertical, 2)
                     .listRowSeparator(.hidden)
                 
                 ForEach(replies) { reply in
