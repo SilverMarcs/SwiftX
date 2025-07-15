@@ -20,7 +20,7 @@ struct TweetContentView: View {
             }
             
             // Tweet Content
-            Text(LocalizedStringKey(tweet.parsedContent))
+            Text(tweet.parsedContent)
                 .font(.default)
                 .opacity(0.9)
             
@@ -31,7 +31,7 @@ struct TweetContentView: View {
                     Label(url.text ?? "Link", systemImage: "link")
                         .labelStyle(RetweetLabel())
                         .foregroundStyle(.blue)
-                        .brightness(1.2)
+                        .brightness(1.1)
                 }
             }
             
@@ -55,7 +55,7 @@ struct TweetContentView: View {
                         Label("Open in X", systemImage: "bird")
                     }
                     
-                    ShareLink("Share URL", item: tweet.twitterWebUrl!)
+                    ShareLink("Share", item: tweet.twitterWebUrl!)
                 } label: {
                     Image(systemName: "ellipsis")
                         .padding(10)

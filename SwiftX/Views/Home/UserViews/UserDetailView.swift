@@ -11,6 +11,11 @@ struct UserDetailView: View {
             if let banner = user.profileBannerUrl, let url = URL(string: banner) {
                 KFImage(url)
                     .downsampling(size: CGSize(width: 800, height: 250))
+                    .placeholder {
+                        Rectangle()
+                            .fill(.background.secondary)
+                            .frame(height: 120)
+                    }
                     .serialize(as: .JPEG)
                     .fade(duration: 0.1)
                     .resizable()
@@ -94,7 +99,7 @@ struct UserDetailView: View {
                         .foregroundStyle(.secondary)
                         .padding(.top, -5)
                 }
-                .padding(.top, -20)
+                .padding(.top, (user.profileBannerUrl == nil) ? 0 : -20)
                 
                 
                 Text(user.rawDescription)
@@ -118,7 +123,7 @@ struct UserDetailView: View {
             }
             .padding([.horizontal, .bottom])
         }
-        .ignoresSafeArea(edges: .top)
+        .ignoresSafeArea(edges: (user.profileBannerUrl == nil) ? .bottom : .top)
         .navigationTitle(user.displayname)
         .toolbarTitleDisplayMode(.inline)
     }
