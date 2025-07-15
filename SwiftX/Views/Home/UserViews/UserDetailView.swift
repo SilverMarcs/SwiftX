@@ -8,26 +8,27 @@ struct UserDetailView: View {
 
     var body: some View {
         List {
-            VStack(alignment: .leading, spacing: 15) {
-                if let banner = user.profileBannerUrl, let url = URL(string: banner) {
-                    KFImage(url)
-                        .downsampling(size: CGSize(width: 800, height: 250))
-                        .placeholder {
-                            Rectangle()
-                                .fill(.background.secondary)
-                                .frame(height: 120)
-                        }
-                        .serialize(as: .JPEG)
-                        .fade(duration: 0.1)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .cornerRadius(12)
-                        .clipped()
-                        .backgroundExtensionEffect()
-                }
-
-                VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 15) { // Changed spacing to 0 for better control
+                // Banner Image Section + Profile Image + Action buttons
+                VStack(alignment: .leading, spacing: 0) {
+                    if let banner = user.profileBannerUrl, let url = URL(string: banner) {
+                        KFImage(url)
+                            .downsampling(size: CGSize(width: 800, height: 250))
+                            .placeholder {
+                                Rectangle()
+                                    .fill(.background.secondary)
+                                    .frame(height: 120)
+                            }
+                            .serialize(as: .JPEG)
+                            .fade(duration: 0.1)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .cornerRadius(12)
+                            .clipped()
+                    }
+                    
                     HStack(alignment: .bottom) {
+                        // Profile Image
                         KFImage(URL(string: user.profileImageUrl))
                             .placeholder {
                                 Rectangle()
@@ -44,27 +45,25 @@ struct UserDetailView: View {
                                 Circle()
                                     .stroke(.primary, lineWidth: 2)
                             )
-
+                        
                         Spacer()
-
-                        HStack {
-                            if !user.descriptionLinks.isEmpty {
-                                Menu {
-                                    ForEach(user.descriptionLinks, id: \ .url) { link in
-                                        SwiftUI.Link(destination: URL(string: link.url)!) {
-                                            Label(link.text ?? "Link", systemImage: "link")
-                                        }
+                        
+                        if !user.descriptionLinks.isEmpty {
+                            Menu {
+                                ForEach(user.descriptionLinks, id: \.url) { link in
+                                    SwiftUI.Link(destination: URL(string: link.url)!) {
+                                        Label(link.text ?? "Link", systemImage: "link")
                                     }
-                                } label: {
-                                    Label("Links", systemImage: "link")
-                                        .labelStyle(.iconOnly)
                                 }
-                                .buttonStyle(.borderless)
-                                .padding(10)
-                                .glassEffect()
+                            } label: {
+                                Label("Links", systemImage: "link")
+                                    .labelStyle(.iconOnly)
                             }
+                            .buttonStyle(.borderless)
+                            .padding(10)
+                            .glassEffect()
                         }
-
+                        
                         if let url = URL(string: user.url) {
                             SwiftUI.Link(destination: url) {
                                 Label("Profile", systemImage: "bird")
@@ -73,63 +72,75 @@ struct UserDetailView: View {
                             .buttonStyle(.glassProminent)
                         }
                     }
-                    
-                    HStack {
-                        Text(user.displayname)
-                            .font(.title2.bold())
-
-                        Group {
-                            if user.verified == true {
-                                Label("Verified", systemImage: "checkmark.seal.fill")
-                                    .foregroundStyle(.yellow)
-                                    .font(.caption)
-                            } else if user.blue == true {
-                                Label("Blue Verified", systemImage: "checkmark.seal.fill")
-                                    .foregroundStyle(.blue)
-                                    .font(.caption)
-                            }
-                        }
-                        .imageScale(.large)
-                        .labelStyle(.iconOnly)
-
-                        Spacer()
-                    }
-
-                    Text("@\(user.username)")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .padding(.top, -5)
+//                        .offset(y: -30)
+                    .padding(.top, -28)
                 }
-                .padding(.top, (user.profileBannerUrl == nil) ? 0 : -45)
-
-                Text(user.rawDescription)
-                    .font(.callout)
-                    .lineLimit(3)
-
+                
+                // User Info Section
                 VStack(alignment: .leading, spacing: 10) {
-                    if let location = user.location, !location.isEmpty {
-                        Label(location, systemImage: "mappin.and.ellipse")
+                    // Name and Verification
+                    
+                    VStack(alignment: .leading, spacing: 0) {
+                        HStack {
+                            Text(user.displayname)
+                                .font(.title2.bold())
+                            
+                            Group {
+                                if user.verified == true {
+                                    Label("Verified", systemImage: "checkmark.seal.fill")
+                                        .foregroundStyle(.yellow)
+                                        .font(.caption)
+                                } else if user.blue == true {
+                                    Label("Blue Verified", systemImage: "checkmark.seal.fill")
+                                        .foregroundStyle(.blue)
+                                        .font(.caption)
+                                }
+                            }
+                            .imageScale(.large)
+                            .labelStyle(.iconOnly)
+                            
+                            Spacer()
+                        }
+                        
+                        Text("@\(user.username)")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
-
-                    HStack(spacing: 24) {
-                        Label("\(user.formattedFriendsCount) Following", systemImage: "person.crop.circle.badge.checkmark")
-                        Label("\(user.formattedFollowersCount) Followers", systemImage: "person.2.fill")
+                    
+                    Text(user.rawDescription)
+                        .font(.callout)
+                        .lineLimit(2) // not working
+                    
+                    // Location and Stats
+                    VStack(alignment: .leading, spacing: 5) {
+                        if let location = user.location, !location.isEmpty {
+                            Label(location, systemImage: "mappin.and.ellipse")
+                                .font(.subheadline)
+                                .foregroundStyle(.green)
+                        }
+                        
+                        HStack(spacing: 24) {
+                            Label("\(user.formattedFriendsCount) Following", systemImage: "person.crop.circle.badge.checkmark")
+                            Label("\(user.formattedFollowersCount) Followers", systemImage: "person.2.fill")
+                        }
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                     }
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .labelStyle(CustomLabelStyle())
                 }
             }
             .listRowSeparator(.hidden, edges: .top)
+            .padding(.top, -20) // Add this line
             .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
-
+            
+            // Loading State
             if isLoading {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .listRowSeparator(.hidden)
             }
             
+            // Tweets
             ForEach(tweets) { tweet in
                 TweetView(tweet: tweet)
             }

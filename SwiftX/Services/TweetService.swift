@@ -40,22 +40,24 @@ struct TweetService {
     
     static func fetchTweets() async throws -> [Tweet] {
         let response: TweetResponse = try await makeRequest(endpoint: "tweets")
-        
-        // Filter tweets to only include:
-        // 1. Top-level tweets (not replies)
-        // 2. Tweets that aren't quoted by other tweets
-        // 3. Tweets that aren't retweeted by other tweets
-        let filteredTweets = response.tweets.filter { tweet in
+        return filterTweets(response.tweets)
+    }
+
+    static func fetchUserTweets(userId: Int) async throws -> [Tweet] {
+        let response: TweetResponse = try await makeRequest(endpoint: "user/\(userId)/tweets")
+        return filterTweets(response.tweets)
+    }
+
+    private static func filterTweets(_ tweets: [Tweet]) -> [Tweet] {
+        return tweets.filter { tweet in
             // Check if:
             // - it's not a reply AND
             // - not quoted in any other tweet AND
             // - not retweeted in any other tweet
             tweet.inReplyToTweetId == nil &&
-            !response.tweets.contains { $0.quotedTweet?.id == tweet.id } &&
-            !response.tweets.contains { $0.retweetedTweet?.id == tweet.id }
+            !tweets.contains { $0.quotedTweet?.id == tweet.id } &&
+            !tweets.contains { $0.retweetedTweet?.id == tweet.id }
         }
-        
-        return filteredTweets
     }
     
     static func fetchReplies(for tweetId: Int) async throws -> [Tweet] {
@@ -63,8 +65,4 @@ struct TweetService {
         return response.replies
     }
     
-    static func fetchUserTweets(userId: Int) async throws -> [Tweet] {
-        let response: TweetResponse = try await makeRequest(endpoint: "user/\(userId)/tweets")
-        return response.tweets
-    }
 }
