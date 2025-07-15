@@ -20,18 +20,18 @@ struct HomeView: View {
                     .controlSize(.large)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .listRowSeparator(.hidden)
-            } else {
-                ForEach(tweets) { tweet in
-                    Button {
-                        appendToPath(tweet)
-                    } label: {
-                        TweetView(tweet: tweet)
-                    }
-                    .buttonStyle(.plain)
-                    .listRowSeparator(.visible, edges: .bottom)
-                    .listRowSeparator(.hidden, edges: .top)
-                    .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
+            }
+                
+            ForEach(tweets) { tweet in
+                Button {
+                    appendToPath(tweet)
+                } label: {
+                    TweetView(tweet: tweet)
                 }
+                .buttonStyle(.plain)
+                .listRowSeparator(.visible, edges: .bottom)
+                .listRowSeparator(.hidden, edges: .top)
+                .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
             }
         }
         .listStyle(.plain)
