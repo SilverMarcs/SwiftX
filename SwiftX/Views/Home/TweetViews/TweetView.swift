@@ -23,42 +23,50 @@ struct TweetView: View {
                     .foregroundStyle(.secondary)
             }
             
-            // Tweet Content
-            Text(LocalizedStringKey(tweet.rawContent))
-                .font(.default)
-                .opacity(0.9)
-            
-            // Media Preview
-            if let media = tweet.media {
-                MediaView(media: media)
-            }
-            
-            // Engagement Stats
-            HStack(spacing: 20) {
-                Label(tweet.formattedReplyCount, systemImage: "message")
+            // Dont shwo original tweet details if this is a repost/retweet
+            if tweet.retweetedTweet == nil {
+                Text(LocalizedStringKey(tweet.parsedContent))
+                    .font(.default)
+                    .opacity(0.9)
                 
-                Label(tweet.formattedRetweetCount, systemImage: "arrow.2.squarepath")
-                
-                Label(tweet.formattedLikeCount, systemImage: "heart")
-                
-                Spacer()
-                
-                Menu {
-                    SwiftUI.Link(destination: tweet.twitterWebUrl!) {
-                        Label("Open in X", systemImage: "bird")
+                ForEach(tweet.links, id: \.url) { url in
+                    SwiftUI.Link(destination: URL(string: url.url)!) {
+                        Label(url.text ?? "Link", systemImage: "link")
                     }
-                        
-                    ShareLink("Share URL", item: tweet.twitterWebUrl!)
-                } label: {
-                    Image(systemName: "ellipsis")
                 }
-                .padding(10)
-                .glassEffect()
+                
+                // Media Preview
+                if let media = tweet.media {
+                    MediaView(media: media)
+                }
+                
+                // Engagement Stats
+                HStack(spacing: 20) {
+                    Label(tweet.formattedReplyCount, systemImage: "message")
+                    
+                    Label(tweet.formattedRetweetCount, systemImage: "arrow.2.squarepath")
+                    
+                    Label(tweet.formattedLikeCount, systemImage: "heart")
+                    
+                    Spacer()
+                    
+                    Menu {
+                        SwiftUI.Link(destination: tweet.twitterWebUrl!) {
+                            Label("Open in X", systemImage: "bird")
+                        }
+                        
+                        ShareLink("Share URL", item: tweet.twitterWebUrl!)
+                    } label: {
+                        Image(systemName: "ellipsis")
+                    }
+                    .padding(10)
+                    .glassEffect()
+                }
+                .labelStyle(CustomLabelStyle())
+                .fontWeight(.semibold)
+                .foregroundStyle(.secondary)
+                .labelIconToTitleSpacing(4)
             }
-            .labelStyle(CustomLabelStyle())
-            .fontWeight(.semibold)
-            .foregroundStyle(.secondary)
-            .labelIconToTitleSpacing(4)
             
             if let quotedTweet = tweet.quotedTweet {
                 Button {
@@ -68,7 +76,21 @@ struct TweetView: View {
                }
                .buttonStyle(.plain)
            }
+            
+            if let retweet = tweet.retweetedTweet {
+                Label("Retweeted", systemImage: "arrow.2.squarepath")
+                    .labelStyle(RetweetLabel())
+                    .labelIconToTitleSpacing(2)
+                
+                Button {
+                    appendToPath(retweet)
+                } label: {
+                   RetweetView(tweet: retweet)
+               }
+               .buttonStyle(.plain)
+           }
         }
-            .contentShape(.rect)
+        .contentShape(.rect)
     }
 }
+

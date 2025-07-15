@@ -22,9 +22,15 @@ struct RetweetView: View {
             }
             
             // Tweet Content
-            Text(LocalizedStringKey(tweet.rawContent))
+            Text(LocalizedStringKey(tweet.parsedContent))
                 .font(.default)
                 .opacity(0.9)
+            
+            ForEach(tweet.links, id: \.url) { url in
+                SwiftUI.Link(destination: URL(string: url.url)!) {
+                    Label(url.text ?? "Link", systemImage: "link")
+                }
+            }
             
             // Media Preview
             if let media = tweet.media {

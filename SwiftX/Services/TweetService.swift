@@ -44,10 +44,15 @@ struct TweetService {
         // Filter tweets to only include:
         // 1. Top-level tweets (not replies)
         // 2. Tweets that aren't quoted by other tweets
+        // 3. Tweets that aren't retweeted by other tweets
         let filteredTweets = response.tweets.filter { tweet in
-            // Check if it's not a reply AND not quoted in any other tweet
+            // Check if:
+            // - it's not a reply AND
+            // - not quoted in any other tweet AND
+            // - not retweeted in any other tweet
             tweet.inReplyToTweetId == nil &&
-            !response.tweets.contains { $0.quotedTweet?.id == tweet.id }
+            !response.tweets.contains { $0.quotedTweet?.id == tweet.id } &&
+            !response.tweets.contains { $0.retweetedTweet?.id == tweet.id }
         }
         
         return filteredTweets

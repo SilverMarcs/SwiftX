@@ -68,3 +68,13 @@ extension String {
         return ""
     }
 }
+
+extension String {
+    static func parseContent(_ rawContent: String, links: [Link]) -> String {
+        if let lastLink = links.last,
+           rawContent.hasSuffix(lastLink.url) {
+            return rawContent.replacingOccurrences(of: lastLink.url, with: "").trimmingCharacters(in: .whitespaces)
+        }
+        return rawContent
+    }
+}

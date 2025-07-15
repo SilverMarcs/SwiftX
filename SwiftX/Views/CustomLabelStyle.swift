@@ -12,11 +12,23 @@ struct CustomLabelStyle: LabelStyle {
         HStack {
             configuration.icon
                 .font(.subheadline)
-//                .scaleEffect(0.9)
             
             configuration.title
                 .font(.callout)
-                .fontWeight(.semibold)
         }
+    }
+}
+
+struct RetweetLabel: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack {
+            configuration.icon
+                .font(.caption)
+                .fontWeight(.semibold)
+            
+            configuration.title
+                .font(.callout)
+        }
+        .foregroundStyle(.secondary)
     }
 }

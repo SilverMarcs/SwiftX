@@ -41,7 +41,7 @@ struct Retweet: Codable, Hashable, Identifiable {
     let inReplyToUser: InReplyToUser?
     let source: String?
     let sourceUrl: String?
-    let sourceLabel: String?
+    let sourceLabel: String? // Twitter Web App // Twitter for iPhone
     let card: Card?
 //    let possiblySensitive: Bool?
     
@@ -51,6 +51,7 @@ struct Retweet: Codable, Hashable, Identifiable {
     let formattedRetweetCount: String
     let formattedLikeCount: String
     let formattedQuoteCount: String
+    let parsedContent: String
     
     var twitterWebUrl: URL? {
         return URL(string: "https://twitter.com/x/status/\(id)")
@@ -91,6 +92,7 @@ struct Retweet: Codable, Hashable, Identifiable {
         formattedRetweetCount = retweetCount.formattedCount()
         formattedLikeCount = likeCount.formattedCount()
         formattedQuoteCount = quoteCount.formattedCount()
+        parsedContent = String.parseContent(rawContent, links: links)
     }
 }
 
@@ -137,6 +139,7 @@ struct Tweet: Hashable, Codable, Identifiable {
     let formattedRetweetCount: String
     let formattedLikeCount: String
     let formattedQuoteCount: String
+    let parsedContent: String
     
     var twitterWebUrl: URL? {
         return URL(string: "https://twitter.com/x/status/\(id)")
@@ -179,6 +182,7 @@ struct Tweet: Hashable, Codable, Identifiable {
         formattedRetweetCount = retweetCount.formattedCount()
         formattedLikeCount = likeCount.formattedCount()
         formattedQuoteCount = quoteCount.formattedCount()
+        parsedContent = String.parseContent(rawContent, links: links)
     }
     
     init(from retweet: Retweet) {
@@ -215,5 +219,6 @@ struct Tweet: Hashable, Codable, Identifiable {
         self.formattedRetweetCount = retweet.formattedRetweetCount
         self.formattedLikeCount = retweet.formattedLikeCount
         self.formattedQuoteCount = retweet.formattedQuoteCount
+        self.parsedContent = retweet.parsedContent
     }
 }

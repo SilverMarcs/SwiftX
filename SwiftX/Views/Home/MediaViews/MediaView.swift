@@ -42,6 +42,7 @@ struct MediaView: View {
                 // Show indicator if there are more photos
                 if photos.count > 1 {
                     Text("+\(photos.count - 1)")
+                        .font(.largeTitle)
                 }
             }
 
