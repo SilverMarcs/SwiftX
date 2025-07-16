@@ -23,7 +23,7 @@ struct UserDetailView: View {
                             .fade(duration: 0.1)
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .cornerRadius(12)
+                            .cornerRadius(10)
                             .clipped()
                     }
                     
@@ -130,20 +130,17 @@ struct UserDetailView: View {
                 }
             }
             .listRowSeparator(.hidden, edges: .top)
-            .padding(.top, -20) // Add this line
+            .listRowSeparator(.visible, edges: .bottom)
+            .padding(.top, user.profileBannerUrl == nil ? 15 : -15) // Add this line
             .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
             
             // Loading State
             if isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .listRowSeparator(.hidden)
+                UniversalProgressView()
             }
             
             // Tweets
-            ForEach(tweets) { tweet in
-                TweetView(tweet: tweet)
-            }
+            TweetItemsView(tweets: tweets)
         }
         .listStyle(.plain)
         .navigationTitle(user.displayname)

@@ -25,6 +25,11 @@ struct RefreshResponse: Decodable {
     let note: String
 }
 
+struct UserSearchResponse: Decodable {
+    let totalUsers: Int
+    let users: [User]
+}
+
 enum NetworkError: Error {
     case invalidURL
     case badServerResponse

@@ -9,10 +9,16 @@ import SwiftUI
 
 struct TweetHeader: View {
     let tweet: any TweetContentProtocol
+    @Environment(\.appendToPath) private var appendToPath
     
     var body: some View {
         HStack {
-            UserButton(user: tweet.user)
+            Button {
+                appendToPath(tweet.user)
+            } label: {
+                UserButton(user: tweet.user)
+            }
+            .buttonStyle(.plain)
             Spacer()
             Text(tweet.formattedDate)
                 .font(.subheadline)

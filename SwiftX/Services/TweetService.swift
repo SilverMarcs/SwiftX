@@ -65,4 +65,17 @@ struct TweetService {
         return response.replies
     }
     
+    static func searchTweets(query: String) async throws -> [Tweet] {
+        guard !query.isEmpty else { return [] }
+        let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
+        let response: TweetResponse = try await makeRequest(endpoint: "search/tweets?q=\(encodedQuery)")
+        return filterTweets(response.tweets)
+    }
+    
+    static func searchUsers(query: String) async throws -> [User] {
+        guard !query.isEmpty else { return [] }
+        let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
+        let response: UserSearchResponse = try await makeRequest(endpoint: "search/users?q=\(encodedQuery)")
+        return response.users
+    }
 }

@@ -1,0 +1,113 @@
+//
+//  SearchView.swift
+//  SwiftX
+//
+//  Created by Zabir Raihan on 16/07/2025.
+//
+
+import SwiftUI
+
+struct SearchView: View {
+    @State private var isLoading = false
+    
+    @State private var searchText = ""
+    @State private var searchScope: SearchScope = .tweets
+    
+    @State private var tweetResults: [Tweet] = []
+    @State private var userResults: [User] = []
+    
+    @Environment(\.appendToPath) private var appendToPath
+    
+    private var hasResults: Bool {
+        !tweetResults.isEmpty || !userResults.isEmpty
+    }
+    
+    var body: some View {
+        Group {
+            if isLoading {
+                UniversalProgressView()
+            }
+            
+            switch searchScope {
+            case .tweets:
+                List {
+                    TweetItemsView(tweets: tweetResults)
+                }
+                .listStyle(.plain)
+            case .users:
+                List {
+                    ForEach(userResults, id: \.id) { user in
+                        Button {
+                            appendToPath(user)
+                        } label: {
+                            UserButton(user: user)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+        .navigationTitle("Search")
+        .toolbarTitleDisplayMode(.inlineLarge)
+        .searchable(text: $searchText, prompt: "Search \(searchScope.rawValue)")
+        .searchScopes($searchScope) {
+            ForEach(SearchScope.allCases, id: \.self) { scope in
+                Text(scope.rawValue).tag(scope)
+            }
+        }
+        .onSubmit(of: .search) {
+            Task {
+                await performSearch()
+            }
+        }
+        .onChange(of: searchScope) {
+            clearResults()
+            Task {
+                await performSearch()
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .destructiveAction) {
+                Button("Clear", role: .destructive) {
+                    searchText = ""
+                    clearResults()
+                }
+                .disabled(searchText.isEmpty && !hasResults)
+            }
+        }
+    }
+    
+    private func clearResults() {
+        tweetResults = []
+        userResults = []
+    }
+    
+    private func performSearch() async {
+        guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            clearResults()
+            return
+        }
+        
+        isLoading = true
+        
+        do {
+            switch searchScope {
+            case .tweets:
+                userResults = []
+                tweetResults = try await TweetService.searchTweets(query: searchText)
+            case .users:
+                tweetResults = []
+                userResults = try await TweetService.searchUsers(query: searchText)
+            }
+        } catch {
+            clearResults()
+        }
+        
+        isLoading = false
+    }
+}
+
+enum SearchScope: String, CaseIterable {
+    case tweets = "Tweets"
+    case users = "Users"
+}

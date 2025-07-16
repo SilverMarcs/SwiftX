@@ -21,12 +21,13 @@ struct ContentView: View {
 
             Tab("Settings", systemImage: "gear") {
                 SettingsView()
+            }
+            
+            Tab(role: .search) {
+                SearchTab()
+                    .environment(\.imageNS, imageNS)
                     .environment(\.videoNS, videoNS)
             }
-
-            // Tab(role: .search) {
-            //     Text("TBI")
-            // }
         }
         .overlay {
             FullscreenVideoOverlay()

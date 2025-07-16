@@ -16,23 +16,10 @@ struct HomeView: View {
     var body: some View {
         List {
             if isLoading {
-                ProgressView()
-                    .controlSize(.large)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .listRowSeparator(.hidden)
+                UniversalProgressView()
             }
                 
-            ForEach(tweets) { tweet in
-                Button {
-                    appendToPath(tweet)
-                } label: {
-                    TweetView(tweet: tweet)
-                }
-                .buttonStyle(.plain)
-                .listRowSeparator(.visible, edges: .bottom)
-                .listRowSeparator(.hidden, edges: .top)
-                .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
-            }
+            TweetItemsView(tweets: tweets)
         }
         .listStyle(.plain)
         .task {

@@ -22,9 +22,7 @@ struct TweetDetailView: View {
                 .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
 
             if isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .listRowSeparator(.hidden)
+                UniversalProgressView()
             } else if !replies.isEmpty {
                 Text("Replies")
                     .font(.title2)
