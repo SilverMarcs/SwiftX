@@ -44,8 +44,8 @@ struct SearchView: View {
                                 UserHeader(user: user)
                                 Spacer()
                                 Image(systemName: "chevron.right")
-                                    .foregroundStyle(.tertiary)
-                                    .font(.caption)
+                                    .foregroundStyle(.secondary.opacity(0.6))
+                                    .font(.system(size: 13.5, weight: .medium))
                             }
                         }
                         .buttonStyle(.plain)
