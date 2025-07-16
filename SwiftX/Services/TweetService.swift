@@ -54,7 +54,7 @@ struct TweetService {
             // - it's not a reply AND
             // - not quoted in any other tweet AND
             // - not retweeted in any other tweet
-            tweet.inReplyToTweetId == nil &&
+//            tweet.inReplyToTweetId == nil &&
             !tweets.contains { $0.quotedTweet?.id == tweet.id } &&
             !tweets.contains { $0.retweetedTweet?.id == tweet.id }
         }

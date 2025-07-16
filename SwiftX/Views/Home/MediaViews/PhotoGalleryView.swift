@@ -14,8 +14,7 @@ struct PhotoGalleryView: View {
                 } label: {
                     CachedImageView(url: URL(string: first.url)!, targetSize: CGSize(width: 500, height: 500))
                         .aspectRatio(contentMode: .fill)
-                        .frame(height: 200)
-                        .frame(maxWidth: .infinity)
+                        .frame(width: 350, height: 300)
                         .clipShape(.rect(cornerRadius: 10))
                         .matchedTransitionSource(id: first.url, in: imageNS ?? fallbackNS)
                 }
