@@ -6,10 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		0867C7972E2427A300DD398A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 0867C7962E2427A300DD398A /* Kingfisher */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
 		08A6B6BF2E2385EB00F111D5 /* SwiftX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftX.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -27,7 +23,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0867C7972E2427A300DD398A /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +65,6 @@
 			);
 			name = SwiftX;
 			packageProductDependencies = (
-				0867C7962E2427A300DD398A /* Kingfisher */,
 			);
 			productName = SwiftX;
 			productReference = 08A6B6BF2E2385EB00F111D5 /* SwiftX.app */;
@@ -101,7 +95,6 @@
 			mainGroup = 08A6B6B62E2385EB00F111D5;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				0867C7952E2427A300DD398A /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 08A6B6C02E2385EB00F111D5 /* Products */;
@@ -380,25 +373,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		0867C7952E2427A300DD398A /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/onevcat/Kingfisher";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 8.4.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		0867C7962E2427A300DD398A /* Kingfisher */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 0867C7952E2427A300DD398A /* XCRemoteSwiftPackageReference "Kingfisher" */;
-			productName = Kingfisher;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 08A6B6B72E2385EB00F111D5 /* Project object */;
 }

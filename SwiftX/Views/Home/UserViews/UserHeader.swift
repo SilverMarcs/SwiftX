@@ -1,19 +1,11 @@
 import SwiftUI
-import Kingfisher
 
 struct UserHeader: View {
     let user: User
 
     var body: some View {
         HStack(alignment: .center, spacing: 8) {
-            KFImage(URL(string: user.profileImageUrl))
-                .placeholder {
-                    Rectangle()
-                        .fill(.background.secondary)
-                }
-                .downsampling(size: CGSize(width: 400, height: 400))
-                .serialize(as: .JPEG)
-                .fade(duration: 0.1)
+            CachedImageView(url: URL(string: user.profileImageUrl)!, targetSize: CGSize(width: 300, height: 300))
                 .frame(width: 45, height: 45)
                 .aspectRatio(contentMode: .fill)
                 .clipShape(Circle())

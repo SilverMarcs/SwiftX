@@ -1,5 +1,4 @@
 import SwiftUI
-import Kingfisher
 
 struct UserDetailView: View {
     let user: User
@@ -12,38 +11,18 @@ struct UserDetailView: View {
                 // Banner Image Section + Profile Image + Action buttons
                 VStack(alignment: .leading, spacing: 0) {
                     if let banner = user.profileBannerUrl, let url = URL(string: banner) {
-                        KFImage(url)
-                            .downsampling(size: CGSize(width: 800, height: 250))
-                            .placeholder {
-                                Rectangle()
-                                    .fill(.background.secondary)
-                                    .frame(height: 120)
-                            }
-                            .serialize(as: .JPEG)
-                            .fade(duration: 0.1)
-                            .resizable()
+                        CachedImageView(url: url, targetSize: CGSize(width: 600, height: 200))
                             .aspectRatio(contentMode: .fit)
-                            .cornerRadius(10)
-                            .clipped()
+                            .clipShape(.rect(cornerRadius: 10))
                     }
                     
                     HStack(alignment: .bottom) {
-                        // Profile Image
-                        KFImage(URL(string: user.profileImageUrl))
-                            .placeholder {
-                                Rectangle()
-                                    .fill(.background.secondary)
-                            }
-                            .downsampling(size: CGSize(width: 400, height: 400))
-                            .serialize(as: .JPEG)
-                            .fade(duration: 0.1)
-                            .resizable()
+                        CachedImageView(url: URL(string: user.profileImageUrl)!, targetSize: CGSize(width: 300, height: 300))
                             .frame(width: 80, height: 80)
                             .aspectRatio(contentMode: .fill)
                             .clipShape(Circle())
                             .overlay(
-                                Circle()
-                                    .stroke(.primary, lineWidth: 2)
+                                Circle().stroke(.primary, lineWidth: 2)
                             )
                         
                         Spacer()
@@ -72,14 +51,11 @@ struct UserDetailView: View {
                             .buttonStyle(.glassProminent)
                         }
                     }
-//                        .offset(y: -30)
                     .padding(.top, -28)
                 }
                 
                 // User Info Section
                 VStack(alignment: .leading, spacing: 10) {
-                    // Name and Verification
-                    
                     VStack(alignment: .leading, spacing: 0) {
                         HStack {
                             Text(user.displayname)

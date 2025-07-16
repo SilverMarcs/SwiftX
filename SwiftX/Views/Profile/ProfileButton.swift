@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Kingfisher
 
 struct ProfileButton: View {
     let user = User.zabir
@@ -21,7 +20,7 @@ struct ProfileButton: View {
 //                    Rectangle()
 //                        .fill(.background.secondary)
 //                }
-//                .downsampling(size: CGSize(width: 400, height: 400))
+//                .downsampling(size: CGSize(width: 300, height: 300))
 //                .serialize(as: .JPEG)
 //                .fade(duration: 0.1)
 //                .resizable()

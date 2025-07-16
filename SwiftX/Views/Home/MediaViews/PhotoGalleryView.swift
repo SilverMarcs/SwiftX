@@ -1,5 +1,4 @@
 import SwiftUI
-import Kingfisher
 
 struct PhotoGalleryView: View {
     let photos: [Photo]
@@ -13,9 +12,11 @@ struct PhotoGalleryView: View {
                 Button {
                     appendToPath(ImageModalData(images: photos.map { $0.url }, startIndex: 0))
                 } label: {
-                    GalleryKFImage(url: first.url)
-                        .aspectRatio(contentMode: .fit)
-                        .clipShape(.rect(cornerRadius: 12))
+                    CachedImageView(url: URL(string: first.url)!, targetSize: CGSize(width: 500, height: 500))
+                        .aspectRatio(contentMode: .fill)
+                        .frame(height: 200)
+                        .frame(maxWidth: .infinity)
+                        .clipShape(.rect(cornerRadius: 10))
                         .matchedTransitionSource(id: first.url, in: imageNS ?? fallbackNS)
                 }
                 .buttonStyle(.plain)
@@ -27,7 +28,7 @@ struct PhotoGalleryView: View {
                         Button {
                             appendToPath(ImageModalData(images: photos.map { $0.url }, startIndex: idx))
                         } label: {
-                            GalleryKFImage(url: photo.url)
+                            CachedImageView(url: URL(string: photo.url)!, targetSize: CGSize(width: 500, height: 500))
                                 .aspectRatio(contentMode: .fill)
                                 .frame(width: 80, height: 80)
                                 .clipShape(.rect(cornerRadius: 8))
