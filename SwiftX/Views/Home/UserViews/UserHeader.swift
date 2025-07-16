@@ -1,7 +1,7 @@
 import SwiftUI
 import Kingfisher
 
-struct UserButton: View {
+struct UserHeader: View {
     let user: User
 
     var body: some View {
@@ -40,5 +40,6 @@ struct UserButton: View {
                     .foregroundStyle(.secondary)
             }
         }
+        .contentShape(.rect)
     }
 }

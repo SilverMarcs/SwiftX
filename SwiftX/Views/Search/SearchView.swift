@@ -40,7 +40,13 @@ struct SearchView: View {
                         Button {
                             appendToPath(user)
                         } label: {
-                            UserButton(user: user)
+                            HStack {
+                                UserHeader(user: user)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundStyle(.tertiary)
+                                    .font(.caption)
+                            }
                         }
                         .buttonStyle(.plain)
                     }

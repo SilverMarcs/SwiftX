@@ -16,7 +16,7 @@ struct TweetHeader: View {
             Button {
                 appendToPath(tweet.user)
             } label: {
-                UserButton(user: tweet.user)
+                UserHeader(user: tweet.user)
             }
             .buttonStyle(.plain)
             Spacer()
