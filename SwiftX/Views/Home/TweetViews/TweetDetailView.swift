@@ -12,6 +12,8 @@ struct TweetDetailView: View {
     @State private var replies: [Tweet] = []
     @State private var isLoading = false
 
+    @Environment(\.appendToPath) var appendToPath
+    
     var body: some View {
         List {
             TweetView(tweet: tweet)
@@ -31,7 +33,11 @@ struct TweetDetailView: View {
                     .listRowSeparator(.hidden)
                 
                 ForEach(replies) { reply in
-                    TweetView(tweet: reply)
+                    Button {
+                        appendToPath(reply)
+                    } label: {
+                        TweetView(tweet: reply)
+                    }
                 }
             }
         }
