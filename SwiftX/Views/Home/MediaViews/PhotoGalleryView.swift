@@ -1,4 +1,5 @@
 import SwiftUI
+import CachedAsyncImage
 
 struct PhotoGalleryView: View {
     let photos: [Photo]
@@ -12,7 +13,7 @@ struct PhotoGalleryView: View {
                 Button {
                     appendToPath(ImageModalData(images: photos.map { $0.url }, startIndex: 0))
                 } label: {
-                    CachedImageView(url: URL(string: first.url)!, targetSize: CGSize(width: 500, height: 500))
+                    CachedAsyncImage(url: URL(string: first.url)!, targetSize: CGSize(width: 500, height: 500))
                         .aspectRatio(contentMode: .fill)
                         .frame(width: 350, height: 300)
                         .clipShape(.rect(cornerRadius: 10))
@@ -27,7 +28,7 @@ struct PhotoGalleryView: View {
                         Button {
                             appendToPath(ImageModalData(images: photos.map { $0.url }, startIndex: idx))
                         } label: {
-                            CachedImageView(url: URL(string: photo.url)!, targetSize: CGSize(width: 500, height: 500))
+                            CachedAsyncImage(url: URL(string: photo.url)!, targetSize: CGSize(width: 500, height: 500))
                                 .aspectRatio(contentMode: .fill)
                                 .frame(width: 80, height: 80)
                                 .clipShape(.rect(cornerRadius: 8))

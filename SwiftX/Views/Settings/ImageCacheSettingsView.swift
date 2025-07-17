@@ -6,10 +6,10 @@
 //
 
 import SwiftUI
+import CachedAsyncImage
 
 struct ImageCacheSettingsView: View {
     @State private var deleteAlertPresented = false
-    @State private var cacheSize: String = "Calculating..."
 
     var body: some View {
         Section("Images") {
