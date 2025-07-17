@@ -11,6 +11,7 @@ struct TweetContentView: View {
     let tweet: any TweetContentProtocol
     var hideHeader: Bool = false
     @Environment(\.openURL) private var openURL
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -31,7 +32,7 @@ struct TweetContentView: View {
                     Label(url.text ?? "Link", systemImage: "link")
                         .labelStyle(RetweetLabel())
                         .foregroundStyle(.blue)
-                        .brightness(1.1)
+                        .brightness(colorScheme == .dark ? 0.6 : 0)
                 }
                 .buttonStyle(.plain)
             }

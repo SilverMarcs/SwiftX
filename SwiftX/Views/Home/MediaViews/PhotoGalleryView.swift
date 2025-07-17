@@ -15,7 +15,7 @@ struct PhotoGalleryView: View {
                 } label: {
                     CachedAsyncImage(url: URL(string: first.url)!, targetSize: CGSize(width: 500, height: 500))
                         .aspectRatio(contentMode: .fill)
-                        .frame(width: 350, height: 300)
+                        .frame(width: 325, height: 300)
                         .clipShape(.rect(cornerRadius: 10))
                         .matchedTransitionSource(id: first.url, in: imageNS ?? fallbackNS)
                 }
