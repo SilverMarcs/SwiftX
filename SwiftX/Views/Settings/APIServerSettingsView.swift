@@ -57,7 +57,7 @@ struct APIServerSettingsView: View {
         } header: {
             Text("API Endpoint")
         } footer: {
-            Text("Using \(settings.useWebserver ? "https://snscrape-production.up.railway.app" : "http://192.168.0.154:8000")")
+            Text("Using \(settings.useWebserver ? AppSettings.webserver : AppSettings.localhost)")
         }
 
         Section(header: Text("API Key")) {
