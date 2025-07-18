@@ -43,7 +43,9 @@ struct TweetDetailView: View {
         .navigationTitle("Tweet")
         .toolbarTitleDisplayMode(.inline)
         .task {
-            await loadReplies()
+            if replies.isEmpty {
+                await loadReplies()
+            }
         }
     }
 
