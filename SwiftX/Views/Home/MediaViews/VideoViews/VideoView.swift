@@ -21,9 +21,14 @@ struct VideoView: View {
                 .matchedGeometryEffect(id: video.variants.first?.url ?? "videoPlayer", in: videoNS ?? fallbackNS)
                 .cornerRadius(12)
                 .clipped()
-                .onTapGesture {
-                    VideoOverlayViewModel.shared.present(player: player, videoURL: video.variants.first?.url)
-                }
+                .overlay(
+                    Rectangle()
+                        .fill(Color.clear)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            VideoOverlayViewModel.shared.present(player: player, videoURL: video.variants.first?.url)
+                        }
+                )
                 .task {
                     await setupPlayer(url: url)
                 }

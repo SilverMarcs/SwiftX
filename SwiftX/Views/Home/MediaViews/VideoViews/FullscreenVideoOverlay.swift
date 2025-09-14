@@ -4,6 +4,7 @@ import AVKit
 struct FullscreenVideoOverlay: View {
     @Environment(\.videoNS) private var videoNS
     @Namespace private var fallbackNS
+    
     var viewModel: VideoOverlayViewModel = .shared
     @State private var dragOffset: CGSize = .zero
     @State private var isDragging = false
@@ -11,20 +12,25 @@ struct FullscreenVideoOverlay: View {
     var body: some View {
         if viewModel.isPresented, let player = viewModel.player {
             ZStack {
-                Color.black.ignoresSafeArea()
+                // Fixed black background
+                Color.black
+                    .ignoresSafeArea()
+                
+                // VideoPlayer with gesture overlay
                 VideoPlayer(player: player)
                     .matchedGeometryEffect(id: viewModel.currentVideoURL ?? "videoPlayer", in: videoNS ?? fallbackNS)
-                    .offset(dragOffset)
-                    .gesture(
-                        DragGesture()
+                    .simultaneousGesture(
+                        DragGesture(minimumDistance: 15)
                             .onChanged { value in
                                 isDragging = true
+                                // Only allow downward dragging
                                 if value.translation.height > 0 {
                                     dragOffset = value.translation
                                 }
                             }
                             .onEnded { value in
                                 isDragging = false
+                                
                                 if value.translation.height > 70 {
                                     dismissVideo()
                                 } else {
@@ -34,6 +40,7 @@ struct FullscreenVideoOverlay: View {
                                 }
                             }
                     )
+                    .offset(dragOffset)
             }
             .onChange(of: viewModel.isPresented) { oldValue, newValue in
                 if !newValue {

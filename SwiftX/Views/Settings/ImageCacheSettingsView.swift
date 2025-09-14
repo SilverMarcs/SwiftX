@@ -22,8 +22,8 @@ struct ImageCacheSettingsView: View {
                     } icon: {
                         Image(systemName: "trash")
                     }
-                    Spacer()
-                    Text("{Cache Size}")
+//                    Spacer()
+//                    Text("{Cache Size}")
                 }
                 .contentShape(.rect)
             }
