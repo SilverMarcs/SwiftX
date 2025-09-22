@@ -114,6 +114,7 @@ struct UserDetailView: View {
             // Loading State
             if isLoading {
                 UniversalProgressView()
+                    .padding(.top, 100)
             }
             
             // Tweets
