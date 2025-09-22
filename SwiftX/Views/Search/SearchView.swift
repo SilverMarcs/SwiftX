@@ -24,10 +24,6 @@ struct SearchView: View {
     
     var body: some View {
         Group {
-            if isLoading {
-                UniversalProgressView()
-            }
-            
             switch searchScope {
             case .tweets:
                 List {
@@ -51,6 +47,11 @@ struct SearchView: View {
                         .buttonStyle(.plain)
                     }
                 }
+            }
+        }
+        .overlay {
+            if isLoading {
+                UniversalProgressView()
             }
         }
         .navigationTitle("Search")

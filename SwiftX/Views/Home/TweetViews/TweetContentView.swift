@@ -44,11 +44,14 @@ struct TweetContentView: View {
             
             // Engagement Stats
             HStack(spacing: 20) {
-                Label(tweet.formattedReplyCount, systemImage: "message")
-                
-                Label(tweet.formattedRetweetCount, systemImage: "arrow.2.squarepath")
-                
-                Label(tweet.formattedLikeCount, systemImage: "heart")
+                Group{
+                    Label(tweet.formattedReplyCount, systemImage: "message")
+                    
+                    Label(tweet.formattedRetweetCount, systemImage: "arrow.2.squarepath")
+                    
+                    Label(tweet.formattedLikeCount, systemImage: "heart")
+                }
+                .lineLimit(1)
                 
                 Spacer()
                 

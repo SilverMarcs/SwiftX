@@ -29,7 +29,7 @@ struct Retweet: Codable, Hashable, Identifiable {
     let conversationId: Int
     let conversationIdStr: String
     let hashtags: [String]
-    let mentionedUsers: [MentionedUser]
+//    let mentionedUsers: [MentionedUser]
     let links: [Link]
     let media: Media?
     let viewCount: Int?
@@ -42,7 +42,7 @@ struct Retweet: Codable, Hashable, Identifiable {
     let source: String?
     let sourceUrl: String?
     let sourceLabel: String? // Twitter Web App // Twitter for iPhone
-    let card: Card?
+//    let card: Card?
 //    let possiblySensitive: Bool?
     
     // Pre-computed formatted values
@@ -73,7 +73,7 @@ struct Retweet: Codable, Hashable, Identifiable {
         conversationId = try container.decode(Int.self, forKey: .conversationId)
         conversationIdStr = try container.decode(String.self, forKey: .conversationIdStr)
         hashtags = try container.decode([String].self, forKey: .hashtags)
-        mentionedUsers = try container.decode([MentionedUser].self, forKey: .mentionedUsers)
+//        mentionedUsers = try container.decode([MentionedUser].self, forKey: .mentionedUsers)
         links = try container.decode([Link].self, forKey: .links)
         media = try container.decodeIfPresent(Media.self, forKey: .media)
         viewCount = try container.decodeIfPresent(Int.self, forKey: .viewCount)
@@ -84,7 +84,7 @@ struct Retweet: Codable, Hashable, Identifiable {
         source = try container.decodeIfPresent(String.self, forKey: .source)
         sourceUrl = try container.decodeIfPresent(String.self, forKey: .sourceUrl)
         sourceLabel = try container.decodeIfPresent(String.self, forKey: .sourceLabel)
-        card = try container.decodeIfPresent(Card.self, forKey: .card)
+//        card = try container.decodeIfPresent(Card.self, forKey: .card)
         
         // Pre-compute formatted values
         formattedDate = date.formattedRelativeDate()
@@ -117,7 +117,7 @@ struct Tweet: Hashable, Codable, Identifiable {
     let conversationId: Int
     let conversationIdStr: String
     let hashtags: [String]
-    let mentionedUsers: [MentionedUser]
+//    let mentionedUsers: [MentionedUser]
     let links: [Link]
     let media: Media?
     let viewCount: Int?
@@ -130,7 +130,7 @@ struct Tweet: Hashable, Codable, Identifiable {
     let source: String?
     let sourceUrl: String?
     let sourceLabel: String?
-    let card: Card?
+//    let card: Card?
 //    let possiblySensitive: Bool?
     
     // Pre-computed formatted values
@@ -161,7 +161,7 @@ struct Tweet: Hashable, Codable, Identifiable {
         conversationId = try container.decode(Int.self, forKey: .conversationId)
         conversationIdStr = try container.decode(String.self, forKey: .conversationIdStr)
         hashtags = try container.decode([String].self, forKey: .hashtags)
-        mentionedUsers = try container.decode([MentionedUser].self, forKey: .mentionedUsers)
+//        mentionedUsers = try container.decode([MentionedUser].self, forKey: .mentionedUsers)
         links = try container.decode([Link].self, forKey: .links)
         media = try container.decodeIfPresent(Media.self, forKey: .media)
         viewCount = try container.decodeIfPresent(Int.self, forKey: .viewCount)
@@ -174,7 +174,7 @@ struct Tweet: Hashable, Codable, Identifiable {
         source = try container.decodeIfPresent(String.self, forKey: .source)
         sourceUrl = try container.decodeIfPresent(String.self, forKey: .sourceUrl)
         sourceLabel = try container.decodeIfPresent(String.self, forKey: .sourceLabel)
-        card = try container.decodeIfPresent(Card.self, forKey: .card)
+//        card = try container.decodeIfPresent(Card.self, forKey: .card)
         
         // Pre-compute formatted values
         formattedDate = date.formattedRelativeDate()
@@ -198,7 +198,7 @@ struct Tweet: Hashable, Codable, Identifiable {
         self.conversationId = retweet.conversationId
         self.conversationIdStr = retweet.conversationIdStr
         self.hashtags = retweet.hashtags
-        self.mentionedUsers = retweet.mentionedUsers
+//        self.mentionedUsers = retweet.mentionedUsers
         self.links = retweet.links
         self.media = retweet.media
         self.viewCount = retweet.viewCount
@@ -211,7 +211,7 @@ struct Tweet: Hashable, Codable, Identifiable {
         self.source = retweet.source
         self.sourceUrl = retweet.sourceUrl
         self.sourceLabel = retweet.sourceLabel
-        self.card = retweet.card
+//        self.card = retweet.card
         
         // Pre-compute formatted values
         self.formattedDate = retweet.formattedDate
@@ -230,13 +230,13 @@ protocol TweetContentProtocol {
     var formattedDate: String { get }
     var parsedContent: String { get }
     var links: [Link] { get }
+    var hashtags: [String] { get }
     var media: Media? { get }
     var formattedReplyCount: String { get }
     var formattedRetweetCount: String { get }
     var formattedLikeCount: String { get }
     var twitterWebUrl: URL? { get }
 }
-
 // Extend Tweet to conform to the protocol
 extension Tweet: TweetContentProtocol {}
 
