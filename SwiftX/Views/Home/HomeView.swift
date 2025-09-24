@@ -16,8 +16,7 @@ struct HomeView: View {
     var body: some View {
         List {
             TweetItemsView(tweets: tweets)
-        }
-        .overlay {
+            
             if isLoading {
                 UniversalProgressView()
             }
