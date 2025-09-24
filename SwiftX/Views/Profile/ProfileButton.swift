@@ -9,26 +9,13 @@ import SwiftUI
 
 struct ProfileButton: View {
     let user = User.zabir
-    @Environment(\.appendToPath) var appendToPath
     
     var body: some View {
-        Button {
-            appendToPath(user)
-        } label: {
-//            KFImage(URL(string: user.profileImageUrl))
-//                .placeholder {
-//                    Rectangle()
-//                        .fill(.background.secondary)
-//                }
-//                .downsampling(size: CGSize(width: 300, height: 300))
-//                .serialize(as: .JPEG)
-//                .fade(duration: 0.1)
-//                .resizable()
-//                    .frame(width: 37, height: 37)
-//                    .aspectRatio(contentMode: .fit)
-//                    .clipShape(Circle())
+        NavigationLink(destination: UserDetailView(user: user)) {
             Image(systemName: "person.fill")
         }
+        .navigationLinkIndicatorVisibility(.hidden)
+        
         .tint(.accentColor)
     }
 }

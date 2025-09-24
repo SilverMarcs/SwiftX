@@ -8,13 +8,10 @@
 import SwiftUI
 
 struct SearchTab: View {
-    @State var path: NavigationPath = NavigationPath()
     
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack {
             SearchView()
-                .environmentActions(path: $path)
-                .navigationDestinations(path: $path)
         }
     }
 }

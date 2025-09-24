@@ -16,8 +16,6 @@ struct SearchView: View {
     @State private var tweetResults: [Tweet] = []
     @State private var userResults: [User] = []
     
-    @Environment(\.appendToPath) private var appendToPath
-    
     private var hasResults: Bool {
         !tweetResults.isEmpty || !userResults.isEmpty
     }
@@ -33,9 +31,7 @@ struct SearchView: View {
             case .users:
                 List {
                     ForEach(userResults, id: \.id) { user in
-                        Button {
-                            appendToPath(user)
-                        } label: {
+                        NavigationLink(destination: UserDetailView(user: user)) {
                             HStack {
                                 UserHeader(user: user)
                                 Spacer()
@@ -44,7 +40,7 @@ struct SearchView: View {
                                     .font(.system(size: 13.5, weight: .medium))
                             }
                         }
-                        .buttonStyle(.plain)
+                        .navigationLinkIndicatorVisibility(.hidden)
                     }
                 }
             }

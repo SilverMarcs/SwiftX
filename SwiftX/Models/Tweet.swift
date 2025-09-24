@@ -73,8 +73,11 @@ struct Retweet: Codable, Hashable, Identifiable {
         conversationId = try container.decode(Int.self, forKey: .conversationId)
         conversationIdStr = try container.decode(String.self, forKey: .conversationIdStr)
         hashtags = try container.decode([String].self, forKey: .hashtags)
-//        mentionedUsers = try container.decode([MentionedUser].self, forKey: .mentionedUsers)
-        links = try container.decode([Link].self, forKey: .links)
+        
+        // Decode links and remove duplicates
+        let decodedLinks = try container.decode([Link].self, forKey: .links)
+        links = Array(Set(decodedLinks)) // Remove duplicates using Set
+        
         media = try container.decodeIfPresent(Media.self, forKey: .media)
         viewCount = try container.decodeIfPresent(Int.self, forKey: .viewCount)
         place = try container.decodeIfPresent(Place.self, forKey: .place)
@@ -84,7 +87,6 @@ struct Retweet: Codable, Hashable, Identifiable {
         source = try container.decodeIfPresent(String.self, forKey: .source)
         sourceUrl = try container.decodeIfPresent(String.self, forKey: .sourceUrl)
         sourceLabel = try container.decodeIfPresent(String.self, forKey: .sourceLabel)
-//        card = try container.decodeIfPresent(Card.self, forKey: .card)
         
         // Pre-compute formatted values
         formattedDate = date.formattedRelativeDate()
@@ -161,8 +163,11 @@ struct Tweet: Hashable, Codable, Identifiable {
         conversationId = try container.decode(Int.self, forKey: .conversationId)
         conversationIdStr = try container.decode(String.self, forKey: .conversationIdStr)
         hashtags = try container.decode([String].self, forKey: .hashtags)
-//        mentionedUsers = try container.decode([MentionedUser].self, forKey: .mentionedUsers)
-        links = try container.decode([Link].self, forKey: .links)
+        
+        // Decode links and remove duplicates
+        let decodedLinks = try container.decode([Link].self, forKey: .links)
+        links = Array(Set(decodedLinks)) // Remove duplicates using Set
+        
         media = try container.decodeIfPresent(Media.self, forKey: .media)
         viewCount = try container.decodeIfPresent(Int.self, forKey: .viewCount)
         retweetedTweet = try container.decodeIfPresent(Retweet.self, forKey: .retweetedTweet)
@@ -174,7 +179,6 @@ struct Tweet: Hashable, Codable, Identifiable {
         source = try container.decodeIfPresent(String.self, forKey: .source)
         sourceUrl = try container.decodeIfPresent(String.self, forKey: .sourceUrl)
         sourceLabel = try container.decodeIfPresent(String.self, forKey: .sourceLabel)
-//        card = try container.decodeIfPresent(Card.self, forKey: .card)
         
         // Pre-compute formatted values
         formattedDate = date.formattedRelativeDate()
@@ -242,3 +246,5 @@ extension Tweet: TweetContentProtocol {}
 
 // Extend Retweet to conform to the protocol
 extension Retweet: TweetContentProtocol {}
+
+

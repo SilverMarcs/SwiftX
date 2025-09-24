@@ -8,13 +8,10 @@
 import SwiftUI
 
 struct HomeTab: View {
-    @State var path: NavigationPath = NavigationPath()
 
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack {
             HomeView()
-                .environmentActions(path: $path)
-                .navigationDestinations(path: $path)
         }
     }
 }

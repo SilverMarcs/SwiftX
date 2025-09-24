@@ -21,7 +21,7 @@ struct TweetContentView: View {
             }
             
             // Tweet Content
-            Text(tweet.parsedContent)
+            ExpandableText(text: tweet.parsedContent)
                 .font(.default)
                 .opacity(0.9)
             
@@ -73,5 +73,46 @@ struct TweetContentView: View {
             .labelIconToTitleSpacing(4)
         }
         .contentShape(.rect)
+    }
+}
+
+
+struct ExpandableText: View {
+    let text: String
+    let maxCharacters: Int
+    
+    @State private var isExpanded = false
+    private let needsExpansion: Bool
+    
+    init(text: String, maxCharacters: Int = 400) {
+        self.text = text
+        self.maxCharacters = maxCharacters
+        self.needsExpansion = text.count > maxCharacters
+    }
+    
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 3) {
+            Text(displayedText)
+                .textSelection(.enabled)
+                .lineSpacing(2)
+            
+            if needsExpansion {
+                Button {
+                    isExpanded.toggle()
+                } label: {
+                    Text(isExpanded ? "Show Less" : "Show More")
+                }
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
+                .controlSize(.small)
+            }
+        }
+    }
+    
+    private var displayedText: String {
+        guard needsExpansion && !isExpanded else {
+            return text
+        }
+        return String(text.prefix(maxCharacters))
     }
 }

@@ -9,7 +9,6 @@ import SwiftUI
 
 struct TweetView: View {
     let tweet: Tweet
-    @Environment(\.appendToPath) private var appendToPath
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -20,24 +19,20 @@ struct TweetView: View {
             }
             
             if let quotedTweet = tweet.quotedTweet {
-                Button {
-                    appendToPath(quotedTweet)
-                } label: {
+                NavigationLink(destination: TweetDetailView(tweet: Tweet(from: quotedTweet))) {
                    RetweetView(tweet: quotedTweet)
                }
-               .buttonStyle(.plain)
+                .navigationLinkIndicatorVisibility(.hidden)
            }
             
             if let retweet = tweet.retweetedTweet {
                 Label("Retweeted", systemImage: "arrow.2.squarepath")
                     .labelStyle(RetweetLabel())
                 
-                Button {
-                    appendToPath(retweet)
-                } label: {
+                NavigationLink(destination: TweetDetailView(tweet: Tweet(from: retweet))) {
                    RetweetView(tweet: retweet)
                }
-               .buttonStyle(.plain)
+                .navigationLinkIndicatorVisibility(.hidden)
            }
         }
         .contentShape(.rect)
