@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		08D5DCC52E28A0530027D139 /* CachedAsyncImage in Frameworks */ = {isa = PBXBuildFile; productRef = 08D5DCC42E28A0530027D139 /* CachedAsyncImage */; };
+		08BB36202E84956300BDF671 /* SwiftMediaViewer in Frameworks */ = {isa = PBXBuildFile; productRef = 08BB361F2E84956300BDF671 /* SwiftMediaViewer */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,7 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				08D5DCC52E28A0530027D139 /* CachedAsyncImage in Frameworks */,
+				08BB36202E84956300BDF671 /* SwiftMediaViewer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +70,7 @@
 			);
 			name = SwiftX;
 			packageProductDependencies = (
-				08D5DCC42E28A0530027D139 /* CachedAsyncImage */,
+				08BB361F2E84956300BDF671 /* SwiftMediaViewer */,
 			);
 			productName = SwiftX;
 			productReference = 08A6B6BF2E2385EB00F111D5 /* SwiftX.app */;
@@ -101,7 +101,7 @@
 			mainGroup = 08A6B6B62E2385EB00F111D5;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				08D5DCC32E28A0530027D139 /* XCRemoteSwiftPackageReference "CachedAsyncImage" */,
+				08BB361E2E84956300BDF671 /* XCRemoteSwiftPackageReference "SwiftMediaViewer" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 08A6B6C02E2385EB00F111D5 /* Products */;
@@ -382,9 +382,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		08D5DCC32E28A0530027D139 /* XCRemoteSwiftPackageReference "CachedAsyncImage" */ = {
+		08BB361E2E84956300BDF671 /* XCRemoteSwiftPackageReference "SwiftMediaViewer" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SilverMarcs/CachedAsyncImage";
+			repositoryURL = "https://github.com/SilverMarcs/SwiftMediaViewer";
 			requirement = {
 				branch = main;
 				kind = branch;
@@ -393,10 +393,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		08D5DCC42E28A0530027D139 /* CachedAsyncImage */ = {
+		08BB361F2E84956300BDF671 /* SwiftMediaViewer */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 08D5DCC32E28A0530027D139 /* XCRemoteSwiftPackageReference "CachedAsyncImage" */;
-			productName = CachedAsyncImage;
+			package = 08BB361E2E84956300BDF671 /* XCRemoteSwiftPackageReference "SwiftMediaViewer" */;
+			productName = SwiftMediaViewer;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

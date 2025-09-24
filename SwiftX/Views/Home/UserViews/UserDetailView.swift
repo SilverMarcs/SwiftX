@@ -1,5 +1,5 @@
 import SwiftUI
-import CachedAsyncImage
+import SwiftMediaViewer
 
 struct UserDetailView: View {
     let user: User
@@ -12,13 +12,13 @@ struct UserDetailView: View {
                 // Banner Image Section + Profile Image + Action buttons
                 VStack(alignment: .leading, spacing: 0) {
                     if let banner = user.profileBannerUrl, let url = URL(string: banner) {
-                        CachedAsyncImage(url: url, targetSize: CGSize(width: 600, height: 200))
+                        CachedAsyncImage(url: url, targetSize: 300)
                             .aspectRatio(contentMode: .fit)
                             .clipShape(.rect(cornerRadius: 10))
                     }
                     
                     HStack(alignment: .bottom) {
-                        CachedAsyncImage(url: URL(string: user.profileImageUrl)!, targetSize: CGSize(width: 300, height: 300))
+                        CachedAsyncImage(url: URL(string: user.profileImageUrl)!, targetSize: 300)
                             .frame(width: 80, height: 80)
                             .aspectRatio(contentMode: .fill)
                             .clipShape(Circle())

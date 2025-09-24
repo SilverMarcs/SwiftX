@@ -9,10 +9,6 @@ import SwiftUI
 
 struct MediaView: View {
     let media: Media
-    @Environment(\.imageNS) private var imageNS
-    @Namespace private var fallbackNS
-    
-    @Environment(\.appendToPath) private var appendToPath
 
     var body: some View {
         VStack {
@@ -22,9 +18,6 @@ struct MediaView: View {
 
             if let videos = media.videos, !videos.isEmpty {
                 VideoView(video: videos[0])
-//                if videos.count > 1 {
-//                    Text("+\(videos.count - 1)")
-//                }
             }
         }
     }

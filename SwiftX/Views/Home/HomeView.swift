@@ -10,8 +10,6 @@ import SwiftUI
 struct HomeView: View {
     @State private var tweets: [Tweet] = []
     @State private var isLoading = false
-    
-    @Environment(\.appendToPath) private var appendToPath
 
     var body: some View {
         List {

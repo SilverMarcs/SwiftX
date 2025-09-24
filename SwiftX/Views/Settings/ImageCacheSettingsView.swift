@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import CachedAsyncImage
+import SwiftMediaViewer
 
 struct ImageCacheSettingsView: View {
     @State private var deleteAlertPresented = false
@@ -32,10 +32,7 @@ struct ImageCacheSettingsView: View {
             #endif
             .alert("Clear Image Cache", isPresented: $deleteAlertPresented) {
                 Button("Clear", role: .destructive) {
-                    Task {
-                        await MemoryCache.shared.clearCache()
-                        await DiskCache.shared.clearCache()
-                    }
+                    CachedAsyncImageConfiguration.clearAllCaches()
                 }
                 Button("Cancel", role: .cancel) { }
             } message: {

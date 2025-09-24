@@ -50,9 +50,6 @@ struct NavigationDestinations: ViewModifier {
                 UserDetailView(user: user)
                     .environmentActions(path: $path)
             }
-            .navigationDestination(for: ImageModalData.self) { data in
-                ImageModal(data: data)
-            }
     }
 }
 

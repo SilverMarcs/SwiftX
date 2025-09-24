@@ -1,12 +1,12 @@
 import SwiftUI
-import CachedAsyncImage
+import SwiftMediaViewer
 
 struct UserHeader: View {
     let user: User
 
     var body: some View {
         HStack(alignment: .center, spacing: 8) {
-            CachedAsyncImage(url: URL(string: user.profileImageUrl)!, targetSize: CGSize(width: 300, height: 300))
+            CachedAsyncImage(url: URL(string: user.profileImageUrl)!, targetSize: 300)
                 .frame(width: 45, height: 45)
                 .aspectRatio(contentMode: .fill)
                 .clipShape(Circle())
