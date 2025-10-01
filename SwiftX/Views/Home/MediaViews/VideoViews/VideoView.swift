@@ -10,11 +10,10 @@ struct VideoView: View {
     
     var body: some View {
         Group {
-            if showVideo {
+            if autoplay || showVideo {
                 SMVVideo(videoURL: video.variants.first?.url ?? "", autoplay: true, muteOnPlay: muteOnPlay)
             } else {
                 CachedAsyncImage(url: URL(string: video.thumbnailUrl), targetSize: 300)
-
                     .overlay(
                         Image(systemName: "play.fill")
                             .imageScale(.large)
