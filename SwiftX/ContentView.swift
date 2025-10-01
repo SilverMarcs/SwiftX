@@ -30,9 +30,9 @@ struct ContentView: View {
             return .systemAction(prefersInApp: true) // Other URLs open in-app
         })
         .tabViewStyle(.sidebarAdaptable)
-        #if !os(macOS)
-        .tabBarMinimizeBehavior(.onScrollDown)
-        #endif
+//        #if !os(macOS)
+//        .tabBarMinimizeBehavior(.onScrollDown)
+//        #endif
     }
     // Helper function to check if URL is from YouTube
     private func isYouTubeURL(_ url: URL) -> Bool {

@@ -91,7 +91,7 @@ struct ExpandableText: View {
     }
     
     var body: some View {
-        VStack(alignment: .trailing, spacing: 3) {
+        VStack(alignment: .leading, spacing: 3) {
             Text(displayedText)
                 .textSelection(.enabled)
                 .lineSpacing(2)
@@ -101,6 +101,7 @@ struct ExpandableText: View {
                     isExpanded.toggle()
                 } label: {
                     Text(isExpanded ? "Show Less" : "Show More")
+                        .contentShape(.rect)
                 }
                 .buttonStyle(.bordered)
                 .buttonBorderShape(.capsule)
