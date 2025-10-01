@@ -12,6 +12,14 @@ struct HomeTab: View {
     var body: some View {
         NavigationStack {
             HomeView()
+                .navigationDestination(for: NavigationDestination.self) { destination in
+                    switch destination {
+                    case .tweetDetail(let tweet):
+                        TweetDetailView(tweet: tweet)
+                    case .userDetail(let user):
+                        UserDetailView(user: user)
+                    }
+                }
         }
     }
 }

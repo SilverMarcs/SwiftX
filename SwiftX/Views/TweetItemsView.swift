@@ -12,7 +12,7 @@ struct TweetItemsView: View {
     
     var body: some View {
         ForEach(tweets) { tweet in
-            NavigationLink(destination: TweetDetailView(tweet: tweet)) {
+            NavigationLink(value: NavigationDestination.tweetDetail(tweet)) {
                 TweetView(tweet: tweet)
             }
             .navigationLinkIndicatorVisibility(.hidden)

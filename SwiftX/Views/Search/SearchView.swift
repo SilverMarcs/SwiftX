@@ -31,7 +31,7 @@ struct SearchView: View {
             case .users:
                 List {
                     ForEach(userResults, id: \.id) { user in
-                        NavigationLink(destination: UserDetailView(user: user)) {
+                        NavigationLink(value: NavigationDestination.userDetail(user)) {
                             HStack {
                                 UserHeader(user: user)
                                 Spacer()

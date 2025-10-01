@@ -11,7 +11,7 @@ struct ProfileButton: View {
     let user = User.zabir
     
     var body: some View {
-        NavigationLink(destination: UserDetailView(user: user)) {
+        NavigationLink(value: NavigationDestination.userDetail(user)) {
             Image(systemName: "person.fill")
         }
         .navigationLinkIndicatorVisibility(.hidden)

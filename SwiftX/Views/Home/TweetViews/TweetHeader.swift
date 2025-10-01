@@ -12,7 +12,7 @@ struct TweetHeader: View {
     
     var body: some View {
         HStack {
-            NavigationLink(destination: UserDetailView(user: tweet.user)) {
+            NavigationLink(value: NavigationDestination.userDetail(tweet.user)) {
                 UserHeader(user: tweet.user)
             }
             .navigationLinkIndicatorVisibility(.hidden)

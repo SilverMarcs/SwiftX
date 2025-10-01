@@ -19,7 +19,7 @@ struct TweetView: View {
             }
             
             if let quotedTweet = tweet.quotedTweet {
-                NavigationLink(destination: TweetDetailView(tweet: Tweet(from: quotedTweet))) {
+                NavigationLink(value: NavigationDestination.tweetDetail(Tweet(from: quotedTweet))) {
                    RetweetView(tweet: quotedTweet)
                }
                 .navigationLinkIndicatorVisibility(.hidden)
@@ -29,7 +29,7 @@ struct TweetView: View {
                 Label("Retweeted", systemImage: "arrow.2.squarepath")
                     .labelStyle(RetweetLabel())
                 
-                NavigationLink(destination: TweetDetailView(tweet: Tweet(from: retweet))) {
+                NavigationLink(value: NavigationDestination.tweetDetail(Tweet(from: retweet))) {
                    RetweetView(tweet: retweet)
                }
                 .navigationLinkIndicatorVisibility(.hidden)

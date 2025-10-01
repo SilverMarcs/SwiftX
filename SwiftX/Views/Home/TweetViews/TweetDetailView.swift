@@ -29,7 +29,7 @@ struct TweetDetailView: View {
                     .listRowSeparator(.hidden)
                 
                 ForEach(replies) { reply in
-                    NavigationLink(destination: TweetDetailView(tweet: reply)) {
+                    NavigationLink(value: NavigationDestination.tweetDetail(reply)) {
                         TweetView(tweet: reply)
                     }
                     .navigationLinkIndicatorVisibility(.hidden)
