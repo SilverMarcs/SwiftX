@@ -14,16 +14,18 @@ struct HomeView: View {
     var body: some View {
         List {
             TweetItemsView(tweets: tweets)
-            
+        }
+        .overlay {
             if isLoading {
                 UniversalProgressView()
             }
         }
         .listStyle(.plain)
         .task {
-            if tweets.isEmpty {
-                await fetchTweets()
-            }
+            guard tweets.isEmpty else { return }
+            isLoading = true
+            await fetchTweets()
+            isLoading = false
         }
         .refreshable {
             await fetchTweets()
@@ -40,16 +42,12 @@ struct HomeView: View {
     
     
     private func fetchTweets() async {
-        isLoading = true
-        
         do {
             let fetched = try await TweetService.fetchTweets()
             tweets = fetched
         } catch {
             print(error.localizedDescription)
         }
-        
-        isLoading = false
     }
 }
 
