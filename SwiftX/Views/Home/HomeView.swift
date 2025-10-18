@@ -34,9 +34,14 @@ struct HomeView: View {
         .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
             ToolbarItem {
-                ProfileButton()
+//                ProfileButton()
+                Button {
+                    
+                } label: {
+                    Text("\(tweets.count)")
+                        .foregroundStyle(.link)
+                }
             }
-//            .sharedBackgroundVisibility(.hidden)
         }
     }
     
