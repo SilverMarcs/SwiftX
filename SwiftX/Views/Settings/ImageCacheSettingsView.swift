@@ -9,35 +9,9 @@ import SwiftUI
 import SwiftMediaViewer
 
 struct ImageCacheSettingsView: View {
-    @State private var deleteAlertPresented = false
-
     var body: some View {
         Section("Images") {
-            Button {
-                deleteAlertPresented = true
-            } label: {
-                HStack {
-                    Label {
-                        Text("Clear Image Cache")
-                    } icon: {
-                        Image(systemName: "trash")
-                    }
-//                    Spacer()
-//                    Text("{Cache Size}")
-                }
-                .contentShape(.rect)
-            }
-            #if os(macOS)
-            .buttonStyle(.plain)
-            #endif
-            .alert("Clear Image Cache", isPresented: $deleteAlertPresented) {
-                Button("Clear", role: .destructive) {
-                    CachedAsyncImageConfiguration.clearAllCaches()
-                }
-                Button("Cancel", role: .cancel) { }
-            } message: {
-                Text("This will clear all cached images, freeing up storage space.")
-            }
+            CacheManagerView()
         }
     }
 }
