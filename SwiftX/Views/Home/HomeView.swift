@@ -41,6 +41,7 @@ struct HomeView: View {
                     Text("\(tweets.count)")
                         .foregroundStyle(.link)
                 }
+                .buttonBorderShape(.circle)
             }
         }
     }

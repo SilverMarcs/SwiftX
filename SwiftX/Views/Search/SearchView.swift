@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SearchView: View {
     @State private var isLoading = false
+    @Environment(NavigationPathManager.self) private var navManager
     
     @State private var searchText = ""
     @State private var searchScope: SearchScope = .tweets
@@ -31,7 +32,9 @@ struct SearchView: View {
             case .users:
                 List {
                     ForEach(userResults, id: \.id) { user in
-                        NavigationLink(value: NavigationDestination.userDetail(user)) {
+                        Button {
+                            navManager.path.append(NavigationDestination.userDetail(user))
+                        } label: {
                             HStack {
                                 UserHeader(user: user)
                                 Spacer()
@@ -40,7 +43,7 @@ struct SearchView: View {
                                     .font(.system(size: 13.5, weight: .medium))
                             }
                         }
-                        .navigationLinkIndicatorVisibility(.hidden)
+                        .buttonStyle(.plain)
                     }
                 }
             }

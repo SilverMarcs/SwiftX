@@ -8,9 +8,10 @@
 import SwiftUI
 
 struct HomeTab: View {
+    @State private var navManager = NavigationPathManager()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navManager.path) {
             HomeView()
                 .navigationDestination(for: NavigationDestination.self) { destination in
                     switch destination {
@@ -21,6 +22,7 @@ struct HomeTab: View {
                     }
                 }
         }
+        .environment(navManager)
     }
 }
 

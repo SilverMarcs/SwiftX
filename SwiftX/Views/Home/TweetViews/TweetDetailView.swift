@@ -11,6 +11,7 @@ struct TweetDetailView: View {
     let tweet: Tweet
     @State private var replies: [Tweet] = []
     @State private var isLoading = false
+    @Environment(NavigationPathManager.self) private var navManager
 
     var body: some View {
         List {
@@ -29,10 +30,12 @@ struct TweetDetailView: View {
                     .listRowSeparator(.hidden)
                 
                 ForEach(replies) { reply in
-                    NavigationLink(value: NavigationDestination.tweetDetail(reply)) {
+                    Button {
+                        navManager.path.append(NavigationDestination.tweetDetail(reply))
+                    } label: {
                         TweetView(tweet: reply)
                     }
-                    .navigationLinkIndicatorVisibility(.hidden)
+                    .buttonStyle(.plain)
                 }
             }
         }

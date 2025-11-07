@@ -8,7 +8,7 @@ struct UserDetailView: View {
 
     var body: some View {
         List {
-            VStack(alignment: .leading, spacing: 15) { // Changed spacing to 0 for better control
+            VStack(alignment: .leading, spacing: 15) {
                 // Banner Image Section + Profile Image + Action buttons
                 VStack(alignment: .leading, spacing: 0) {
                     if let banner = user.profileBannerUrl, let url = URL(string: banner) {

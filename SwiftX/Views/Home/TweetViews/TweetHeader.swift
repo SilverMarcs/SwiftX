@@ -9,13 +9,16 @@ import SwiftUI
 
 struct TweetHeader: View {
     let tweet: any TweetContentProtocol
+    @Environment(NavigationPathManager.self) private var navManager
     
     var body: some View {
         HStack {
-            NavigationLink(value: NavigationDestination.userDetail(tweet.user)) {
+            Button {
+                navManager.path.append(NavigationDestination.userDetail(tweet.user))
+            } label: {
                 UserHeader(user: tweet.user)
             }
-            .navigationLinkIndicatorVisibility(.hidden)
+            .buttonStyle(.plain)
             
             Spacer()
             Text(tweet.formattedDate)

@@ -9,13 +9,16 @@ import SwiftUI
 
 struct TweetItemsView: View {
     let tweets: [Tweet]
+    @Environment(NavigationPathManager.self) private var navManager
     
     var body: some View {
         ForEach(tweets) { tweet in
-            NavigationLink(value: NavigationDestination.tweetDetail(tweet)) {
+            Button {
+                navManager.path.append(NavigationDestination.tweetDetail(tweet))
+            } label: {
                 TweetView(tweet: tweet)
             }
-            .navigationLinkIndicatorVisibility(.hidden)
+            .buttonStyle(.plain)
             .listRowSeparator(.visible, edges: .bottom)
             .listRowSeparator(.hidden, edges: .top)
             .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }

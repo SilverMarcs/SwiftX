@@ -9,12 +9,15 @@ import SwiftUI
 
 struct ProfileButton: View {
     let user = User.zabir
+    @Environment(NavigationPathManager.self) private var navManager
     
     var body: some View {
-        NavigationLink(value: NavigationDestination.userDetail(user)) {
+        Button {
+            navManager.path.append(NavigationDestination.userDetail(user))
+        } label: {
             Image(systemName: "person.fill")
         }
-        .navigationLinkIndicatorVisibility(.hidden)
+        .buttonStyle(.plain)
         
         .tint(.accentColor)
     }

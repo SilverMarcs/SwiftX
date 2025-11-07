@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct SearchTab: View {
-    
+    @State private var navManager = NavigationPathManager()
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navManager.path) {
             SearchView()
                 .navigationDestination(for: NavigationDestination.self) { destination in
                     switch destination {
@@ -21,5 +21,6 @@ struct SearchTab: View {
                     }
                 }
         }
+        .environment(navManager)
     }
 }
