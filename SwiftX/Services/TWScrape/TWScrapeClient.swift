@@ -17,20 +17,17 @@ struct TWScrapeClient {
         self.gqlClient = graphQLClient
     }
 
-    func fetchListTimeline(limit: Int = 120) async throws -> [Tweet] {
-        let pages = try await gqlClient.pagedRequest(
+    func fetchListTimeline() async throws -> [Tweet] {
+        let page = try await gqlClient.singleRequest(
             op: Ops.listTimeline,
-            baseVariables: ["listId": listId],
-            fieldToggles: ["withArticleRichContentState": false],
-            limit: 120,
-            pageSize: 50,
-            cursorType: .bottom
+            variables: ["listId": listId, "count": 20],
+            fieldToggles: ["withArticleRichContentState": false]
         )
-
-        return newestFirst(mergeTweets(from: pages, limit: limit))
+        let tweets = newestFirst(TWScrapeParser.parseTweets(from: page, limit: -1))
+        return tweets
     }
 
-    func fetchListTimelinePage(cursor: String? = nil, pageSize: Int = 25) async throws -> (tweets: [Tweet], nextCursor: String?) {
+    func fetchListTimelinePage(cursor: String? = nil, pageSize: Int = 20) async throws -> (tweets: [Tweet], nextCursor: String?) {
         var variables: [String: Any] = ["listId": listId, "count": pageSize]
         if let cursor = cursor {
             variables["cursor"] = cursor
