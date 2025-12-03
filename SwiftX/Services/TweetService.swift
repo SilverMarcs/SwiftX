@@ -39,8 +39,8 @@ struct TweetService {
     }
     
     static func fetchTweets() async throws -> [Tweet] {
-        let response: TweetResponse = try await makeRequest(endpoint: "tweets")
-        return filterTweets(response.tweets)
+        let tweets = try await TWScrapeClient.shared.fetchListTimeline()
+        return filterTweets(tweets)
     }
 
     static func fetchUserTweets(userId: Int) async throws -> [Tweet] {
