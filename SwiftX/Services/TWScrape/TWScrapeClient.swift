@@ -22,12 +22,30 @@ struct TWScrapeClient {
             op: Ops.listTimeline,
             baseVariables: ["listId": listId],
             fieldToggles: ["withArticleRichContentState": false],
-            limit: limit,
+            limit: 120,
             pageSize: 50,
             cursorType: .bottom
         )
 
-        return mergeTweets(from: pages, limit: limit)
+        return newestFirst(mergeTweets(from: pages, limit: limit))
+    }
+
+    func fetchListTimelinePage(cursor: String? = nil, pageSize: Int = 25) async throws -> (tweets: [Tweet], nextCursor: String?) {
+        var variables: [String: Any] = ["listId": listId, "count": pageSize]
+        if let cursor = cursor {
+            variables["cursor"] = cursor
+        }
+
+        let page = try await gqlClient.singleRequest(
+            op: Ops.listTimeline,
+            variables: variables,
+            fieldToggles: ["withArticleRichContentState": false]
+        )
+
+        let tweets = newestFirst(TWScrapeParser.parseTweets(from: page, limit: -1))
+        let nextCursor = TWScrapeGraphQLClient.findCursor(in: page, type: TWScrapeGraphQLClient.CursorType.bottom.rawValue)
+
+        return (tweets, nextCursor)
     }
 
     func fetchUserTweets(userId: Int, limit: Int = 60) async throws -> [Tweet] {
@@ -143,5 +161,14 @@ struct TWScrapeClient {
             }
         }
         return all
+    }
+
+    private func newestFirst(_ tweets: [Tweet]) -> [Tweet] {
+        let formatter = ISO8601DateFormatter()
+        return tweets.sorted { lhs, rhs in
+            let l = formatter.date(from: lhs.date) ?? Date.distantPast
+            let r = formatter.date(from: rhs.date) ?? Date.distantPast
+            return l > r
+        }
     }
 }
