@@ -1,255 +1,41 @@
 import Foundation
 
-// Simple container for the Twitter account cookies/headers that were previously in accounts.json
-private struct TwitterAccount {
-    let username: String
-    let headers: [String: String]
-    let cookies: [String: String]
-    let userAgent: String
-    let active: Bool
-
-    func cookieHeader() -> String {
-        cookies.map { "\($0.key)=\($0.value)" }.joined(separator: "; ")
+struct TWScrapeParser {
+    struct OldRepresentation {
+        let tweets: [String: [String: Any]]
+        let users: [String: [String: Any]]
     }
 
-    func authHeaders() -> [String: String] {
-        var result: [String: String] = [
-            "accept": "*/*",
-            "accept-encoding": "gzip, deflate, br",
-            "accept-language": "en-US,en;q=0.9",
-            "user-agent": userAgent,
-            "content-type": "application/json",
-        ]
-
-        headers.forEach { key, value in
-            result[key.lowercased()] = value
-        }
-
-        if let ct0 = cookies["ct0"] {
-            result["x-csrf-token"] = ct0
-        }
-
-        if let auth = headers.first(where: { $0.key.lowercased() == "authorization" })?.value {
-            result["authorization"] = auth
-        }
-
-        result["cookie"] = cookieHeader()
-        return result
-    }
-
-    // Stubs copied from twscrape-serverless/accounts.json
-    static let stubs: [TwitterAccount] = [
-        TwitterAccount(
-            username: "ZabirRaihan6",
-            headers: [
-                "accept": "*/*",
-                "accept-encoding": "gzip, deflate",
-                "connection": "keep-alive",
-                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1.1 Mobile/15E148 Safari/604.1",
-                "content-type": "application/json",
-                "authorization": "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA",
-                "x-twitter-active-user": "yes",
-                "x-twitter-client-language": "en",
-                "x-guest-token": "1944317346782539966",
-                "x-csrf-token": "691c191ecb6e6c2ccc9db7229633768b9ae5a2ae66e32c1a29eab0fc66359188d4a25f769e86361bb47fd23bc4e69898ed6d2205f7651471362ac596fa10220704fee535b573aa63bdb3819b108e53dc",
-                "x-twitter-auth-type": "OAuth2Session"
-            ],
-            cookies: [
-                "guest_id_marketing": "v1%3A175239635379340338",
-                "guest_id_ads": "v1%3A175239635379340338",
-                "personalization_id": "\"v1_lOnNL9itGt3j8EBvdRICww==\"",
-                "guest_id": "v1%3A175239635379340338",
-                "__cf_bm": "cjwW6uWkw24xlsIQAKG49wnELTn4z.oHIgxGDzd0Nos-1752396353-1.0.1.1-tiaNrbvdMgavE1MJ6KOBjytCG7YcSr4upfcqMSOb5tFMJsVhWeyPdbjxreXX65rO8cM37Jz7BwDk11Q.eO47PJ_cd18TCkTZFtlNY4MEvXA",
-                "kdt": "Ae8cgmkuzMpFoWxDpYZ8bPu5tSjYdgapQ9rwPyky",
-                "twid": "\"u=1920525919464329216\"",
-                "ct0": "691c191ecb6e6c2ccc9db7229633768b9ae5a2ae66e32c1a29eab0fc66359188d4a25f769e86361bb47fd23bc4e69898ed6d2205f7651471362ac596fa10220704fee535b573aa63bdb3819b108e53dc",
-                "auth_token": "6180de3ff8cb16b73396f797bf6a497c23a44433",
-                "att": "1-UJjl7HjBjvW551cBvutDzrZsCNyKh9zCCWb0RLCc"
-            ],
-            userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1.1 Mobile/15E148 Safari/604.1",
-            active: true
-        ),
-        TwitterAccount(
-            username: "zabir.raihan8@gmail.com",
-            headers: [:],
-            cookies: [
-                "auth_token": "d6e6e2131bf74b6ced768de7217186c910a77d26",
-                "ct0": "d159fa38cd9ca7c075b422b6657452346d4881356ad0cbf4fd4784a4e02ecc193abe9e80d0e9df8fbf1dbd7880401b674a5a0987977eda69825ca05d32b96c42967a7a900d767d3843a3274a9242c154"
-            ],
-            userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1.1 Mobile/15E148 Safari/604.1",
-            active: true
-        ),
-        TwitterAccount(
-            username: "Davidd609198688",
-            headers: [:],
-            cookies: [
-                "auth_token": "962d2da2540ea664e3bba85d9b5d0833d097aac1",
-                "ct0": "4e897f6321f387edf99bc2e1fc7e3ccd0a15337dafb8aaca44224c2ea60e6b4af85e8fa61abca992c24204748e9edbe744671aec566b5b1e84728e90d56e0419099dbdc796f922e2b0d8cf4fe6331bea"
-            ],
-            userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Mobile/15E148 Safari/604.1",
-            active: true
-        ),
-        TwitterAccount(
-            username: "RaihanZabi14335",
-            headers: [:],
-            cookies: [
-                "auth_token": "d6e6e2131bf74b6ced768de7217186c910a77d26",
-                "ct0": "d159fa38cd9ca7c075b422b6657452346d4881356ad0cbf4fd4784a4e02ecc193abe9e80d0e9df8fbf1dbd7880401b674a5a0987977eda69825ca05d32b96c42967a7a900d767d3843a3274a9242c154"
-            ],
-            userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.4 Mobile/15E148 Safari/604.1",
-            active: true
-        )
-    ]
-}
-
-// Minimal Swift re-implementation of the Python twscrape list timeline fetch
-struct TWScrapeClient {
-    static let shared = TWScrapeClient()
-
-    private let gqlURL = "https://x.com/i/api/graphql/BkauSnPUDQTeeJsxq17opA/ListLatestTweetsTimeline"
-    private let listId = "1661518034639659009" // DEFAULT_LIST_ID from Python config
-    private let features: [String: Any] = [
-        "articles_preview_enabled": false,
-        "c9s_tweet_anatomy_moderator_badge_enabled": true,
-        "communities_web_enable_tweet_community_results_fetch": true,
-        "creator_subscriptions_quote_tweet_preview_enabled": false,
-        "creator_subscriptions_tweet_preview_api_enabled": true,
-        "freedom_of_speech_not_reach_fetch_enabled": true,
-        "graphql_is_translatable_rweb_tweet_is_translatable_enabled": true,
-        "longform_notetweets_consumption_enabled": true,
-        "longform_notetweets_inline_media_enabled": true,
-        "longform_notetweets_rich_text_read_enabled": true,
-        "responsive_web_edit_tweet_api_enabled": true,
-        "responsive_web_enhance_cards_enabled": false,
-        "responsive_web_graphql_exclude_directive_enabled": true,
-        "responsive_web_graphql_skip_user_profile_image_extensions_enabled": false,
-        "responsive_web_graphql_timeline_navigation_enabled": true,
-        "responsive_web_media_download_video_enabled": false,
-        "responsive_web_twitter_article_tweet_consumption_enabled": true,
-        "rweb_tipjar_consumption_enabled": true,
-        "rweb_video_timestamps_enabled": true,
-        "standardized_nudges_misinfo": true,
-        "tweet_awards_web_tipping_enabled": false,
-        "tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled": true,
-        "tweet_with_visibility_results_prefer_gql_media_interstitial_enabled": false,
-        "tweetypie_unmention_optimization_enabled": true,
-        "verified_phone_label_enabled": false,
-        "view_counts_everywhere_api_enabled": true,
-        "responsive_web_grok_analyze_button_fetch_trends_enabled": false,
-        "premium_content_api_read_enabled": false,
-        "profile_label_improvements_pcf_label_in_post_enabled": false,
-        "responsive_web_grok_share_attachment_enabled": false,
-        "responsive_web_grok_analyze_post_followups_enabled": false,
-        "responsive_web_grok_image_annotation_enabled": false,
-        "responsive_web_grok_analysis_button_from_backend": false,
-        "responsive_web_jetfuel_frame": false,
-        "rweb_video_screen_enabled": true,
-        "responsive_web_grok_show_grok_translated_post": true
-    ]
-
-    func fetchListTimeline(limit: Int = 120) async throws -> [Tweet] {
-        guard let account = TwitterAccount.stubs.first(where: { $0.active }) else {
-            throw NetworkError.invalidURL
-        }
-
-        var all: [Tweet] = []
-        var cursor: String?
-        let pageSize = 50
-        var page = 0
-
-        repeat {
-            page += 1
-            var components = URLComponents(string: gqlURL)
-            var variables: [String: Any] = ["listId": listId, "count": pageSize]
-            if let cursor = cursor { variables["cursor"] = cursor }
-            components?.queryItems = [
-                URLQueryItem(name: "variables", value: Self.encodeQueryParam(variables)),
-                URLQueryItem(name: "features", value: Self.encodeQueryParam(features)),
-                URLQueryItem(name: "fieldToggles", value: Self.encodeQueryParam(["withArticleRichContentState": false]))
-            ]
-
-            guard let url = components?.url else { throw NetworkError.invalidURL }
-
-            var request = URLRequest(url: url)
-            request.httpMethod = "GET"
-            request.allHTTPHeaderFields = account.authHeaders()
-
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                throw NetworkError.badServerResponse
-            }
-
-            let jsonObject = try JSONSerialization.jsonObject(with: data)
-            guard let json = jsonObject as? [String: Any] else {
-                throw NetworkError.decodingError
-            }
-
-            let newTweets = GraphQLTweetParser.parseTweets(from: json, limit: -1)
-            let existingIds = Set(all.map { $0.id })
-            let deduped = newTweets.filter { !existingIds.contains($0.id) }
-            all.append(contentsOf: deduped)
-
-            cursor = findCursor(in: json, type: "Bottom")
-        } while cursor != nil && all.count < limit && page < 10
-
-        if all.count > limit {
-            all = Array(all.prefix(limit))
-        }
-
-        return all
-    }
-
-    private static func encodeQueryParam(_ value: Any) -> String {
-        guard let data = try? JSONSerialization.data(withJSONObject: value, options: []) else {
-            return ""
-        }
-        return String(data: data, encoding: .utf8) ?? ""
-    }
-}
-
-private func findCursor(in obj: Any, type: String) -> String? {
-    guard let dict = obj as? [String: Any] else {
-        if let arr = obj as? [Any] {
-            for item in arr {
-                if let val = findCursor(in: item, type: type) {
-                    return val
-                }
-            }
-        }
-        return nil
-    }
-
-    if let cursorType = dict["cursorType"] as? String,
-       cursorType == type,
-       let value = dict["value"] as? String {
-        return value
-    }
-
-    for value in dict.values {
-        if let found = findCursor(in: value, type: type) {
-            return found
-        }
-    }
-
-    return nil
-}
-
-// MARK: - Parser (ported from twscrape)
-
-private struct OldRepresentation {
-    let tweets: [String: [String: Any]]
-    let users: [String: [String: Any]]
-}
-
-private enum GraphQLTweetParser {
     static func parseTweets(from json: [String: Any], limit: Int = -1) -> [Tweet] {
         let rep = toOldRepresentation(json)
         var results: [Tweet] = []
+        var ids = Set<Int>()
 
-        for (idx, (_, value)) in rep.tweets.enumerated() {
-            if limit != -1 && idx >= limit { break }
-            if let tweet = parseTweet(from: value, context: rep, visited: Set<Int>()) {
-                results.append(tweet)
+        for (_, value) in rep.tweets {
+            guard limit == -1 || results.count < limit else { break }
+            if let tweet = parseTweet(from: value, context: rep, visited: []) {
+                if !ids.contains(tweet.id) {
+                    ids.insert(tweet.id)
+                    results.append(tweet)
+                }
+            }
+        }
+
+        return results
+    }
+
+    static func parseUsers(from json: [String: Any], limit: Int = -1) -> [User] {
+        let rep = toOldRepresentation(json)
+        var results: [User] = []
+        var ids = Set<Int>()
+
+        for (_, value) in rep.users {
+            guard limit == -1 || results.count < limit else { break }
+            if let user = parseUser(value) {
+                if !ids.contains(user.id) {
+                    ids.insert(user.id)
+                    results.append(user)
+                }
             }
         }
 
@@ -262,7 +48,8 @@ private enum GraphQLTweetParser {
         visited: Set<Int>,
         asRetweet: Bool = false
     ) -> Tweet? {
-        guard let userId = obj["user_id_str"] as? String, let userObj = context.users[userId],
+        guard let userId = obj["user_id_str"] as? String,
+              let userObj = context.users[userId],
               let user = parseUser(userObj),
               let idStr = obj["id_str"] as? String,
               let id = Int(idStr)
@@ -499,7 +286,8 @@ private enum GraphQLTweetParser {
 
     private static func parseSourceLabel(_ source: String?) -> String? {
         guard let source = source else { return nil }
-        guard let startRange = source.range(of: ">"), let endRange = source.range(of: "<", range: startRange.upperBound..<source.endIndex) else {
+        guard let startRange = source.range(of: ">"),
+              let endRange = source.range(of: "<", range: startRange.upperBound..<source.endIndex) else {
             return nil
         }
         return String(source[startRange.upperBound..<endRange.lowerBound])
