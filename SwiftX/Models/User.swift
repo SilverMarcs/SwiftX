@@ -34,10 +34,6 @@ struct User: Codable, Hashable {
     let descriptionLinks: [Link]
     let pinnedIds: [Int]
     
-    // Pre-computed formatted values
-    let formattedFollowersCount: String
-    let formattedFriendsCount: String
-    
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
@@ -63,10 +59,6 @@ struct User: Codable, Hashable {
         blue = try container.decodeIfPresent(Bool.self, forKey: .blue)
         descriptionLinks = try container.decode([Link].self, forKey: .descriptionLinks)
         pinnedIds = try container.decode([Int].self, forKey: .pinnedIds)
-        
-        // Pre-compute formatted values
-        formattedFollowersCount = followersCount.formattedCount()
-        formattedFriendsCount = friendsCount.formattedCount()
     }
     
     private enum CodingKeys: String, CodingKey {
