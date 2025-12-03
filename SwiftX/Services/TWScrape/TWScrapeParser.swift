@@ -63,7 +63,7 @@ struct TWScrapeParser {
 
         let url = "https://x.com/\(user.username)/status/\(idStr)"
         let createdAt = (obj["created_at"] as? String) ?? ""
-        let dateString = isoDate(from: createdAt)
+        let date = parseDate(from: createdAt)
 
         let replyCount = obj["reply_count"] as? Int ?? 0
         let retweetCount = obj["retweet_count"] as? Int ?? 0
@@ -109,7 +109,7 @@ struct TWScrapeParser {
         let payload = TweetPayload(
             id: id,
             url: url,
-            date: dateString,
+            date: date,
             user: user,
             rawContent: rawContent,
             replyCount: replyCount,
@@ -169,7 +169,7 @@ struct TWScrapeParser {
             username: username,
             displayname: displayName,
             rawDescription: description,
-            created: isoDate(from: createdAt),
+            created: parseDate(from: createdAt),
             followersCount: followersCount,
             friendsCount: friendsCount,
             statusesCount: statusesCount,
@@ -329,15 +329,8 @@ struct TWScrapeParser {
         return nil
     }
 
-    private static func isoDate(from source: String) -> String {
-        guard !source.isEmpty else { return "" }
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "EEE MMM dd HH:mm:ss Z yyyy"
-        if let date = formatter.date(from: source) {
-            return ISO8601DateFormatter().string(from: date)
-        }
-        return source
+    private static func parseDate(from source: String) -> Date {
+        TweetDateParser.parse(source) ?? Date()
     }
 
     private static func toOldRepresentation(_ obj: [String: Any]) -> OldRepresentation {
@@ -412,7 +405,7 @@ struct TWScrapeParser {
 private struct TweetPayload {
     let id: Int
     let url: String
-    let date: String
+    let date: Date
     let user: User
     let rawContent: String
     let replyCount: Int
@@ -462,12 +455,6 @@ private extension Tweet {
         self.source = payload.source
         self.sourceUrl = payload.sourceUrl
         self.sourceLabel = payload.sourceLabel
-        self.formattedDate = payload.date.formattedRelativeDate()
-        self.formattedReplyCount = payload.replyCount.formattedCount()
-        self.formattedRetweetCount = payload.retweetCount.formattedCount()
-        self.formattedLikeCount = payload.likeCount.formattedCount()
-        self.formattedQuoteCount = payload.quoteCount.formattedCount()
-        self.parsedContent = String.parseContent(payload.rawContent)
     }
 }
 
@@ -495,12 +482,6 @@ private extension Retweet {
         self.source = tweet.source
         self.sourceUrl = tweet.sourceUrl
         self.sourceLabel = tweet.sourceLabel
-        self.formattedDate = tweet.formattedDate
-        self.formattedReplyCount = tweet.formattedReplyCount
-        self.formattedRetweetCount = tweet.formattedRetweetCount
-        self.formattedLikeCount = tweet.formattedLikeCount
-        self.formattedQuoteCount = tweet.formattedQuoteCount
-        self.parsedContent = tweet.parsedContent
     }
 
     init(from payload: TweetPayload) {
@@ -526,12 +507,6 @@ private extension Retweet {
         self.source = payload.source
         self.sourceUrl = payload.sourceUrl
         self.sourceLabel = payload.sourceLabel
-        self.formattedDate = payload.date.formattedRelativeDate()
-        self.formattedReplyCount = payload.replyCount.formattedCount()
-        self.formattedRetweetCount = payload.retweetCount.formattedCount()
-        self.formattedLikeCount = payload.likeCount.formattedCount()
-        self.formattedQuoteCount = payload.quoteCount.formattedCount()
-        self.parsedContent = String.parseContent(payload.rawContent)
     }
 }
 

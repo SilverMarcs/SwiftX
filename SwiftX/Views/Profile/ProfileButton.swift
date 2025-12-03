@@ -30,7 +30,7 @@ extension User {
         username: "SilverMarcs3",
         displayname: "Zabir Raihan",
         rawDescription: "Just a random tweeter",
-        created: "2016-08-19 06:21:23+00:00",
+        created: TweetDateParser.parse("2016-08-19 06:21:23+00:00") ?? Date(),
         followersCount: 10,
         friendsCount: 146,
         statusesCount: 122,
@@ -46,7 +46,7 @@ extension User {
 
 extension User {
     init(id: Int, url: String, username: String, displayname: String,
-         rawDescription: String, created: String, followersCount: Int,
+         rawDescription: String, created: Date, followersCount: Int,
          friendsCount: Int, statusesCount: Int, location: String?,
          profileImageUrl: String, profileBannerUrl: String?,
          verified: Bool?, blue: Bool?, descriptionLinks: [Link], pinnedIds: [Int]) {

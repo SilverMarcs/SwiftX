@@ -7,6 +7,43 @@
 
 import Foundation
 
+enum TweetDateParser {
+    static let isoFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
+    }()
+
+    static let isoFractionalFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+
+    static let fallbackFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ssZ"
+        return formatter
+    }()
+
+    static let twitterFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "EEE MMM dd HH:mm:ss Z yyyy"
+        return formatter
+    }()
+
+    static func parse(_ value: String) -> Date? {
+        if let date = isoFractionalFormatter.date(from: value) { return date }
+        if let date = isoFormatter.date(from: value) { return date }
+        if let date = fallbackFormatter.date(from: value) { return date }
+        if let date = twitterFormatter.date(from: value) { return date }
+        return nil
+    }
+
+}
+
 // MARK: - Tweet
 struct Retweet: Codable, Hashable, Identifiable {
     static func == (lhs: Retweet, rhs: Retweet) -> Bool {
@@ -19,7 +56,7 @@ struct Retweet: Codable, Hashable, Identifiable {
     
     let id: Int
     let url: String
-    let date: String
+    let date: Date
     let user: User
     let rawContent: String
     let replyCount: Int
@@ -44,15 +81,11 @@ struct Retweet: Codable, Hashable, Identifiable {
     let sourceLabel: String? // Twitter Web App // Twitter for iPhone
 //    let card: Card?
 //    let possiblySensitive: Bool?
-    
-    // Pre-computed formatted values
-    let formattedDate: String
-    let formattedReplyCount: String
-    let formattedRetweetCount: String
-    let formattedLikeCount: String
-    let formattedQuoteCount: String
-    let parsedContent: String
-    
+
+    var parsedContent: String {
+        String.parseContent(rawContent)
+    }
+
     var twitterWebUrl: URL? {
         return URL(string: "https://twitter.com/x/status/\(id)")
     }
@@ -63,7 +96,12 @@ struct Retweet: Codable, Hashable, Identifiable {
         // Decode all the original properties
         id = try container.decode(Int.self, forKey: .id)
         url = try container.decode(String.self, forKey: .url)
-        date = try container.decode(String.self, forKey: .date)
+        if let storedDate = try? container.decode(Date.self, forKey: .date) {
+            date = storedDate
+        } else {
+            let dateString = try container.decode(String.self, forKey: .date)
+            date = TweetDateParser.parse(dateString) ?? Date.distantPast
+        }
         user = try container.decode(User.self, forKey: .user)
         rawContent = try container.decode(String.self, forKey: .rawContent)
         replyCount = try container.decode(Int.self, forKey: .replyCount)
@@ -88,13 +126,39 @@ struct Retweet: Codable, Hashable, Identifiable {
         sourceUrl = try container.decodeIfPresent(String.self, forKey: .sourceUrl)
         sourceLabel = try container.decodeIfPresent(String.self, forKey: .sourceLabel)
         
-        // Pre-compute formatted values
-        formattedDate = date.formattedRelativeDate()
-        formattedReplyCount = replyCount.formattedCount()
-        formattedRetweetCount = retweetCount.formattedCount()
-        formattedLikeCount = likeCount.formattedCount()
-        formattedQuoteCount = quoteCount.formattedCount()
-        parsedContent = String.parseContent(rawContent)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(url, forKey: .url)
+        try container.encode(date, forKey: .date)
+        try container.encode(user, forKey: .user)
+        try container.encode(rawContent, forKey: .rawContent)
+        try container.encode(replyCount, forKey: .replyCount)
+        try container.encode(retweetCount, forKey: .retweetCount)
+        try container.encode(likeCount, forKey: .likeCount)
+        try container.encode(quoteCount, forKey: .quoteCount)
+        try container.encode(conversationId, forKey: .conversationId)
+        try container.encode(conversationIdStr, forKey: .conversationIdStr)
+        try container.encode(hashtags, forKey: .hashtags)
+        try container.encode(links, forKey: .links)
+        try container.encodeIfPresent(media, forKey: .media)
+        try container.encodeIfPresent(viewCount, forKey: .viewCount)
+        try container.encodeIfPresent(place, forKey: .place)
+        try container.encodeIfPresent(inReplyToTweetId, forKey: .inReplyToTweetId)
+        try container.encodeIfPresent(inReplyToTweetIdStr, forKey: .inReplyToTweetIdStr)
+        try container.encodeIfPresent(inReplyToUser, forKey: .inReplyToUser)
+        try container.encodeIfPresent(source, forKey: .source)
+        try container.encodeIfPresent(sourceUrl, forKey: .sourceUrl)
+        try container.encodeIfPresent(sourceLabel, forKey: .sourceLabel)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, url, date, user, rawContent, replyCount, retweetCount, likeCount, quoteCount
+        case conversationId, conversationIdStr, hashtags, links, media, viewCount
+        case place, inReplyToTweetId, inReplyToTweetIdStr, inReplyToUser
+        case source, sourceUrl, sourceLabel
     }
 }
 
@@ -109,7 +173,7 @@ struct Tweet: Hashable, Codable, Identifiable {
     
     let id: Int
     let url: String
-    let date: String
+    let date: Date
     let user: User
     let rawContent: String
     let replyCount: Int
@@ -134,15 +198,11 @@ struct Tweet: Hashable, Codable, Identifiable {
     let sourceLabel: String?
 //    let card: Card?
 //    let possiblySensitive: Bool?
-    
-    // Pre-computed formatted values
-    let formattedDate: String
-    let formattedReplyCount: String
-    let formattedRetweetCount: String
-    let formattedLikeCount: String
-    let formattedQuoteCount: String
-    let parsedContent: String
-    
+
+    var parsedContent: String {
+        String.parseContent(rawContent)
+    }
+
     var twitterWebUrl: URL? {
         return URL(string: "https://twitter.com/x/status/\(id)")
     }
@@ -153,7 +213,12 @@ struct Tweet: Hashable, Codable, Identifiable {
         // Decode all the original properties
         id = try container.decode(Int.self, forKey: .id)
         url = try container.decode(String.self, forKey: .url)
-        date = try container.decode(String.self, forKey: .date)
+        if let storedDate = try? container.decode(Date.self, forKey: .date) {
+            date = storedDate
+        } else {
+            let dateString = try container.decode(String.self, forKey: .date)
+            date = TweetDateParser.parse(dateString) ?? Date.distantPast
+        }
         user = try container.decode(User.self, forKey: .user)
         rawContent = try container.decode(String.self, forKey: .rawContent)
         replyCount = try container.decode(Int.self, forKey: .replyCount)
@@ -180,13 +245,6 @@ struct Tweet: Hashable, Codable, Identifiable {
         sourceUrl = try container.decodeIfPresent(String.self, forKey: .sourceUrl)
         sourceLabel = try container.decodeIfPresent(String.self, forKey: .sourceLabel)
         
-        // Pre-compute formatted values
-        formattedDate = date.formattedRelativeDate()
-        formattedReplyCount = replyCount.formattedCount()
-        formattedRetweetCount = retweetCount.formattedCount()
-        formattedLikeCount = likeCount.formattedCount()
-        formattedQuoteCount = quoteCount.formattedCount()
-        parsedContent = String.parseContent(rawContent)
     }
     
     init(from retweet: Retweet) {
@@ -216,14 +274,41 @@ struct Tweet: Hashable, Codable, Identifiable {
         self.sourceUrl = retweet.sourceUrl
         self.sourceLabel = retweet.sourceLabel
 //        self.card = retweet.card
-        
-        // Pre-compute formatted values
-        self.formattedDate = retweet.formattedDate
-        self.formattedReplyCount = retweet.formattedReplyCount
-        self.formattedRetweetCount = retweet.formattedRetweetCount
-        self.formattedLikeCount = retweet.formattedLikeCount
-        self.formattedQuoteCount = retweet.formattedQuoteCount
-        self.parsedContent = retweet.parsedContent
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(url, forKey: .url)
+        try container.encode(date, forKey: .date)
+        try container.encode(user, forKey: .user)
+        try container.encode(rawContent, forKey: .rawContent)
+        try container.encode(replyCount, forKey: .replyCount)
+        try container.encode(retweetCount, forKey: .retweetCount)
+        try container.encode(likeCount, forKey: .likeCount)
+        try container.encode(quoteCount, forKey: .quoteCount)
+        try container.encode(conversationId, forKey: .conversationId)
+        try container.encode(conversationIdStr, forKey: .conversationIdStr)
+        try container.encode(hashtags, forKey: .hashtags)
+        try container.encode(links, forKey: .links)
+        try container.encodeIfPresent(media, forKey: .media)
+        try container.encodeIfPresent(viewCount, forKey: .viewCount)
+        try container.encodeIfPresent(retweetedTweet, forKey: .retweetedTweet)
+        try container.encodeIfPresent(quotedTweet, forKey: .quotedTweet)
+        try container.encodeIfPresent(place, forKey: .place)
+        try container.encodeIfPresent(inReplyToTweetId, forKey: .inReplyToTweetId)
+        try container.encodeIfPresent(inReplyToTweetIdStr, forKey: .inReplyToTweetIdStr)
+        try container.encodeIfPresent(inReplyToUser, forKey: .inReplyToUser)
+        try container.encodeIfPresent(source, forKey: .source)
+        try container.encodeIfPresent(sourceUrl, forKey: .sourceUrl)
+        try container.encodeIfPresent(sourceLabel, forKey: .sourceLabel)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, url, date, user, rawContent, replyCount, retweetCount, likeCount, quoteCount
+        case conversationId, conversationIdStr, hashtags, links, media, viewCount
+        case retweetedTweet, quotedTweet, place, inReplyToTweetId, inReplyToTweetIdStr
+        case inReplyToUser, source, sourceUrl, sourceLabel
     }
 }
 
@@ -231,20 +316,25 @@ struct Tweet: Hashable, Codable, Identifiable {
 protocol TweetContentProtocol {
     var id: Int { get }
     var user: User { get }
-    var formattedDate: String { get }
+    var date: Date { get }
+    var rawContent: String { get }
     var parsedContent: String { get }
     var links: [Link] { get }
     var hashtags: [String] { get }
     var media: Media? { get }
-    var formattedReplyCount: String { get }
-    var formattedRetweetCount: String { get }
-    var formattedLikeCount: String { get }
+    var replyCount: Int { get }
+    var retweetCount: Int { get }
+    var likeCount: Int { get }
     var twitterWebUrl: URL? { get }
+}
+
+extension TweetContentProtocol {
+    var parsedContent: String {
+        String.parseContent(rawContent)
+    }
 }
 // Extend Tweet to conform to the protocol
 extension Tweet: TweetContentProtocol {}
 
 // Extend Retweet to conform to the protocol
 extension Retweet: TweetContentProtocol {}
-
-

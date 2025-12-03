@@ -161,11 +161,6 @@ struct TWScrapeClient {
     }
 
     private func newestFirst(_ tweets: [Tweet]) -> [Tweet] {
-        let formatter = ISO8601DateFormatter()
-        return tweets.sorted { lhs, rhs in
-            let l = formatter.date(from: lhs.date) ?? Date.distantPast
-            let r = formatter.date(from: rhs.date) ?? Date.distantPast
-            return l > r
-        }
+        return tweets.sorted { $0.date > $1.date }
     }
 }
