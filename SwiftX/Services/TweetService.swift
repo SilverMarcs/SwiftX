@@ -10,6 +10,11 @@ struct TweetService {
         return filterTweets(tweets)
     }
 
+    static func fetchTimelinePage(cursor: String? = nil, pageSize: Int = 25) async throws -> (tweets: [Tweet], nextCursor: String?) {
+        let page = try await TWScrapeClient.shared.fetchListTimelinePage(cursor: cursor, pageSize: pageSize)
+        return (filterTweets(page.tweets), page.nextCursor)
+    }
+
     static func fetchUserTweets(userId: Int) async throws -> [Tweet] {
         let tweets = try await TWScrapeClient.shared.fetchUserTweets(userId: userId)
         return filterTweets(tweets)

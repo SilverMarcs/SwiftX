@@ -9,26 +9,39 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var tweets: [Tweet] = []
-    @State private var isLoading = false
+    @State private var isLoadingMore = false
+    @State private var nextCursor: String?
 
     var body: some View {
         List {
             TweetItemsView(tweets: tweets)
-        }
-        .overlay {
-            if isLoading {
-                UniversalProgressView()
+
+            if nextCursor != nil {
+                Color.clear
+                    .frame(height: 1)
+                    .onAppear {
+                        Task { await loadMore() }
+                    }
+                    .listRowSeparator(.hidden)
+            }
+
+            if isLoadingMore {
+                ProgressView()
+                    .id(UUID())
+                    .controlSize(.large)
+                    .listRowSeparator(.hidden)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .listStyle(.plain)
         .task {
             guard tweets.isEmpty else { return }
-            isLoading = true
-            await fetchTweets()
-            isLoading = false
+            // initial load: show custom ProgressView
+            await refresh(showProgress: true)
         }
         .refreshable {
-            await fetchTweets()
+            // pull-to-refresh: DO NOT show custom ProgressView
+            await refresh(showProgress: false)
         }
         .navigationTitle("Tweets")
         .toolbarTitleDisplayMode(.inlineLarge)
@@ -47,10 +60,37 @@ struct HomeView: View {
     }
     
     
-    private func fetchTweets() async {
+    private func refresh(showProgress: Bool) async {
+        nextCursor = nil
+        tweets = []
+        await loadMore(reset: true, showProgress: showProgress)
+    }
+    
+    private func loadMore(reset: Bool = false, showProgress: Bool = true) async {
+        // Only guard on isLoadingMore if we're actually using it
+        guard !isLoadingMore else { return }
+        if !reset, nextCursor == nil { return }
+
+        if showProgress {
+            isLoadingMore = true
+        }
+        defer {
+            if showProgress {
+                isLoadingMore = false
+            }
+        }
+
         do {
-            let fetched = try await TweetService.fetchTweets()
-            tweets = fetched
+            let result = try await TweetService.fetchTimelinePage(
+                cursor: reset ? nil : nextCursor,
+                pageSize: 25
+            )
+            nextCursor = result.nextCursor
+
+            var existing = Set(tweets.map { $0.id })
+            let fresh = result.tweets.filter { !existing.contains($0.id) }
+            existing.formUnion(fresh.map { $0.id })
+            tweets.append(contentsOf: fresh)
         } catch {
             print(error.localizedDescription)
         }

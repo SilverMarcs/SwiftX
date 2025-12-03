@@ -17,7 +17,7 @@ struct TWScrapeGraphQLClient {
         op: String,
         baseVariables: [String: Any],
         fieldToggles: [String: Any]? = nil,
-        limit _: Int,
+        limit: Int,
         pageSize: Int,
         cursorType: CursorType = .bottom,
         maxPages: Int = 12
@@ -41,7 +41,7 @@ struct TWScrapeGraphQLClient {
             )
 
             pages.append(response)
-            cursor = findCursor(in: response, type: cursorType.rawValue)
+            cursor = Self.findCursor(in: response, type: cursorType.rawValue)
         } while cursor != nil && page < maxPages
 
         return pages
@@ -138,26 +138,28 @@ struct TWScrapeGraphQLClient {
     ]
 }
 
-private func findCursor(in obj: Any, type: String) -> String? {
-    if let dict = obj as? [String: Any] {
-        if let cursorType = dict["cursorType"] as? String,
-           cursorType == type,
-           let value = dict["value"] as? String {
-            return value
-        }
-
-        for value in dict.values {
-            if let found = findCursor(in: value, type: type) {
-                return found
+extension TWScrapeGraphQLClient {
+    static func findCursor(in obj: Any, type: String) -> String? {
+        if let dict = obj as? [String: Any] {
+            if let cursorType = dict["cursorType"] as? String,
+               cursorType == type,
+               let value = dict["value"] as? String {
+                return value
+            }
+            
+            for value in dict.values {
+                if let found = findCursor(in: value, type: type) {
+                    return found
+                }
+            }
+        } else if let arr = obj as? [Any] {
+            for item in arr {
+                if let found = findCursor(in: item, type: type) {
+                    return found
+                }
             }
         }
-    } else if let arr = obj as? [Any] {
-        for item in arr {
-            if let found = findCursor(in: item, type: type) {
-                return found
-            }
-        }
+        
+        return nil
     }
-
-    return nil
 }
