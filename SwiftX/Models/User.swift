@@ -22,7 +22,7 @@ struct User: Codable, Hashable {
     let username: String
     let displayname: String
     let rawDescription: String
-    let created: String
+    let created: Date
     let followersCount: Int
     let friendsCount: Int
     let statusesCount: Int
@@ -47,7 +47,12 @@ struct User: Codable, Hashable {
         username = try container.decode(String.self, forKey: .username)
         displayname = try container.decode(String.self, forKey: .displayname)
         rawDescription = try container.decode(String.self, forKey: .rawDescription)
-        created = try container.decode(String.self, forKey: .created)
+        if let date = try? container.decode(Date.self, forKey: .created) {
+            created = date
+        } else {
+            let createdString = try container.decode(String.self, forKey: .created)
+            created = TweetDateParser.parse(createdString) ?? Date()
+        }
         followersCount = try container.decode(Int.self, forKey: .followersCount)
         friendsCount = try container.decode(Int.self, forKey: .friendsCount)
         statusesCount = try container.decode(Int.self, forKey: .statusesCount)
