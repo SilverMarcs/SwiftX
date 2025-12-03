@@ -66,10 +66,6 @@ extension User {
         self.blue = blue
         self.descriptionLinks = descriptionLinks
         self.pinnedIds = pinnedIds
-        
-        // Pre-compute formatted values
-        self.formattedFollowersCount = "10"
-        self.formattedFriendsCount = "146"
     }
 }
 

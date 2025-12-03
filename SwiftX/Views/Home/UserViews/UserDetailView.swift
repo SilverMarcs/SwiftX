@@ -97,8 +97,19 @@ struct UserDetailView: View {
                         }
                         
                         HStack(spacing: 24) {
-                            Label("\(user.formattedFriendsCount) Following", systemImage: "person.crop.circle.badge.checkmark")
-                            Label("\(user.formattedFollowersCount) Followers", systemImage: "person.2.fill")
+                            Label {
+                                Text("\(user.friendsCount, format: .number.notation(.compactName)) Following")
+                                    .fontWeight(.semibold)
+                            } icon: {
+                                Image(systemName: "person.crop.circle.badge.checkmark")
+                            }
+
+                            Label {
+                                Text("\(user.followersCount, format: .number.notation(.compactName)) Followers")
+                                    .fontWeight(.semibold)
+                            } icon: {
+                                Image(systemName: "person.2.fill")
+                            }
                         }
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
