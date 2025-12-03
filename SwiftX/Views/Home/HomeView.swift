@@ -83,7 +83,7 @@ struct HomeView: View {
         do {
             let result = try await TweetService.fetchTimelinePage(
                 cursor: reset ? nil : nextCursor,
-                pageSize: 25
+                pageSize: 20
             )
             nextCursor = result.nextCursor
 

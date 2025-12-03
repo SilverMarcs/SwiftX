@@ -11,7 +11,6 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                APIServerSettingsView()
                 VideoPlaybackSettingsView()
                 ImageCacheSettingsView()
             }
