@@ -59,7 +59,7 @@ struct HomeView: View {
     
     private func refresh(showProgress: Bool) async {
         nextCursor = nil
-        tweets = []
+        if showProgress { tweets = [] }
         await loadMore(reset: true, showProgress: showProgress)
     }
     
