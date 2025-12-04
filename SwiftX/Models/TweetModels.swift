@@ -12,20 +12,6 @@ struct Link: Codable, Hashable {
     let url: String
     let text: String?
     let tcourl: String?
-    
-    // If Link doesn't automatically synthesize Hashable conformance,
-      // you might need to implement it manually:
-      func hash(into hasher: inout Hasher) {
-          // Hash the properties that make a link unique
-          // For example, if you have a 'url' property:
-          hasher.combine(url)
-      }
-      
-      static func == (lhs: Link, rhs: Link) -> Bool {
-          // Define equality based on what makes links the same
-          // For example:
-          return lhs.url == rhs.url
-      }
 }
 
 // MARK: - Media
