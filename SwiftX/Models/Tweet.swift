@@ -96,12 +96,7 @@ struct Retweet: Codable, Hashable, Identifiable {
         // Decode all the original properties
         id = try container.decode(Int.self, forKey: .id)
         url = try container.decode(String.self, forKey: .url)
-        if let storedDate = try? container.decode(Date.self, forKey: .date) {
-            date = storedDate
-        } else {
-            let dateString = try container.decode(String.self, forKey: .date)
-            date = TweetDateParser.parse(dateString) ?? Date.distantPast
-        }
+        date = try container.decode(Date.self, forKey: .date)
         user = try container.decode(User.self, forKey: .user)
         rawContent = try container.decode(String.self, forKey: .rawContent)
         replyCount = try container.decode(Int.self, forKey: .replyCount)
@@ -213,12 +208,7 @@ struct Tweet: Hashable, Codable, Identifiable {
         // Decode all the original properties
         id = try container.decode(Int.self, forKey: .id)
         url = try container.decode(String.self, forKey: .url)
-        if let storedDate = try? container.decode(Date.self, forKey: .date) {
-            date = storedDate
-        } else {
-            let dateString = try container.decode(String.self, forKey: .date)
-            date = TweetDateParser.parse(dateString) ?? Date.distantPast
-        }
+        date = try container.decode(Date.self, forKey: .date)
         user = try container.decode(User.self, forKey: .user)
         rawContent = try container.decode(String.self, forKey: .rawContent)
         replyCount = try container.decode(Int.self, forKey: .replyCount)

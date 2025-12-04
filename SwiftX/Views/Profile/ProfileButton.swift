@@ -30,7 +30,7 @@ extension User {
         username: "SilverMarcs3",
         displayname: "Zabir Raihan",
         rawDescription: "Just a random tweeter",
-        created: TweetDateParser.parse("2016-08-19 06:21:23+00:00") ?? Date(),
+        created: Date(),
         followersCount: 10,
         friendsCount: 146,
         statusesCount: 122,
