@@ -45,7 +45,7 @@ struct TWScrapeClient {
         return (tweets, nextCursor)
     }
 
-    func fetchUserTweets(userId: Int, limit: Int = 60) async throws -> [Tweet] {
+    func fetchUserTweets(userId: Int, limit: Int = 20) async throws -> [Tweet] {
         let pages = try await gqlClient.pagedRequest(
             op: Ops.userTweets,
             baseVariables: [
@@ -56,7 +56,7 @@ struct TWScrapeClient {
                 "withV2Timeline": true
             ],
             limit: limit,
-            pageSize: 40,
+            pageSize: 20,
             cursorType: .bottom
         )
 
