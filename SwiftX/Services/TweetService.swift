@@ -15,8 +15,8 @@ struct TweetService {
         return (filterTweets(page.tweets), page.nextCursor)
     }
 
-    static func fetchUserTweets(userId: Int) async throws -> [Tweet] {
-        let tweets = try await TWScrapeClient.shared.fetchUserTweets(userId: userId)
+    static func fetchUserTweets(userId: Int, limit: Int = 12) async throws -> [Tweet] {
+        let tweets = try await TWScrapeClient.shared.fetchUserTweets(userId: userId, limit: limit)
         return filterTweets(tweets)
     }
 

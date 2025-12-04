@@ -25,6 +25,9 @@ struct TWScrapeGraphQLClient {
         var pages: [[String: Any]] = []
         var cursor: String?
         var page = 0
+        let pagesToFetch = limit > 0
+            ? min(maxPages, max(1, Int(ceil(Double(limit) / Double(pageSize)))))
+            : maxPages
 
         repeat {
             page += 1
@@ -42,7 +45,7 @@ struct TWScrapeGraphQLClient {
 
             pages.append(response)
             cursor = Self.findCursor(in: response, type: cursorType.rawValue)
-        } while cursor != nil && page < maxPages
+        } while cursor != nil && page < pagesToFetch
 
         return pages
     }

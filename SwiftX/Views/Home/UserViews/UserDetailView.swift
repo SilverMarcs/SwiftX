@@ -147,7 +147,7 @@ struct UserDetailView: View {
     private func fetchUserTweets() async {
         isLoading = true
         do {
-            let fetchTweets = try await TweetService.fetchUserTweets(userId: user.id)
+            let fetchTweets = try await TweetService.fetchUserTweets(userId: user.id, limit: 12)
             tweets = fetchTweets
         } catch {
             print(error.localizedDescription)
