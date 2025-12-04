@@ -33,35 +33,6 @@ struct User: Codable, Hashable {
     let blue: Bool?
     let descriptionLinks: [Link]
     let pinnedIds: [Int]
-    
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        
-        // Decode all the original properties
-        id = try container.decode(Int.self, forKey: .id)
-        url = try container.decode(String.self, forKey: .url)
-        username = try container.decode(String.self, forKey: .username)
-        displayname = try container.decode(String.self, forKey: .displayname)
-        rawDescription = try container.decode(String.self, forKey: .rawDescription)
-        created = try container.decode(Date.self, forKey: .created)
-        followersCount = try container.decode(Int.self, forKey: .followersCount)
-        friendsCount = try container.decode(Int.self, forKey: .friendsCount)
-        statusesCount = try container.decode(Int.self, forKey: .statusesCount)
-        location = try container.decodeIfPresent(String.self, forKey: .location)
-        profileImageUrl = try container.decode(String.self, forKey: .profileImageUrl)
-        profileBannerUrl = try container.decodeIfPresent(String.self, forKey: .profileBannerUrl)
-        verified = try container.decodeIfPresent(Bool.self, forKey: .verified)
-        blue = try container.decodeIfPresent(Bool.self, forKey: .blue)
-        descriptionLinks = try container.decode([Link].self, forKey: .descriptionLinks)
-        pinnedIds = try container.decode([Int].self, forKey: .pinnedIds)
-    }
-    
-    private enum CodingKeys: String, CodingKey {
-        case id, url, username, displayname, rawDescription, created
-        case followersCount, friendsCount, statusesCount, location
-        case profileImageUrl, profileBannerUrl, verified, blue
-        case descriptionLinks, pinnedIds
-    }
 }
 
 // MARK: - MentionedUser
