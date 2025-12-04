@@ -89,72 +89,6 @@ struct Retweet: Codable, Hashable, Identifiable {
     var twitterWebUrl: URL? {
         return URL(string: "https://twitter.com/x/status/\(id)")
     }
-    
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        
-        // Decode all the original properties
-        id = try container.decode(Int.self, forKey: .id)
-        url = try container.decode(String.self, forKey: .url)
-        date = try container.decode(Date.self, forKey: .date)
-        user = try container.decode(User.self, forKey: .user)
-        rawContent = try container.decode(String.self, forKey: .rawContent)
-        replyCount = try container.decode(Int.self, forKey: .replyCount)
-        retweetCount = try container.decode(Int.self, forKey: .retweetCount)
-        likeCount = try container.decode(Int.self, forKey: .likeCount)
-        quoteCount = try container.decode(Int.self, forKey: .quoteCount)
-        conversationId = try container.decode(Int.self, forKey: .conversationId)
-        conversationIdStr = try container.decode(String.self, forKey: .conversationIdStr)
-        hashtags = try container.decode([String].self, forKey: .hashtags)
-        
-        // Decode links and remove duplicates
-        let decodedLinks = try container.decode([Link].self, forKey: .links)
-        links = Array(Set(decodedLinks)) // Remove duplicates using Set
-        
-        media = try container.decodeIfPresent(Media.self, forKey: .media)
-        viewCount = try container.decodeIfPresent(Int.self, forKey: .viewCount)
-        place = try container.decodeIfPresent(Place.self, forKey: .place)
-        inReplyToTweetId = try container.decodeIfPresent(Int.self, forKey: .inReplyToTweetId)
-        inReplyToTweetIdStr = try container.decodeIfPresent(String.self, forKey: .inReplyToTweetIdStr)
-        inReplyToUser = try container.decodeIfPresent(InReplyToUser.self, forKey: .inReplyToUser)
-        source = try container.decodeIfPresent(String.self, forKey: .source)
-        sourceUrl = try container.decodeIfPresent(String.self, forKey: .sourceUrl)
-        sourceLabel = try container.decodeIfPresent(String.self, forKey: .sourceLabel)
-        
-    }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
-        try container.encode(url, forKey: .url)
-        try container.encode(date, forKey: .date)
-        try container.encode(user, forKey: .user)
-        try container.encode(rawContent, forKey: .rawContent)
-        try container.encode(replyCount, forKey: .replyCount)
-        try container.encode(retweetCount, forKey: .retweetCount)
-        try container.encode(likeCount, forKey: .likeCount)
-        try container.encode(quoteCount, forKey: .quoteCount)
-        try container.encode(conversationId, forKey: .conversationId)
-        try container.encode(conversationIdStr, forKey: .conversationIdStr)
-        try container.encode(hashtags, forKey: .hashtags)
-        try container.encode(links, forKey: .links)
-        try container.encodeIfPresent(media, forKey: .media)
-        try container.encodeIfPresent(viewCount, forKey: .viewCount)
-        try container.encodeIfPresent(place, forKey: .place)
-        try container.encodeIfPresent(inReplyToTweetId, forKey: .inReplyToTweetId)
-        try container.encodeIfPresent(inReplyToTweetIdStr, forKey: .inReplyToTweetIdStr)
-        try container.encodeIfPresent(inReplyToUser, forKey: .inReplyToUser)
-        try container.encodeIfPresent(source, forKey: .source)
-        try container.encodeIfPresent(sourceUrl, forKey: .sourceUrl)
-        try container.encodeIfPresent(sourceLabel, forKey: .sourceLabel)
-    }
-
-    private enum CodingKeys: String, CodingKey {
-        case id, url, date, user, rawContent, replyCount, retweetCount, likeCount, quoteCount
-        case conversationId, conversationIdStr, hashtags, links, media, viewCount
-        case place, inReplyToTweetId, inReplyToTweetIdStr, inReplyToUser
-        case source, sourceUrl, sourceLabel
-    }
 }
 
 struct Tweet: Hashable, Codable, Identifiable {
@@ -201,42 +135,6 @@ struct Tweet: Hashable, Codable, Identifiable {
     var twitterWebUrl: URL? {
         return URL(string: "https://twitter.com/x/status/\(id)")
     }
-    
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        
-        // Decode all the original properties
-        id = try container.decode(Int.self, forKey: .id)
-        url = try container.decode(String.self, forKey: .url)
-        date = try container.decode(Date.self, forKey: .date)
-        user = try container.decode(User.self, forKey: .user)
-        rawContent = try container.decode(String.self, forKey: .rawContent)
-        replyCount = try container.decode(Int.self, forKey: .replyCount)
-        retweetCount = try container.decode(Int.self, forKey: .retweetCount)
-        likeCount = try container.decode(Int.self, forKey: .likeCount)
-        quoteCount = try container.decode(Int.self, forKey: .quoteCount)
-        conversationId = try container.decode(Int.self, forKey: .conversationId)
-        conversationIdStr = try container.decode(String.self, forKey: .conversationIdStr)
-        hashtags = try container.decode([String].self, forKey: .hashtags)
-        
-        // Decode links and remove duplicates
-        let decodedLinks = try container.decode([Link].self, forKey: .links)
-        links = Array(Set(decodedLinks)) // Remove duplicates using Set
-        
-        media = try container.decodeIfPresent(Media.self, forKey: .media)
-        viewCount = try container.decodeIfPresent(Int.self, forKey: .viewCount)
-        retweetedTweet = try container.decodeIfPresent(Retweet.self, forKey: .retweetedTweet)
-        quotedTweet = try container.decodeIfPresent(Retweet.self, forKey: .quotedTweet)
-        place = try container.decodeIfPresent(Place.self, forKey: .place)
-        inReplyToTweetId = try container.decodeIfPresent(Int.self, forKey: .inReplyToTweetId)
-        inReplyToTweetIdStr = try container.decodeIfPresent(String.self, forKey: .inReplyToTweetIdStr)
-        inReplyToUser = try container.decodeIfPresent(InReplyToUser.self, forKey: .inReplyToUser)
-        source = try container.decodeIfPresent(String.self, forKey: .source)
-        sourceUrl = try container.decodeIfPresent(String.self, forKey: .sourceUrl)
-        sourceLabel = try container.decodeIfPresent(String.self, forKey: .sourceLabel)
-        
-    }
-    
     init(from retweet: Retweet) {
         self.id = retweet.id
         self.url = retweet.url
@@ -264,41 +162,6 @@ struct Tweet: Hashable, Codable, Identifiable {
         self.sourceUrl = retweet.sourceUrl
         self.sourceLabel = retweet.sourceLabel
 //        self.card = retweet.card
-    }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
-        try container.encode(url, forKey: .url)
-        try container.encode(date, forKey: .date)
-        try container.encode(user, forKey: .user)
-        try container.encode(rawContent, forKey: .rawContent)
-        try container.encode(replyCount, forKey: .replyCount)
-        try container.encode(retweetCount, forKey: .retweetCount)
-        try container.encode(likeCount, forKey: .likeCount)
-        try container.encode(quoteCount, forKey: .quoteCount)
-        try container.encode(conversationId, forKey: .conversationId)
-        try container.encode(conversationIdStr, forKey: .conversationIdStr)
-        try container.encode(hashtags, forKey: .hashtags)
-        try container.encode(links, forKey: .links)
-        try container.encodeIfPresent(media, forKey: .media)
-        try container.encodeIfPresent(viewCount, forKey: .viewCount)
-        try container.encodeIfPresent(retweetedTweet, forKey: .retweetedTweet)
-        try container.encodeIfPresent(quotedTweet, forKey: .quotedTweet)
-        try container.encodeIfPresent(place, forKey: .place)
-        try container.encodeIfPresent(inReplyToTweetId, forKey: .inReplyToTweetId)
-        try container.encodeIfPresent(inReplyToTweetIdStr, forKey: .inReplyToTweetIdStr)
-        try container.encodeIfPresent(inReplyToUser, forKey: .inReplyToUser)
-        try container.encodeIfPresent(source, forKey: .source)
-        try container.encodeIfPresent(sourceUrl, forKey: .sourceUrl)
-        try container.encodeIfPresent(sourceLabel, forKey: .sourceLabel)
-    }
-
-    private enum CodingKeys: String, CodingKey {
-        case id, url, date, user, rawContent, replyCount, retweetCount, likeCount, quoteCount
-        case conversationId, conversationIdStr, hashtags, links, media, viewCount
-        case retweetedTweet, quotedTweet, place, inReplyToTweetId, inReplyToTweetIdStr
-        case inReplyToUser, source, sourceUrl, sourceLabel
     }
 }
 
