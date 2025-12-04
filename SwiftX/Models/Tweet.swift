@@ -66,12 +66,9 @@ struct Retweet: Codable, Hashable, Identifiable {
     let conversationId: Int
     let conversationIdStr: String
     let hashtags: [String]
-//    let mentionedUsers: [MentionedUser]
     let links: [Link]
     let media: Media?
     let viewCount: Int?
-//    var retweetedTweet: Tweet? = nil
-//    var quotedTweet: Tweet? = nil
     let place: Place?
     let inReplyToTweetId: Int?
     let inReplyToTweetIdStr: String?
@@ -79,8 +76,6 @@ struct Retweet: Codable, Hashable, Identifiable {
     let source: String?
     let sourceUrl: String?
     let sourceLabel: String? // Twitter Web App // Twitter for iPhone
-//    let card: Card?
-//    let possiblySensitive: Bool?
 
     var parsedContent: String {
         String.parseContent(rawContent)
@@ -112,7 +107,6 @@ struct Tweet: Hashable, Codable, Identifiable {
     let conversationId: Int
     let conversationIdStr: String
     let hashtags: [String]
-//    let mentionedUsers: [MentionedUser]
     let links: [Link]
     let media: Media?
     let viewCount: Int?
@@ -125,8 +119,6 @@ struct Tweet: Hashable, Codable, Identifiable {
     let source: String?
     let sourceUrl: String?
     let sourceLabel: String?
-//    let card: Card?
-//    let possiblySensitive: Bool?
 
     var parsedContent: String {
         String.parseContent(rawContent)
@@ -135,6 +127,7 @@ struct Tweet: Hashable, Codable, Identifiable {
     var twitterWebUrl: URL? {
         return URL(string: "https://twitter.com/x/status/\(id)")
     }
+    
     init(from retweet: Retweet) {
         self.id = retweet.id
         self.url = retweet.url
@@ -148,7 +141,6 @@ struct Tweet: Hashable, Codable, Identifiable {
         self.conversationId = retweet.conversationId
         self.conversationIdStr = retweet.conversationIdStr
         self.hashtags = retweet.hashtags
-//        self.mentionedUsers = retweet.mentionedUsers
         self.links = retweet.links
         self.media = retweet.media
         self.viewCount = retweet.viewCount
@@ -161,7 +153,6 @@ struct Tweet: Hashable, Codable, Identifiable {
         self.source = retweet.source
         self.sourceUrl = retweet.sourceUrl
         self.sourceLabel = retweet.sourceLabel
-//        self.card = retweet.card
     }
 }
 

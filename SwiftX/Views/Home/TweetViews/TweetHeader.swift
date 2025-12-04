@@ -21,6 +21,7 @@ struct TweetHeader: View {
             .buttonStyle(.plain)
             
             Spacer()
+            
             Text(tweet.date, format: .relative(presentation: .named, unitsStyle: .narrow))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)

@@ -19,18 +19,15 @@ struct HomeView: View {
             if nextCursor != nil {
                 Color.clear
                     .frame(height: 1)
+                    .listRowSeparator(.hidden)
                     .onAppear {
                         Task { await loadMore() }
                     }
-                    .listRowSeparator(.hidden)
             }
 
             if isLoadingMore {
-                ProgressView()
+                UniversalProgressView()
                     .id(UUID())
-                    .controlSize(.large)
-                    .listRowSeparator(.hidden)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .listStyle(.plain)
