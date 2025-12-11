@@ -11,6 +11,7 @@ struct HomeView: View {
     @State private var tweets: [Tweet] = []
     @State private var isLoadingMore = false
     @State private var nextCursor: String?
+    @State private var showingSettings = false
 
     var body: some View {
         List {
@@ -43,16 +44,28 @@ struct HomeView: View {
         .navigationTitle("Tweets")
         .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
-            ToolbarItem {
-//                ProfileButton()
+            ToolbarSpacer(.flexible, placement: .bottomBar)
+            ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    
+                    showingSettings = true
                 } label: {
-                    Text("\(tweets.count)")
-                        .foregroundStyle(.link)
+                    Image(systemName: "gear")
                 }
-                .buttonBorderShape(.circle)
             }
+            
+//            ToolbarItem {
+////                ProfileButton()
+//                Button {
+//                    
+//                } label: {
+//                    Text("\(tweets.count)")
+//                        .foregroundStyle(.link)
+//                }
+//                .buttonBorderShape(.circle)
+//            }
+        }
+        .sheet(isPresented: $showingSettings) {
+            SettingsView()
         }
     }
     
