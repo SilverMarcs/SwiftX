@@ -12,6 +12,8 @@ struct HomeView: View {
     @State private var isLoadingMore = false
     @State private var nextCursor: String?
     @State private var showingSettings = false
+    
+    @Namespace private var transition
 
     var body: some View {
         List {
@@ -34,24 +36,22 @@ struct HomeView: View {
         .listStyle(.plain)
         .task {
             guard tweets.isEmpty else { return }
-            // initial load: show custom ProgressView
             await refresh(showProgress: true)
         }
         .refreshable {
-            // pull-to-refresh: DO NOT show custom ProgressView
             await refresh(showProgress: false)
         }
         .navigationTitle("Tweets")
         .toolbarTitleDisplayMode(.inlineLarge)
-        .toolbar {
-            ToolbarSpacer(.flexible, placement: .bottomBar)
-            ToolbarItem(placement: .topBarTrailing) {
+        .toolbar {            
+            ToolbarItem(placement: .primaryAction) {
                 Button {
                     showingSettings = true
                 } label: {
-                    Image(systemName: "gear")
+                    Label("Settings", systemImage: "gear")
                 }
             }
+            .matchedTransitionSource(id: "settings-button", in: transition)
             
 //            ToolbarItem {
 ////                ProfileButton()
@@ -65,7 +65,11 @@ struct HomeView: View {
 //            }
         }
         .sheet(isPresented: $showingSettings) {
-            SettingsView()
+            NavigationStack {
+                SettingsView()
+                    .presentationDetents([.medium])
+            }
+            .navigationTransition(.zoom(sourceID: "settings-button", in: transition))
         }
     }
     

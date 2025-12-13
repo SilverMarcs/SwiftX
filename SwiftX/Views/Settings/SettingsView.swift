@@ -8,15 +8,20 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @Environment(\.dismiss) var dismiss
+    
     var body: some View {
-        NavigationStack {
-            Form {
-                VideoPlaybackSettingsView()
-                ImageCacheSettingsView()
+        Form {
+            VideoPlaybackSettingsView()
+            ImageCacheSettingsView()
+        }
+        .formStyle(.grouped)
+        .navigationTitle("Settings")
+        .toolbarTitleDisplayMode(.inline)
+        .toolbar {
+            Button(role: .close) {
+                dismiss()
             }
-            .formStyle(.grouped)
-            .navigationTitle("Settings")
-            .toolbarTitleDisplayMode(.inline)
         }
     }
 }
