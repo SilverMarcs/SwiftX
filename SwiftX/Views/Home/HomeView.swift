@@ -41,9 +41,10 @@ struct HomeView: View {
         .refreshable {
             await refresh(showProgress: false)
         }
-        .navigationTitle("Tweets")
+        .navigationTitle("Home")
         .toolbarTitleDisplayMode(.inlineLarge)
-        .toolbar {            
+        .navigationSubtitle("\(tweets.count) tweets")
+        .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     showingSettings = true
