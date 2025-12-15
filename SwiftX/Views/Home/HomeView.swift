@@ -9,8 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var tweets: [Tweet] = []
-    @State private var isLoadingMore = false
-    @State private var nextCursor: String?
+    @State private var isLoading = false
     @State private var showingSettings = false
     
     @Namespace private var transition
@@ -18,20 +17,6 @@ struct HomeView: View {
     var body: some View {
         List {
             TweetItemsView(tweets: tweets)
-
-            if nextCursor != nil {
-                Color.clear
-                    .frame(height: 1)
-                    .listRowSeparator(.hidden)
-                    .onAppear {
-                        Task { await loadMore() }
-                    }
-            }
-
-            if isLoadingMore {
-                UniversalProgressView()
-                    .id(UUID())
-            }
         }
         .listStyle(.plain)
         .task {
@@ -40,6 +25,11 @@ struct HomeView: View {
         }
         .refreshable {
             await refresh(showProgress: false)
+        }
+        .overlay {
+            if isLoading {
+                UniversalProgressView()
+            }
         }
         .navigationTitle("Home")
         .toolbarTitleDisplayMode(.inlineLarge)
@@ -76,36 +66,19 @@ struct HomeView: View {
     
     
     private func refresh(showProgress: Bool) async {
-        nextCursor = nil
-        if showProgress { tweets = [] }
-        await loadMore(reset: true, showProgress: showProgress)
-    }
-    
-    private func loadMore(reset: Bool = false, showProgress: Bool = true) async {
-        // Only guard on isLoadingMore if we're actually using it
-        guard !isLoadingMore else { return }
-        if !reset, nextCursor == nil { return }
-
         if showProgress {
-            isLoadingMore = true
+            isLoading = true
         }
         defer {
             if showProgress {
-                isLoadingMore = false
+                isLoading = false
             }
         }
 
         do {
-            let result = try await TweetService.fetchTimelinePage(
-                cursor: reset ? nil : nextCursor,
-                pageSize: 20
-            )
-            nextCursor = result.nextCursor
-
-            var existing = Set(tweets.map { $0.id })
-            let fresh = result.tweets.filter { !existing.contains($0.id) }
-            existing.formUnion(fresh.map { $0.id })
-            tweets.append(contentsOf: fresh)
+            let freshTweets = try await TweetService.fetchTweets()
+            guard !Task.isCancelled else { return }
+            tweets = freshTweets
         } catch {
             print(error.localizedDescription)
         }
