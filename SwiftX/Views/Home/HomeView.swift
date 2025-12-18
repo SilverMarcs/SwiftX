@@ -77,8 +77,9 @@ struct HomeView: View {
 
         do {
             let freshTweets = try await TweetService.fetchTweets()
-            guard !Task.isCancelled else { return }
-            tweets = freshTweets
+            withAnimation {
+                tweets = freshTweets
+            }
         } catch {
             print(error.localizedDescription)
         }

@@ -54,7 +54,9 @@ struct TweetDetailView: View {
         
         do {
             let fetched = try await TweetService.fetchReplies(for: tweet.id)
-            replies = fetched
+            withAnimation {
+                replies = fetched
+            }
         } catch {
             print("Failed to load replies.")
         }
