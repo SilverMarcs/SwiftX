@@ -42,7 +42,9 @@ struct HomeView: View {
                     Label("Settings", systemImage: "gear")
                 }
             }
+            #if !os(macOS)
             .matchedTransitionSource(id: "settings-button", in: transition)
+            #endif
             
 //            ToolbarItem {
 ////                ProfileButton()
@@ -60,7 +62,9 @@ struct HomeView: View {
                 SettingsView()
                     .presentationDetents([.medium])
             }
+            #if !os(macOS)
             .navigationTransition(.zoom(sourceID: "settings-button", in: transition))
+            #endif
         }
     }
     
