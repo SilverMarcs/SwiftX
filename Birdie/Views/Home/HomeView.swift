@@ -18,6 +18,8 @@ struct HomeView: View {
     var body: some View {
         List {
             TweetItemsView(tweets: tweets)
+                .frame(maxWidth: 750)
+                .frame(maxWidth: .infinity)
         }
         .listStyle(.plain)
         .task {
