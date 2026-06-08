@@ -121,15 +121,21 @@ struct UserDetailView: View {
             .listRowSeparator(.visible, edges: .bottom)
             .padding(.top, user.profileBannerUrl == nil ? 15 : -15) // Add this line
             .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
+            .frame(maxWidth: 800)
+            .frame(maxWidth: .infinity)
             
             // Loading State
             if isLoading {
                 UniversalProgressView()
                     .padding(.top, 100)
+                    .frame(maxWidth: 800)
+                    .frame(maxWidth: .infinity)
             }
             
             // Tweets
             TweetItemsView(tweets: tweets)
+                .frame(maxWidth: 800)
+                .frame(maxWidth: .infinity)
         }
         .listStyle(.plain)
         .navigationTitle(user.displayname)

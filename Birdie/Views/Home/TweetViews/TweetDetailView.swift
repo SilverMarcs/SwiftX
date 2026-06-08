@@ -16,17 +16,23 @@ struct TweetDetailView: View {
     var body: some View {
         List {
             TweetView(tweet: tweet)
+                .frame(maxWidth: 800)
+                .frame(maxWidth: .infinity)
                 .listRowSeparator(.hidden, edges: .top)
                 .listRowSeparator(.visible, edges: .bottom)
                 .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
 
             if isLoading {
                 UniversalProgressView()
+                    .frame(maxWidth: 800)
+                    .frame(maxWidth: .infinity)
             } else if !replies.isEmpty {
                 Text("Replies")
                     .font(.title2)
                     .fontWeight(.semibold)
 //                    .padding(.vertical, 2)
+                    .frame(maxWidth: 800, alignment: .leading)
+                    .frame(maxWidth: .infinity)
                     .listRowSeparator(.hidden)
                 
                 ForEach(replies) { reply in
@@ -36,6 +42,8 @@ struct TweetDetailView: View {
                         TweetView(tweet: reply)
                     }
                     .buttonStyle(.plain)
+                    .frame(maxWidth: 800)
+                    .frame(maxWidth: .infinity)
                 }
             }
         }
