@@ -10,7 +10,7 @@ struct VideoView: View {
     
     var body: some View {
         Group {
-            if autoplay || showVideo {
+            if showVideo {
                 SMVVideo(videoURL: video.variants.first?.url ?? "", autoplay: true, muteOnPlay: muteOnPlay)
             } else {
                 Button(action: {
@@ -26,6 +26,15 @@ struct VideoView: View {
                         )
                 }
                 .buttonStyle(.plain)
+                .task {
+                    guard autoplay else { return }
+                    do {
+                        try await Task.sleep(for: .seconds(1))
+                    } catch {
+                        return
+                    }
+                    showVideo = true
+                }
             }
         }
         .clipShape(.rect(cornerRadius: 12))

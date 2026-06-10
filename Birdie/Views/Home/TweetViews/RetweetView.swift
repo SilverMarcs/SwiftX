@@ -13,9 +13,7 @@ struct RetweetView: View {
     var body: some View {
         TweetContentView(tweet: tweet)
             .padding(10)
-            .background {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(.background.secondary)
-            }
+            .background(.background.secondary)
+            .clipShape(.rect(cornerRadius: 10))
     }
 }

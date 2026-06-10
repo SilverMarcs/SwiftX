@@ -12,6 +12,7 @@ struct TweetContentView: View {
     var hideHeader: Bool = false
     @Environment(\.openURL) private var openURL
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(NavigationPathManager.self) private var navManager
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -64,20 +65,34 @@ struct TweetContentView: View {
                     }
                 }
                 .lineLimit(1)
-                
+
                 Spacer()
-                
+
                 Menu {
+                    Section {
+                        Button {
+                            navManager.path.append(NavigationDestination.userDetail(tweet.user))
+                        } label: {
+                            Label {
+                                Text(tweet.user.displayname)
+                            } icon: {
+                                Image(systemName: "person")
+                            }
+                        }
+                    }
+
                     SwiftUI.Link(destination: tweet.twitterWebUrl!) {
                         Label("Open in X", systemImage: "bird")
                     }
-                    
-                    ShareLink("Share", item: tweet.twitterWebUrl!)
+
+                    ShareLink(item: tweet.twitterWebUrl!) {
+                        Label("Share", systemImage: "square.and.arrow.up")
+                    }
                 } label: {
                     Image(systemName: "ellipsis")
-                        .padding(10)
+                        .padding(8)
+                        .background(.background.secondary, in: .capsule)
                 }
-                .glassEffect()
             }
             .labelStyle(CustomLabelStyle())
             .fontWeight(.semibold)
