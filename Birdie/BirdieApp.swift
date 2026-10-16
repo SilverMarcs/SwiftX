@@ -13,7 +13,13 @@ struct BirdieApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                #if os(macOS)
+                .frame(minWidth: 540, minHeight: 560)
+                #endif
         }
+        #if os(macOS)
+        .defaultSize(width: 980, height: 800)
+        #endif
     }
     
     #if !os(macOS)

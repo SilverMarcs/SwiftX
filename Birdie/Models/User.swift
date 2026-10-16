@@ -1,43 +1,19 @@
-//
-//  User.swift
-//  Birdie
-//
-//  Created by Zabir Raihan on 14/07/2025.
-//
-
 import Foundation
 
-// MARK: - User
-struct User: Codable, Hashable {
-    static func == (lhs: User, rhs: User) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-    
-    let id: Int
-    let url: String
+nonisolated struct User: Hashable, Sendable, Identifiable {
+    let id: String
     let username: String
-    let displayname: String
-    let rawDescription: String
-    let created: Date
-    let followersCount: Int
-    let friendsCount: Int
-    let statusesCount: Int
-    let location: String?
-    let profileImageUrl: String
-    let profileBannerUrl: String?
-    let verified: Bool?
-    let blue: Bool?
-    let descriptionLinks: [Link]
-    let pinnedIds: [Int]
-}
+    let name: String
+    var bio: String?
+    var followersCount: Int?
+    var followingCount: Int?
+    var location: String?
+    var avatarURL: URL?
+    var bannerURL: URL?
+    var isVerified = false
+    var isLegacyVerified = false
+    var isFollowing: Bool?
+    var links: [PostLink] = []
 
-// MARK: - MentionedUser
-struct MentionedUser: Codable {
-    let id: Int
-    let username: String
-    let displayname: String
+    var webURL: URL? { URL(string: "https://x.com/\(username)") }
 }

@@ -1,82 +1,60 @@
 import SwiftUI
 
-struct XServiceSettings: View {
-    var body: some View {
-        Section("Account") {
-            NavigationLink {
-                XServiceSettingsView()
-            } label: {
-                Label("Authentication", systemImage: "key.fill")
-            }
-        }
-    }
-}
-
 struct XServiceSettingsView: View {
-    @Bindable private var store = XAuthStore.shared
+    @Environment(\.dismiss) private var dismiss
+    @State private var store = XAuthStore.shared
+    @State private var cookie = ""
+    @State private var authorization = ""
+    @State private var userAgent = ""
+    @State private var error: String?
 
     var body: some View {
         Form {
             Section {
-                TextField("Public List ID", text: $store.listId, prompt: Text("Example: 1661518034639659009"))
-                    #if !os(macOS)
-                    .textInputAutocapitalization(.never)
-                    #endif
+                SecureField("Cookie", text: $cookie)
+                    .autocorrectionDisabled()
+                SecureField("Authorization (Bearer …)", text: $authorization)
+                    .autocorrectionDisabled()
+                TextField("User-Agent (optional)", text: $userAgent)
                     .autocorrectionDisabled()
             } header: {
-                Text("List")
+                Text("X browser session")
             } footer: {
-                Text("This is the X List ID — the numeric ID at the end of any `x.com/i/lists/<id>` URL. The Home tab loads tweets from this list.")
+                Text("In your signed-in X browser, open the Network inspector and copy the Cookie and Authorization request headers from a timeline request. The cookie must include auth_token and ct0. Your session is stored in Keychain.")
             }
-
+            #if !os(macOS)
+            .textInputAutocapitalization(.never)
+            #endif
             Section {
-                TextEditor(text: $store.cookieHeader)
-                    .frame(maxHeight: 70)
-                    #if !os(macOS)
-                    .textInputAutocapitalization(.never)
-                    #endif
-                    .autocorrectionDisabled()
-                    .clipShape(.rect(cornerRadius: 10))
-                    .font(.footnote)
+                Label(store.isAuthenticated ? "Session saved" : "Session required", systemImage: store.isAuthenticated ? "checkmark.circle" : "key")
+                Text("Home loads your personalized For you feed, including recommendations from accounts you don’t follow.")
                     .foregroundStyle(.secondary)
-            } header: {
-                Text("Cookie")
-            } footer: {
-                Text("In a logged-in browser (X.com), open DevTools → Network, click any `i/api/graphql` request, and copy the `Cookie` request header value. You can paste either the full `Cookie: ...` line or just the value.")
-            }
-
-            Section {
-                TextField("Authorization", text: $store.authorizationBearer, prompt: Text("Bearer ..."))
-                    #if !os(macOS)
-                    .textInputAutocapitalization(.never)
-                    #endif
-                    .autocorrectionDisabled()
-
-                TextField("User-Agent", text: $store.userAgent, prompt: Text("Mozilla/5.0 ..."))
-                    #if !os(macOS)
-                    .textInputAutocapitalization(.never)
-                    #endif
-                    .autocorrectionDisabled()
-
-                TextField("Guest token", text: $store.guestToken, prompt: Text("Optional"))
-                    #if !os(macOS)
-                    .textInputAutocapitalization(.never)
-                    #endif
-                    .autocorrectionDisabled()
-            } header: {
-                Text("Headers")
-            } footer: {
-                Text("Grab these from the same `i/api/graphql` request in DevTools: copy the `authorization` header (with the `Bearer ` prefix) and the `user-agent` header. Guest token is optional — leave empty unless requests fail.")
+                if let error { Text(error).foregroundStyle(.red) }
+                Button("Save session", systemImage: "key", action: save)
+                    .disabled(cookie.isEmpty || authorization.isEmpty)
+                if store.isAuthenticated {
+                    Button("Sign out of Birdie", role: .destructive, action: signOut)
+                }
             }
         }
         .formStyle(.grouped)
-        .navigationTitle("Authentication")
-        .toolbarTitleDisplayMode(.inline)
+        .navigationTitle("X session")
+        .task {
+            cookie = store.session.cookie
+            authorization = store.session.authorization
+            userAgent = store.session.userAgent
+        }
     }
-}
 
-#Preview {
-    NavigationStack {
-        XServiceSettingsView()
+    private func save() {
+        do {
+            try store.save(XSession(cookie: cookie, authorization: authorization, userAgent: userAgent))
+            dismiss()
+        } catch { self.error = error.localizedDescription }
+    }
+
+    private func signOut() {
+        do { try store.signOut(); cookie = ""; authorization = ""; dismiss() }
+        catch { self.error = error.localizedDescription }
     }
 }

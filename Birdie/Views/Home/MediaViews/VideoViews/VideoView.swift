@@ -9,6 +9,11 @@ struct VideoView: View {
     @State private var showVideo = false
     
     var body: some View {
+        #if os(macOS)
+        MacVideoPlayer(video: video, autoplay: autoplay, muted: muteOnPlay)
+            .clipShape(.rect(cornerRadius: 12))
+            .aspectRatio(1, contentMode: .fit)
+        #else
         Group {
             if showVideo {
                 SMVVideo(videoURL: video.variants.first?.url ?? "", autoplay: true, muteOnPlay: muteOnPlay)
@@ -39,5 +44,6 @@ struct VideoView: View {
         }
         .clipShape(.rect(cornerRadius: 12))
         .aspectRatio(1, contentMode: .fit)
+        #endif
     }
 }

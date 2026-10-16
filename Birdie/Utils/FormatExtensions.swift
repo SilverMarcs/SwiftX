@@ -8,7 +8,7 @@
 import Foundation
 
 extension String {
-    static func parseContent(_ content: String) -> String {
+    nonisolated static func parseContent(_ content: String) -> String {
         // First, decode HTML entities
         let decodedContent = content.decodingHTMLEntities()
         
@@ -33,7 +33,7 @@ extension String {
     }
     
     /// Decodes HTML entities in a string (e.g., &amp; -> &, &lt; -> <)
-    func decodingHTMLEntities() -> String {
+    nonisolated func decodingHTMLEntities() -> String {
         var result = self
         
         // Common HTML entities
@@ -54,7 +54,7 @@ extension String {
         ]
         
         for (entity, replacement) in entities {
-            result = result.replacingOccurrences(of: entity, with: replacement)
+            result = result.replacing(entity, with: replacement)
         }
         
         return result

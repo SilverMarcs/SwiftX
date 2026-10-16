@@ -14,8 +14,8 @@ struct SearchTab: View {
             SearchView()
                 .navigationDestination(for: NavigationDestination.self) { destination in
                     switch destination {
-                    case .tweetDetail(let tweet):
-                        TweetDetailView(tweet: tweet)
+                    case .postDetail(let tweet):
+                        PostDetailView(tweet: tweet)
                     case .userDetail(let user):
                         UserDetailView(user: user)
                     }

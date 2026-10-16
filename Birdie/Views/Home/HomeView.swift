@@ -1,109 +1,60 @@
-//
-//  HomeView.swift
-//  Birdie
-//
-//  Created by Zabir Raihan on 14/07/2025.
-//
-
 import SwiftUI
 
 struct HomeView: View {
-    @State private var tweets: [Tweet] = []
-    @State private var isLoading = false
+    @State private var model = TimelineStore()
     @State private var showingSettings = false
-    @Bindable private var auth = XAuthStore.shared
-
+    @State private var auth = XAuthStore.shared
     @Namespace private var transition
 
     var body: some View {
-        List {
-            TweetItemsView(tweets: tweets)
-                .frame(maxWidth: 800)
-                .frame(maxWidth: .infinity)
-        }
-        .listStyle(.plain)
-        .task {
-            guard auth.isAuthenticated, tweets.isEmpty else { return }
-            await refresh(showProgress: true)
-        }
-        .refreshable {
-            guard auth.isAuthenticated else { return }
-            await refresh(showProgress: false)
-        }
+        TimelineFeedView(model: model)
+        .refreshable { await model.refresh() }
         .overlay {
             if !auth.isAuthenticated {
                 ContentUnavailableView {
-                    Label("Sign in to X", systemImage: "person.crop.circle.badge.exclamationmark")
+                    Label("Connect your X session", systemImage: "person.crop.circle.badge.exclamationmark")
                 } description: {
-                    Text("Birdie needs your X cookie and a list ID to load tweets. Add them in Settings → Authentication.")
+                    Text(auth.loadError ?? "Add your saved X session in Settings to load your personalized For you feed.")
                 } actions: {
-                    Button("Open Settings") {
-                        showingSettings = true
-                    }
-                    .buttonStyle(.borderedProminent)
+                    Button("Open Settings", systemImage: "gear") { showingSettings = true }
                 }
-            } else if isLoading {
-                UniversalProgressView()
+            } else if model.entries.isEmpty, model.nextCursor == nil {
+                if model.isRefreshing {
+                    UniversalProgressView()
+                } else if let error = model.error {
+                    ContentUnavailableView {
+                        Label("Couldn’t load your feed", systemImage: "wifi.exclamationmark")
+                    } description: { Text("\(error) Pull down to try again.") } actions: {
+                        Button("Settings", systemImage: "gear") { showingSettings = true }
+                    }
+                } else {
+                    ContentUnavailableView {
+                        Label("No posts right now", systemImage: "text.bubble")
+                    } description: { Text("Pull down to ask X for a new selection of posts.") }
+                }
             }
         }
         .navigationTitle("Home")
         .toolbarTitleDisplayMode(.inlineLarge)
-        .navigationSubtitle("\(tweets.count) tweets")
+        .navigationSubtitle("\(model.entries.count) tweets")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showingSettings = true
-                } label: {
-                    Label("Settings", systemImage: "gear")
-                }
+                Button("Settings", systemImage: "gear") { showingSettings = true }
             }
             #if !os(macOS)
             .matchedTransitionSource(id: "settings-button", in: transition)
             #endif
-            
-//            ToolbarItem {
-////                ProfileButton()
-//                Button {
-//                    
-//                } label: {
-//                    Text("\(tweets.count)")
-//                        .foregroundStyle(.link)
-//                }
-//                .buttonBorderShape(.circle)
-//            }
         }
         .sheet(isPresented: $showingSettings) {
-            NavigationStack {
-                SettingsView()
-            }
+            NavigationStack { SettingsView() }
             #if !os(macOS)
             .navigationTransition(.zoom(sourceID: "settings-button", in: transition))
             #endif
         }
-    }
-    
-    
-    private func refresh(showProgress: Bool) async {
-        if showProgress {
-            isLoading = true
-        }
-        defer {
-            if showProgress {
-                isLoading = false
-            }
-        }
-
-        do {
-            let freshTweets = try await TweetService.fetchTweets()
-            withAnimation {
-                tweets = freshTweets
-            }
-        } catch {
-            print(error.localizedDescription)
+        .task(id: auth.revision) {
+            model.configure(accountKey: auth.isAuthenticated ? auth.session.accountKey : nil)
+            guard auth.isAuthenticated, model.entries.isEmpty else { return }
+            await model.refresh()
         }
     }
-}
-
-#Preview {
-    HomeView()
 }

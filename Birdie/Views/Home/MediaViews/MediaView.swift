@@ -1,22 +1,10 @@
-//
-//  MediaView.swift
-//  Birdie
-//
-//  Created by Zabir Raihan on 13/07/2025.
-//
-
 import SwiftUI
 
 struct MediaView: View {
     let media: Media
 
     var body: some View {
-        if let photos = media.photos, !photos.isEmpty {
-            PhotoGalleryView(photos: photos)
-        }
-
-        if let videos = media.videos, !videos.isEmpty {
-            VideoView(video: videos[0])
-        }
+        if !media.photos.isEmpty { PhotoGalleryView(photos: media.photos) }
+        ForEach(media.videos, id: \.thumbnailUrl) { video in VideoView(video: video) }
     }
 }

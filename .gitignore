@@ -24,3 +24,5 @@ xcuserdata/
 twscrape-serverless
 
 current-x-values.txt
+.build/
+.swiftpm/

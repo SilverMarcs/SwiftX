@@ -1,68 +1,49 @@
 import Foundation
 import Observation
 
+@MainActor
 @Observable
 final class XAuthStore {
     static let shared = XAuthStore()
+    private(set) var session = XSession(cookie: "", authorization: "", userAgent: "")
+    private(set) var revision = UUID()
+    private(set) var loadError: String?
 
-    var listId: String {
-        didSet { UserDefaults.standard.set(listId, forKey: Keys.listId) }
-    }
+    var isAuthenticated: Bool { session.isComplete }
 
-    var userAgent: String {
-        didSet { UserDefaults.standard.set(userAgent, forKey: Keys.userAgent) }
-    }
-
-    var cookieHeader: String {
-        didSet { KeychainManager.shared.save(key: Keys.cookieHeader, data: cookieHeader) }
-    }
-
-    var authorizationBearer: String {
-        didSet { KeychainManager.shared.save(key: Keys.authorizationBearer, data: authorizationBearer) }
-    }
-
-    var guestToken: String {
-        didSet { KeychainManager.shared.save(key: Keys.guestToken, data: guestToken) }
-    }
-
-    private init() {
-        listId = UserDefaults.standard.string(forKey: Keys.listId) ?? ""
-        userAgent = UserDefaults.standard.string(forKey: Keys.userAgent) ?? ""
-        cookieHeader = KeychainManager.shared.load(key: Keys.cookieHeader) ?? ""
-        authorizationBearer = KeychainManager.shared.load(key: Keys.authorizationBearer) ?? ""
-        guestToken = KeychainManager.shared.load(key: Keys.guestToken) ?? ""
-    }
-
-    var isAuthenticated: Bool {
-        !normalizedCookieHeader().isEmpty && !listId.isEmpty
-    }
-
-    func normalizedCookieHeader() -> String {
-        let trimmed = cookieHeader.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.lowercased().hasPrefix("cookie:") {
-            return trimmed.dropFirst("cookie:".count).trimmingCharacters(in: .whitespacesAndNewlines)
-        }
-        return trimmed
-    }
-
-    func extractCookie(named name: String) -> String? {
-        let header = normalizedCookieHeader()
-        for part in header.split(separator: ";") {
-            let pair = part.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
-            guard pair.count == 2 else { continue }
-            let key = pair[0].trimmingCharacters(in: .whitespacesAndNewlines)
-            if key == name {
-                return String(pair[1]).trimmingCharacters(in: .whitespacesAndNewlines)
+    init() {
+        do {
+            if let value = try KeychainManager.shared.load(key: "x.session") {
+                session = try JSONDecoder().decode(XSession.self, from: Data(value.utf8))
+            } else {
+                // Read existing installations without exposing or requiring re-entry of credentials.
+                session = XSession(
+                    cookie: try KeychainManager.shared.load(key: "x.cookieHeader") ?? "",
+                    authorization: try KeychainManager.shared.load(key: "x.authorizationBearer") ?? "",
+                    userAgent: UserDefaults.standard.string(forKey: "x.userAgent") ?? ""
+                )
             }
+        } catch {
+            loadError = "Your saved session couldn’t be read. Check Keychain access, then reopen Birdie or add your session again."
         }
-        return nil
     }
 
-    private enum Keys {
-        static let listId = "x.listId"
-        static let userAgent = "x.userAgent"
-        static let cookieHeader = "x.cookieHeader"
-        static let authorizationBearer = "x.authorizationBearer"
-        static let guestToken = "x.guestToken"
+    func save(_ value: XSession) throws {
+        guard value.isComplete else { throw XAPIError.missingSession }
+        let normalized = XSession(cookie: value.normalizedCookie, authorization: value.normalizedAuthorization, userAgent: value.userAgent.trimmingCharacters(in: .whitespacesAndNewlines))
+        let data = try JSONEncoder().encode(normalized)
+        try KeychainManager.shared.save(key: "x.session", data: String(decoding: data, as: UTF8.self))
+        session = normalized
+        loadError = nil
+        revision = UUID()
+    }
+
+    func signOut() throws {
+        for key in ["x.session", "x.cookieHeader", "x.authorizationBearer", "x.guestToken"] {
+            try KeychainManager.shared.delete(key: key)
+        }
+        session = XSession(cookie: "", authorization: "", userAgent: "")
+        loadError = nil
+        revision = UUID()
     }
 }
