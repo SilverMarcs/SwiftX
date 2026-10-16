@@ -7,7 +7,6 @@ struct TWScrapeClient {
         static let listTimeline = "BkauSnPUDQTeeJsxq17opA/ListLatestTweetsTimeline"
         static let userTweets = "HeWHY26ItCfUmm1e6ITjeA/UserTweets"
         static let tweetDetail = "_8aYOgEDz35BrBcBal1-_w/TweetDetail"
-        static let searchTimeline = "AIdc203rPpK_k_2KWSdm7g/SearchTimeline"
     }
 
     private var listId: String { XAuthStore.shared.listId }
@@ -88,43 +87,15 @@ struct TWScrapeClient {
     }
 
     func searchTweets(query: String, limit: Int = 40) async throws -> [Tweet] {
-        guard !query.isEmpty else { return [] }
-
-        let pages = try await gqlClient.pagedRequest(
-            op: Ops.searchTimeline,
-            baseVariables: [
-                "rawQuery": query,
-                "count": 20,
-                "product": "Latest",
-                "querySource": "typed_query"
-            ],
-            fieldToggles: ["withArticleRichContentState": false],
-            limit: limit,
-            pageSize: 20,
-            cursorType: .bottom
-        )
-
-        return mergeTweets(from: pages, limit: limit)
+        let pages = try await TWScrapeSearchClient().search(query: query, product: "Latest", limit: limit)
+        var ids = Set<Int>()
+        return Array(pages.flatMap(\.tweets).filter { ids.insert($0.id).inserted }.prefix(max(0, limit)))
     }
 
     func searchUsers(query: String, limit: Int = 20) async throws -> [User] {
-        guard !query.isEmpty else { return [] }
-
-        let pages = try await gqlClient.pagedRequest(
-            op: Ops.searchTimeline,
-            baseVariables: [
-                "rawQuery": query,
-                "count": 20,
-                "product": "People",
-                "querySource": "typed_query"
-            ],
-            fieldToggles: ["withArticleRichContentState": false],
-            limit: limit,
-            pageSize: 20,
-            cursorType: .bottom
-        )
-
-        return mergeUsers(from: pages, limit: limit)
+        let pages = try await TWScrapeSearchClient().search(query: query, product: "People", limit: limit)
+        var ids = Set<Int>()
+        return Array(pages.flatMap(\.users).filter { ids.insert($0.id).inserted }.prefix(max(0, limit)))
     }
 
     private func mergeTweets(from pages: [[String: Any]], limit: Int) -> [Tweet] {
@@ -136,23 +107,6 @@ struct TWScrapeClient {
             for tweet in parsed where !ids.contains(tweet.id) {
                 ids.insert(tweet.id)
                 all.append(tweet)
-                if limit > 0 && all.count >= limit {
-                    return all
-                }
-            }
-        }
-        return all
-    }
-
-    private func mergeUsers(from pages: [[String: Any]], limit: Int) -> [User] {
-        var all: [User] = []
-        var ids = Set<Int>()
-
-        for page in pages {
-            let parsed = TWScrapeParser.parseUsers(from: page, limit: -1)
-            for user in parsed where !ids.contains(user.id) {
-                ids.insert(user.id)
-                all.append(user)
                 if limit > 0 && all.count >= limit {
                     return all
                 }

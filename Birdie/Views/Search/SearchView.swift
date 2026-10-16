@@ -1,121 +1,68 @@
-//
-//  SearchView.swift
-//  Birdie
-//
-//  Created by Zabir Raihan on 16/07/2025.
-//
-
 import SwiftUI
 
 struct SearchView: View {
-    @State private var isLoading = false
+    @State private var model = SearchStore()
     @Environment(NavigationPathManager.self) private var navManager
-    
-    @State private var searchText = ""
-    @State private var searchScope: SearchScope = .tweets
-    
-    @State private var tweetResults: [Tweet] = []
-    @State private var userResults: [User] = []
-    
-    private var hasResults: Bool {
-        !tweetResults.isEmpty || !userResults.isEmpty
-    }
-    
+
     var body: some View {
-        Group {
-            switch searchScope {
+        List {
+            switch model.scope {
             case .tweets:
-                List {
-                    TweetItemsView(tweets: tweetResults)
-                }
-                .listStyle(.plain)
+                TweetItemsView(tweets: model.tweets)
             case .users:
-                List {
-                    ForEach(userResults, id: \.id) { user in
-                        Button {
-                            navManager.path.append(NavigationDestination.userDetail(user))
-                        } label: {
-                            HStack {
-                                UserHeader(user: user)
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundStyle(.secondary.opacity(0.6))
-                                    .font(.system(size: 13.5, weight: .medium))
-                            }
+                ForEach(model.users, id: \.id) { user in
+                    Button {
+                        navManager.path.append(NavigationDestination.userDetail(user))
+                    } label: {
+                        HStack {
+                            UserHeader(user: user)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundStyle(.secondary)
+                                .font(.caption)
                         }
-                        .buttonStyle(.plain)
                     }
+                    .buttonStyle(.plain)
                 }
             }
         }
+        .listStyle(.plain)
         .overlay {
-            if isLoading {
+            if model.isLoading {
                 UniversalProgressView()
+            } else if let error = model.errorMessage {
+                ContentUnavailableView {
+                    Label("Search Failed", systemImage: "exclamationmark.magnifyingglass")
+                } description: {
+                    Text(error)
+                } actions: {
+                    Button("Try Again", action: model.submit)
+                }
+            } else if model.hasSearched, model.tweets.isEmpty, model.users.isEmpty {
+                ContentUnavailableView.search(text: model.submittedQuery)
+            } else if !model.hasSearched {
+                ContentUnavailableView("Search X", systemImage: "magnifyingglass", description: Text("Find tweets and people on X."))
             }
         }
         .navigationTitle("Search")
         .toolbarTitleDisplayMode(.inlineLarge)
-        .searchable(text: $searchText, placement: .toolbarPrincipal, prompt: "Search \(searchScope.rawValue)")
-        .searchScopes($searchScope) {
+        .searchable(text: $model.query, placement: .toolbarPrincipal, prompt: "Search \(model.scope.rawValue)")
+        .searchScopes($model.scope) {
             ForEach(SearchScope.allCases, id: \.self) { scope in
                 Text(scope.rawValue).tag(scope)
             }
         }
-        .onSubmit(of: .search) {
-            Task {
-                await performSearch()
-            }
+        .onSubmit(of: .search, model.submit)
+        .onChange(of: model.scope) { model.submit() }
+        .onChange(of: model.query) {
+            if model.query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { model.clear() }
         }
-        .onChange(of: searchScope) {
-            clearResults()
-            Task {
-                await performSearch()
-            }
-        }
+        .task(id: model.requestID) { await model.load() }
         .toolbar {
             ToolbarItem(placement: .destructiveAction) {
-                Button(role: .destructive) {
-                    searchText = ""
-                    clearResults()
-                } label: {
-                    Image(systemName: "eraser")
-                }
-                .disabled(searchText.isEmpty && !hasResults)
+                Button("Clear Search", systemImage: "eraser", action: model.clear)
+                    .disabled(model.query.isEmpty && model.tweets.isEmpty && model.users.isEmpty)
             }
         }
     }
-    
-    private func clearResults() {
-        tweetResults = []
-        userResults = []
-    }
-    
-    private func performSearch() async {
-        guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            clearResults()
-            return
-        }
-        
-        isLoading = true
-        
-        do {
-            switch searchScope {
-            case .tweets:
-                userResults = []
-                tweetResults = try await TweetService.searchTweets(query: searchText)
-            case .users:
-                tweetResults = []
-                userResults = try await TweetService.searchUsers(query: searchText)
-            }
-        } catch {
-            clearResults()
-        }
-        
-        isLoading = false
-    }
-}
-
-enum SearchScope: String, CaseIterable {
-    case tweets = "Tweets"
-    case users = "Users"
 }

@@ -9,32 +9,24 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-//        TabView {
-//            Tab("Tweets", systemImage: "bird.fill") {
-//                HomeTab()
-//            }
-//
-//            Tab("Settings", systemImage: "gear") {
-//                SettingsView()
-//            }
-//            
-//            Tab(role: .search) {
-//                SearchTab()
-//            }
-//        }
-//        .tabViewStyle(.sidebarAdaptable)
-//        .tabViewSearchActivation(.searchTabSelection)
-        
-        HomeTab()
-            .toolbar {
-                
+        TabView {
+            Tab("Home", systemImage: "house") {
+                HomeTab()
             }
-            .environment(\.openURL, OpenURLAction { url in
-                if isYouTubeURL(url) {
-                    return .systemAction(prefersInApp: false) // Open in YouTube app
-                }
-                return .systemAction(prefersInApp: true) // Other URLs open in-app
-            })
+
+            Tab("Search", systemImage: "magnifyingglass", role: .search) {
+                SearchTab()
+            }
+        }
+        .tabViewStyle(.sidebarAdaptable)
+        .tabBarMinimizeBehavior(.onScrollDown)
+        .tabViewSearchActivation(.searchTabSelection)
+        .environment(\.openURL, OpenURLAction { url in
+            if isYouTubeURL(url) {
+                return .systemAction(prefersInApp: false) // Open in YouTube app
+            }
+            return .systemAction(prefersInApp: true) // Other URLs open in-app
+        })
 
     }
     // Helper function to check if URL is from YouTube
