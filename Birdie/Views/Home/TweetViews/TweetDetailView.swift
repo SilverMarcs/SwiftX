@@ -27,7 +27,7 @@ struct TweetDetailView: View {
                     .frame(maxWidth: 800)
                     .frame(maxWidth: .infinity)
             } else if let errorMessage {
-                FollowingRetryRow(message: errorMessage) { await loadReplies() }
+                FeedRetryRow(message: errorMessage) { await loadReplies() }
             } else if !replies.isEmpty {
                 Text("Replies")
                     .font(.title2)

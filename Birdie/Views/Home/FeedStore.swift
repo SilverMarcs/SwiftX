@@ -3,7 +3,7 @@ import Observation
 
 @MainActor
 @Observable
-final class FollowingStore {
+final class FeedStore {
     private(set) var tweets: [Tweet] = []
     private(set) var isLoading = false
     private(set) var isLoadingMore = false
@@ -13,22 +13,23 @@ final class FollowingStore {
     private(set) var nextCursor: String?
 
     @ObservationIgnored private var generation = UUID()
-    @ObservationIgnored private var sort: FollowingSort?
+    @ObservationIgnored private var filter: FeedFilter?
     @ObservationIgnored private var sessionRevision: UUID?
     @ObservationIgnored private var consumedCursors: Set<String> = []
 
-    func load(sort: FollowingSort, sessionRevision: UUID, isAuthenticated: Bool) async {
+    func load(filter: FeedFilter, sessionRevision: UUID, isAuthenticated: Bool) async {
         generation = UUID()
         let requestGeneration = generation
-        let changedContext = self.sort != sort || self.sessionRevision != sessionRevision
-        self.sort = sort
+        let changedContext = self.filter != filter || self.sessionRevision != sessionRevision
+        self.filter = filter
         self.sessionRevision = sessionRevision
         isLoadingMore = false
         errorMessage = nil
         paginationErrorMessage = nil
+        // Recreate the pagination footer even if a refresh returns the same cursor.
+        nextCursor = nil
         if changedContext || !isAuthenticated {
             tweets = []
-            nextCursor = nil
             consumedCursors = []
             hasLoaded = false
         }
@@ -40,7 +41,7 @@ final class FollowingStore {
         isLoading = true
         defer { if generation == requestGeneration { isLoading = false } }
         do {
-            let page = try await XClient.shared.fetchFollowing(sort: sort, cursor: nil)
+            let page = try await XClient.shared.fetchFeed(filter: filter, cursor: nil)
             try Task.checkCancellation()
             guard generation == requestGeneration else { return }
             tweets = unique(page.tweets)
@@ -54,13 +55,13 @@ final class FollowingStore {
     }
 
     func loadNextPage() async {
-        guard !isLoading, !isLoadingMore, let sort, let cursor = nextCursor else { return }
+        guard !isLoading, !isLoadingMore, let filter, let cursor = nextCursor else { return }
         let requestGeneration = generation
         isLoadingMore = true
         paginationErrorMessage = nil
         defer { if generation == requestGeneration { isLoadingMore = false } }
         do {
-            let page = try await XClient.shared.fetchFollowing(sort: sort, cursor: cursor)
+            let page = try await XClient.shared.fetchFeed(filter: filter, cursor: cursor)
             try Task.checkCancellation()
             guard generation == requestGeneration else { return }
             var seen = Set(tweets.map(\.id))

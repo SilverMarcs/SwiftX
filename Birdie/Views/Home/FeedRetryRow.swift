@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct FollowingRetryRow: View {
+struct FeedRetryRow: View {
     let message: String
     let retry: () async -> Void
 

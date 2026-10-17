@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State private var model = FollowingStore()
-    @State private var sort: FollowingSort = .recent
+    @State private var model = FeedStore()
+    @State private var filter: FeedFilter = .recent
     @State private var showingSignIn = false
     private var session: XSessionStore { .shared }
 
@@ -13,13 +13,13 @@ struct HomeView: View {
                 .frame(maxWidth: .infinity)
 
             if !model.tweets.isEmpty, let error = model.errorMessage {
-                FollowingRetryRow(message: error) { await refresh() }
+                FeedRetryRow(message: error) { await refresh() }
             }
 
             if model.nextCursor != nil {
                 if let error = model.paginationErrorMessage {
                     if !model.tweets.isEmpty {
-                        FollowingRetryRow(message: error) { await model.loadNextPage() }
+                        FeedRetryRow(message: error) { await model.loadNextPage() }
                     }
                 } else {
                     ProgressView()
@@ -31,13 +31,13 @@ struct HomeView: View {
         }
         .listStyle(.plain)
         .refreshable { await refresh() }
-        .task(id: "\(sort.rawValue)-\(session.revision)-\(session.followingRevision)") { await refresh() }
+        .task(id: "\(filter.rawValue)-\(session.revision)-\(session.followingRevision)") { await refresh() }
         .overlay {
             if !session.isAuthenticated {
                 ContentUnavailableView {
                     Label("Sign in to X", systemImage: "person.crop.circle")
                 } description: {
-                    Text("See posts from the people you follow.")
+                    Text("Sign in to see your feed.")
                 } actions: {
                     Button("Sign in to X") { showingSignIn = true }
                         .buttonStyle(.borderedProminent)
@@ -66,7 +66,7 @@ struct HomeView: View {
                     ContentUnavailableView {
                         Label("No Posts Yet", systemImage: "text.bubble")
                     } description: {
-                        Text("Posts from people you follow will appear here.")
+                        Text(filter.emptyMessage)
                     } actions: {
                         Button("Refresh") { Task { await refresh() } }
                     }
@@ -78,23 +78,23 @@ struct HomeView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
-                    Picker("Feed Order", selection: $sort) {
-                        ForEach(FollowingSort.allCases) { order in
-                            Label(order.rawValue, systemImage: order == .recent ? "clock" : "heart")
-                                .tag(order)
+                    Picker("Feed", selection: $filter) {
+                        ForEach(FeedFilter.allCases) { option in
+                            Label(option.rawValue, systemImage: option.systemImage)
+                                .tag(option)
                         }
                     }
                 } label: {
-                    Label(sort.rawValue, systemImage: "line.3.horizontal.decrease")
+                    Label(filter.rawValue, systemImage: "line.3.horizontal.decrease")
                 }
-                .accessibilityLabel("Feed order: \(sort.rawValue)")
+                .accessibilityLabel("Feed: \(filter.rawValue)")
             }
         }
         .sheet(isPresented: $showingSignIn) { SignInView() }
     }
 
     private func refresh() async {
-        await model.load(sort: sort, sessionRevision: session.revision, isAuthenticated: session.isAuthenticated)
+        await model.load(filter: filter, sessionRevision: session.revision, isAuthenticated: session.isAuthenticated)
     }
 }
 

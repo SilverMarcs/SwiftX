@@ -13,6 +13,7 @@ final class XOperationRegistry {
         let relay = Self.relayDefaults
         let seeds = [
             XOperation(name: "HomeLatestTimelineQuery", queryID: "Lk_3-p7nX68Uq1VFYo0m0g", relayVariables: relay, isRelay: true),
+            XOperation(name: "HomeTimelineQuery", queryID: "msrNpQ16xpmF5Um0O4Y_Zg", relayVariables: relay, isRelay: true),
             XOperation(name: "UserByScreenName", queryID: "yvm61GcJCIpqEwe_3RBccw", relayVariables: relay, isRelay: true),
             XOperation(name: "UserOriginalsTimeline", queryID: "U9W6pwnA7XeTBja_ql4lbw", relayVariables: relay, isRelay: true),
             XOperation(name: "TweetDetail", queryID: "mw1YqNf95jXRYKKJMGKzgw", relayVariables: relay, isRelay: true),
@@ -45,7 +46,7 @@ final class XOperationRegistry {
         }
         let variables = object("variables")
         let relayVariables = variables.filter { $0.key.hasPrefix("__relay_internal__pv__") }.compactMapValues { $0 as? Bool }
-        let isRelay = !relayVariables.isEmpty || name == "HomeLatestTimelineQuery"
+        let isRelay = !relayVariables.isEmpty || name == "HomeLatestTimelineQuery" || name == "HomeTimelineQuery"
             || name == "UserOriginalsTimeline" || name.hasSuffix("Mutation") || name == "viewerQuery"
         var cleanEndpoint = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)
         cleanEndpoint?.query = nil
@@ -133,6 +134,7 @@ final class XOperationRegistry {
     private static func canonicalName(_ name: String) -> String {
         switch name {
         case "HomeLatestTimelineQuery": "HomeLatestTimeline"
+        case "HomeTimelineQuery": "HomeTimeline"
         case "UserOriginalsTimeline": "UserTweets"
         default: name
         }
@@ -157,7 +159,7 @@ final class XOperationRegistry {
     ]
 
     private static let allowedNames: Set<String> = [
-        "HomeLatestTimeline", "HomeLatestTimelineQuery", "UserByRestId", "UserByScreenName",
+        "HomeLatestTimeline", "HomeLatestTimelineQuery", "HomeTimeline", "HomeTimelineQuery", "UserByRestId", "UserByScreenName",
         "UserTweets", "UserOriginalsTimeline", "TweetDetail", "SearchByRawQuery", "viewerQuery",
         "followUserMutation", "unfollowUserMutation"
     ]

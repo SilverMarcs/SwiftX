@@ -30,14 +30,21 @@ struct XClient {
                         profileImageURL: (user["avatar"] as? [String: Any])?["image_url"] as? String)
     }
 
-    func fetchFollowing(sort: FollowingSort, cursor: String? = nil) async throws -> XTimelinePage {
-        var variables: [String: Any] = [
-            "count": 20, "enableRanking": sort == .popular,
-            "includePromotedContent": true, "seenTweetIds": [String]()
-        ]
+    func fetchFeed(filter: FeedFilter, cursor: String? = nil) async throws -> XTimelinePage {
+        let operation: String
+        var variables: [String: Any] = ["count": 20]
+        switch filter {
+        case .recent, .popular:
+            operation = "HomeLatestTimeline"
+            variables["enableRanking"] = filter == .popular
+            variables["includePromotedContent"] = true
+        case .forYou:
+            operation = "HomeTimeline"
+            variables["includePromotedContent"] = true
+        }
         if let cursor { variables["cursor"] = cursor }
         else { variables["requestContext"] = "launch" }
-        return try XTimelineResponse(json: await perform("HomeLatestTimeline", variables: variables)).page
+        return try XTimelineResponse(json: await perform(operation, variables: variables)).page
     }
 
     func fetchProfile(userID: Int, username: String? = nil) async throws -> XProfile {

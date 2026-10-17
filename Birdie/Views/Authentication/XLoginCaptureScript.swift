@@ -6,7 +6,7 @@ enum XLoginCaptureScript {
     static let allowedOperations: Set<String> = [
         "HomeLatestTimeline", "HomeTimeline", "SearchTimeline", "UserByScreenName", "UserByRestId",
         "UserTweets", "UserTweetsAndReplies", "UserMedia", "TweetDetail",
-        "viewerQuery", "HomeLatestTimelineQuery", "UserOriginalsTimeline"
+        "viewerQuery", "HomeLatestTimelineQuery", "HomeTimelineQuery", "UserOriginalsTimeline"
     ]
 
     static let source = #"""
@@ -14,7 +14,7 @@ enum XLoginCaptureScript {
       if (location.protocol !== 'https:' || location.hostname !== 'x.com' || window !== window.top) return;
       const operations = new Set(['HomeLatestTimeline', 'HomeTimeline', 'SearchTimeline', 'UserByScreenName',
         'UserByRestId', 'UserTweets', 'UserTweetsAndReplies', 'UserMedia', 'TweetDetail',
-        'viewerQuery', 'HomeLatestTimelineQuery', 'UserOriginalsTimeline']);
+        'viewerQuery', 'HomeLatestTimelineQuery', 'HomeTimelineQuery', 'UserOriginalsTimeline']);
       function target(value) {
         try {
           const url = new URL(value, location.href);
