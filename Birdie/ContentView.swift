@@ -10,16 +10,26 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         TabView {
-            Tab("Home", systemImage: "house") {
+            Tab("Feed", systemImage: "bird") {
                 HomeTab()
+                    .id(XSessionStore.shared.revision)
+            }
+
+            Tab("Settings", systemImage: "gear") {
+                NavigationStack {
+                    SettingsView()
+                }
             }
 
             Tab("Search", systemImage: "magnifyingglass", role: .search) {
                 SearchTab()
+                    .id(XSessionStore.shared.revision)
             }
         }
         .tabViewStyle(.sidebarAdaptable)
+        #if os(iOS)
         .tabBarMinimizeBehavior(.onScrollDown)
+        #endif
         .tabViewSearchActivation(.searchTabSelection)
         .environment(\.openURL, OpenURLAction { url in
             if isYouTubeURL(url) {

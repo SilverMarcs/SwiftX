@@ -26,7 +26,7 @@ struct TweetView: View {
                     RetweetView(tweet: quotedTweet)
                 }
                 .buttonStyle(.plain)
-           }
+            }
             
             if let retweet = tweet.retweetedTweet {
                 Label("Retweeted", systemImage: "arrow.2.squarepath")
@@ -38,8 +38,9 @@ struct TweetView: View {
                     RetweetView(tweet: retweet)
                 }
                 .buttonStyle(.plain)
-           }
+            }
         }
         .contentShape(.rect)
+        .textSelection(.enabled)
     }
 }

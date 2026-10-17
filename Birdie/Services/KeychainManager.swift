@@ -1,26 +1,37 @@
 import Foundation
 import Security
 
+@MainActor
 final class KeychainManager {
     static let shared = KeychainManager()
     private let service = "com.SilverMarcs.Birdie"
 
     private init() {}
 
-    func save(key: String, data: String) {
+    func save(key: String, data: String) throws {
         guard let keyData = data.data(using: .utf8) else {
-            return
+            throw XClientError.credentialStorage
         }
 
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: key,
-            kSecValueData as String: keyData
+            kSecValueData as String: keyData,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
         ]
 
-        SecItemDelete(query as CFDictionary)
-        SecItemAdd(query as CFDictionary, nil)
+        let identity: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: key
+        ]
+        let status = SecItemUpdate(identity as CFDictionary, [kSecValueData as String: keyData] as CFDictionary)
+        if status == errSecItemNotFound {
+            guard SecItemAdd(query as CFDictionary, nil) == errSecSuccess else { throw XClientError.credentialStorage }
+        } else if status != errSecSuccess {
+            throw XClientError.credentialStorage
+        }
     }
 
     func load(key: String) -> String? {

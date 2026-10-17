@@ -11,7 +11,7 @@ struct TweetDetailView: View {
     let tweet: Tweet
     @State private var replies: [Tweet] = []
     @State private var isLoading = false
-    @Environment(NavigationPathManager.self) private var navManager
+    @State private var errorMessage: String?
 
     var body: some View {
         List {
@@ -26,29 +26,24 @@ struct TweetDetailView: View {
                 UniversalProgressView()
                     .frame(maxWidth: 800)
                     .frame(maxWidth: .infinity)
+            } else if let errorMessage {
+                FollowingRetryRow(message: errorMessage) { await loadReplies() }
             } else if !replies.isEmpty {
                 Text("Replies")
                     .font(.title2)
-                    .fontWeight(.semibold)
+                    .bold()
 //                    .padding(.vertical, 2)
                     .frame(maxWidth: 800, alignment: .leading)
                     .frame(maxWidth: .infinity)
                     .listRowSeparator(.hidden)
                 
-                ForEach(replies) { reply in
-                    Button {
-                        navManager.path.append(NavigationDestination.tweetDetail(reply))
-                    } label: {
-                        TweetView(tweet: reply)
-                    }
-                    .buttonStyle(.plain)
+                TweetItemsView(tweets: replies)
                     .frame(maxWidth: 800)
                     .frame(maxWidth: .infinity)
-                }
             }
         }
         .listStyle(.plain)
-        .navigationTitle("Tweet")
+        .navigationTitle("Post")
         .toolbarTitleDisplayMode(.inline)
         .task {
             if replies.isEmpty {
@@ -59,15 +54,18 @@ struct TweetDetailView: View {
 
     private func loadReplies() async {
         isLoading = true
+        errorMessage = nil
+        defer { isLoading = false }
         
         do {
-            let fetched = try await TweetService.fetchReplies(for: tweet.id)
+            let fetched = try await XClient.shared.fetchReplies(tweetID: tweet.id)
+            try Task.checkCancellation()
             withAnimation {
                 replies = fetched
             }
         } catch {
-            print("Failed to load replies.")
+            guard !Task.isCancelled, !(error is CancellationError) else { return }
+            errorMessage = error.localizedDescription
         }
-        isLoading = false
     }
 }

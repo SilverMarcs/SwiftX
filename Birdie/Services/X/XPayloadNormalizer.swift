@@ -1,74 +1,12 @@
 import Foundation
 
-/// Adapts X's current search fields to the shared tweet parser without changing other endpoints.
-struct TWScrapeSearchResponse {
-    let tweets: [Tweet]
-    let users: [User]
-    let nextCursor: String?
-
-    init(json: [String: Any]) throws {
-        if let errors = json["errors"] as? [Any], !errors.isEmpty {
-            throw TWScrapeSearchError.apiError
-        }
-        guard let data = json["data"] as? [String: Any],
-              let search = data["search_by_raw_query"] as? [String: Any],
-              let searchTimeline = search["search_timeline"] as? [String: Any],
-              let timeline = searchTimeline["timeline"] as? [String: Any],
-              let instructions = timeline["instructions"] as? [[String: Any]] else {
-            throw TWScrapeSearchError.invalidResponse
-        }
-
-        let entries = instructions.flatMap { $0["entries"] as? [[String: Any]] ?? [] }
-        var tweetIDs: [Int] = []
-        var userIDs: [Int] = []
-        var cursor: String?
-        for entry in entries {
-            guard let content = entry["content"] as? [String: Any] else { continue }
-            if content["cursor_type"] as? String == "Bottom" {
-                cursor = content["value"] as? String
-            }
-            let items: [[String: Any]]
-            if let moduleItems = content["items"] as? [[String: Any]] {
-                items = moduleItems.compactMap { $0["item"] as? [String: Any] }
-            } else {
-                items = [content]
-            }
-            for item in items {
-                guard let itemContent = item["content"] as? [String: Any] else { continue }
-                if let result = Self.result(in: itemContent, key: "tweet_results"),
-                   let id = Self.resultID(result) {
-                    tweetIDs.append(id)
-                }
-                if let result = Self.result(in: itemContent, key: "user_results"),
-                   let id = Self.resultID(result) {
-                    userIDs.append(id)
-                }
-            }
-        }
-
-        let normalized = Self.normalize(json) as? [String: Any] ?? [:]
-        let parsedTweets = Dictionary(TWScrapeParser.parseTweets(from: normalized).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
-        let parsedUsers = Dictionary(TWScrapeParser.parseUsers(from: normalized).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
-        var seenTweets = Set<Int>()
-        var seenUsers = Set<Int>()
-        tweets = tweetIDs.filter { seenTweets.insert($0).inserted }.compactMap { parsedTweets[$0] }
-        users = userIDs.filter { seenUsers.insert($0).inserted }.compactMap { parsedUsers[$0] }
-        nextCursor = cursor
-        guard tweetIDs.isEmpty || !tweets.isEmpty, userIDs.isEmpty || !users.isEmpty else {
-            throw TWScrapeSearchError.invalidResponse
-        }
-    }
-
+/// Maps current X web payloads into the common leaf parser while preserving nested posts.
+enum XPayloadNormalizer {
     private static func result(in item: [String: Any], key: String) -> [String: Any]? {
         (item[key] as? [String: Any])?["result"] as? [String: Any]
     }
 
-    private static func resultID(_ result: [String: Any]) -> Int? {
-        let tweet = result["tweet"] as? [String: Any] ?? result
-        return (tweet["rest_id"] as? String).flatMap(Int.init)
-    }
-
-    private static func normalize(_ value: Any) -> Any {
+    static func normalize(_ value: Any) -> Any {
         if let array = value as? [Any] { return array.map { normalize($0) } }
         guard let dictionary = value as? [String: Any] else { return value }
         var object = dictionary.mapValues { normalize($0) }
@@ -82,12 +20,19 @@ struct TWScrapeSearchResponse {
             legacy["description"] = bio["description"] ?? legacy["description"] ?? ""
             legacy["entities"] = bio["entities"] ?? legacy["entities"]
             legacy["created_at"] = core["created_at"] ?? legacy["created_at"] ?? ""
+            if let milliseconds = core["created_at_ms"] as? NSNumber {
+                legacy["created_at"] = Date(timeIntervalSince1970: milliseconds.doubleValue / 1000).ISO8601Format()
+            }
             legacy["profile_image_url_https"] = (object["avatar"] as? [String: Any])?["image_url"] ?? legacy["profile_image_url_https"]
+            legacy["profile_banner_url"] = (object["banner"] as? [String: Any])?["image_url"] ?? legacy["profile_banner_url"]
+            legacy["location"] = (object["location"] as? [String: Any])?["location"] ?? legacy["location"]
+            legacy["pinned_tweet_ids_str"] = (object["pinned_items"] as? [String: Any])?["tweet_ids_str"] ?? legacy["pinned_tweet_ids_str"]
             let counts = object["relationship_counts"] as? [String: Any] ?? [:]
             legacy["followers_count"] = counts["followers"] ?? legacy["followers_count"]
             legacy["friends_count"] = counts["following"] ?? legacy["friends_count"]
             legacy["statuses_count"] = (object["tweet_counts"] as? [String: Any])?["tweets"] ?? legacy["statuses_count"]
             legacy["is_blue_verified"] = (object["verification"] as? [String: Any])?["is_blue_verified"] ?? object["is_blue_verified"]
+            legacy["verified"] = (object["verification"] as? [String: Any])?["verified"] ?? legacy["verified"]
             object["legacy"] = legacy
         case "Tweet":
             let details = object["details"] as? [String: Any] ?? [:]
@@ -113,6 +58,10 @@ struct TWScrapeSearchResponse {
                 object["quoted_status_result"] = ["result": quote]
             }
             if let retweet = result(in: object, key: "retweeted_tweet_results") {
+                object["retweeted_status_result"] = ["result": retweet]
+            } else if let retweet = result(in: legacy, key: "retweeted_status_results") {
+                // Current Relay timelines keep the repost's original post under legacy,
+                // using a plural key even though this contains a single result.
                 object["retweeted_status_result"] = ["result": retweet]
             }
             if let note = object["note_tweet"] as? [String: Any], note["text"] != nil {

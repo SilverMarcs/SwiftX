@@ -14,19 +14,11 @@ final class SearchStore {
     private(set) var tweets: [Tweet] = []
     private(set) var users: [User] = []
     private var submittedScope: SearchScope = .tweets
-
-    @ObservationIgnored private let searchTweets: (String) async throws -> [Tweet]
-    @ObservationIgnored private let searchUsers: (String) async throws -> [User]
-
-    init(
-        searchTweets: @escaping (String) async throws -> [Tweet] = { try await TweetService.searchTweets(query: $0) },
-        searchUsers: @escaping (String) async throws -> [User] = { try await TweetService.searchUsers(query: $0) }
-    ) {
-        self.searchTweets = searchTweets
-        self.searchUsers = searchUsers
-    }
+    @ObservationIgnored private var sessionRevision: UUID?
 
     func submit() {
+        let session = XSessionStore.shared
+        sessionRevision = session.revision
         submittedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
         submittedScope = scope
         requestID = UUID()
@@ -34,7 +26,7 @@ final class SearchStore {
         users = []
         errorMessage = nil
         hasSearched = false
-        isLoading = !submittedQuery.isEmpty
+        isLoading = session.isAuthenticated && !submittedQuery.isEmpty
     }
 
     func clear() {
@@ -43,7 +35,10 @@ final class SearchStore {
     }
 
     func load() async {
-        guard !submittedQuery.isEmpty else { return }
+        let session = XSessionStore.shared
+        let revision = session.revision
+        guard !submittedQuery.isEmpty, session.isAuthenticated,
+              sessionRevision == session.revision, !Task.isCancelled else { return }
         let id = requestID
         let query = submittedQuery
         let scope = submittedScope
@@ -52,20 +47,25 @@ final class SearchStore {
         do {
             switch scope {
             case .tweets:
-                let results = try await searchTweets(query)
+                let results = try await XClient.shared.searchTweets(query: query)
                 try Task.checkCancellation()
-                guard requestID == id else { return }
+                guard isCurrent(id, revision: revision) else { return }
                 tweets = results
             case .users:
-                let results = try await searchUsers(query)
+                let results = try await XClient.shared.searchUsers(query: query)
                 try Task.checkCancellation()
-                guard requestID == id else { return }
+                guard isCurrent(id, revision: revision) else { return }
                 users = results
             }
             hasSearched = true
         } catch {
-            guard requestID == id, !Task.isCancelled, !(error is CancellationError) else { return }
+            guard isCurrent(id, revision: revision), !(error is CancellationError) else { return }
             errorMessage = error.localizedDescription
         }
+    }
+
+    private func isCurrent(_ id: UUID, revision: UUID) -> Bool {
+        let session = XSessionStore.shared
+        return requestID == id && session.revision == revision && session.isAuthenticated && !Task.isCancelled
     }
 }

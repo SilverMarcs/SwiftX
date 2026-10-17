@@ -19,6 +19,7 @@ struct TweetHeader: View {
                 UserHeader(user: tweet.user)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("View @\(tweet.user.username)’s profile")
             
             Spacer()
             

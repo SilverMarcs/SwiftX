@@ -1,6 +1,6 @@
 import Foundation
 
-struct TWScrapeParser {
+struct XPostParser {
     struct OldRepresentation {
         let tweets: [String: [String: Any]]
         let users: [String: [String: Any]]
@@ -358,7 +358,15 @@ struct TWScrapeParser {
         for user in typed["User"] ?? [] where user["legacy"] != nil {
             let converted = toOldObject(user)
             if let id = converted["id_str"] as? String {
-                users[id] = converted
+                // A mention or nested quote may carry only an ID and screen name.
+                // Preserve full author fields regardless of dictionary traversal order.
+                users[id] = (users[id] ?? [:]).merging(converted) { existing, incoming in
+                    if let text = incoming as? String, text.isEmpty,
+                       let previous = existing as? String, !previous.isEmpty {
+                        return existing
+                    }
+                    return incoming is NSNull ? existing : incoming
+                }
             }
         }
 

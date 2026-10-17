@@ -8,22 +8,15 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @Environment(\.dismiss) var dismiss
-    
     var body: some View {
         Form {
-            XServiceSettings()
+            XAccountSettingsView()
             VideoPlaybackSettingsView()
             ImageCacheSettingsView()
         }
         .formStyle(.grouped)
         .navigationTitle("Settings")
         .toolbarTitleDisplayMode(.inline)
-        .toolbar {
-            Button(role: .close) {
-                dismiss()
-            }
-        }
     }
 }
 
