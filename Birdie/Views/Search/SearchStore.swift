@@ -5,67 +5,74 @@ import Observation
 @Observable
 final class SearchStore {
     var query = ""
-    var scope: SearchScope = .tweets
-    private(set) var requestID = UUID()
+    var scope: SearchScope = .users
     private(set) var submittedQuery = ""
-    private(set) var isLoading = false
-    private(set) var hasSearched = false
-    private(set) var errorMessage: String?
     private(set) var tweets: [Tweet] = []
     private(set) var users: [User] = []
-    private var submittedScope: SearchScope = .tweets
-    @ObservationIgnored private var sessionRevision: UUID?
+    private var loadingScopes: Set<SearchScope> = []
+    private var errors: [SearchScope: String] = [:]
 
-    func submit() {
-        let session = XSessionStore.shared
-        sessionRevision = session.revision
-        submittedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        submittedScope = scope
-        requestID = UUID()
+    var isLoading: Bool { loadingScopes.contains(scope) }
+    var hasSearched: Bool { !submittedQuery.isEmpty }
+    var errorMessage: String? { errors[scope] }
+    var isEmpty: Bool {
+        switch scope {
+        case .tweets: tweets.isEmpty
+        case .users: users.isEmpty
+        }
+    }
+
+    private func clearResults() {
+        submittedQuery = ""
         tweets = []
         users = []
-        errorMessage = nil
-        hasSearched = false
-        isLoading = session.isAuthenticated && !submittedQuery.isEmpty
+        errors = [:]
     }
 
     func clear() {
         query = ""
-        submit()
+        clearResults()
     }
 
-    func load() async {
+    func submit() async {
+        let searchQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard loadingScopes.isEmpty, XSessionStore.shared.isAuthenticated, !searchQuery.isEmpty else { return }
+
+        if submittedQuery != searchQuery {
+            clearResults()
+            submittedQuery = searchQuery
+        }
+        await search(query: searchQuery)
+    }
+
+    func loadIfNeeded() async {
+        guard isEmpty, !submittedQuery.isEmpty else { return }
+        await search(query: submittedQuery)
+    }
+
+    private func search(query searchQuery: String) async {
         let session = XSessionStore.shared
+        let searchScope = scope
+        guard session.isAuthenticated, !loadingScopes.contains(searchScope) else { return }
         let revision = session.revision
-        guard !submittedQuery.isEmpty, session.isAuthenticated,
-              sessionRevision == session.revision, !Task.isCancelled else { return }
-        let id = requestID
-        let query = submittedQuery
-        let scope = submittedScope
-        isLoading = true
-        defer { if requestID == id { isLoading = false } }
+        loadingScopes.insert(searchScope)
+        errors[searchScope] = nil
+        defer { loadingScopes.remove(searchScope) }
+
         do {
-            switch scope {
+            switch searchScope {
             case .tweets:
-                let results = try await XClient.shared.searchTweets(query: query)
-                try Task.checkCancellation()
-                guard isCurrent(id, revision: revision) else { return }
+                let results = try await XClient.shared.searchTweets(query: searchQuery)
+                guard session.revision == revision, submittedQuery == searchQuery else { return }
                 tweets = results
             case .users:
-                let results = try await XClient.shared.searchUsers(query: query)
-                try Task.checkCancellation()
-                guard isCurrent(id, revision: revision) else { return }
+                let results = try await XClient.shared.searchUsers(query: searchQuery)
+                guard session.revision == revision, submittedQuery == searchQuery else { return }
                 users = results
             }
-            hasSearched = true
         } catch {
-            guard isCurrent(id, revision: revision), !(error is CancellationError) else { return }
-            errorMessage = error.localizedDescription
+            guard session.revision == revision, submittedQuery == searchQuery else { return }
+            errors[searchScope] = error.localizedDescription
         }
-    }
-
-    private func isCurrent(_ id: UUID, revision: UUID) -> Bool {
-        let session = XSessionStore.shared
-        return requestID == id && session.revision == revision && session.isAuthenticated && !Task.isCancelled
     }
 }

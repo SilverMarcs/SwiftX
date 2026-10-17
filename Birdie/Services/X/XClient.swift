@@ -113,7 +113,6 @@ struct XClient {
               result["__typename"] as? String == expected else { throw XClientError.apiError }
         try Task.checkCancellation()
         guard revision == sessionStore.revision else { throw CancellationError() }
-        sessionStore.followingDidChange()
         // Protected accounts may return a request instead of an immediate follow.
         let relationship = try await fetchProfile(userID: userID, username: username).relationship
         return relationship

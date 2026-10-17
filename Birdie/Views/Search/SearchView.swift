@@ -17,31 +17,28 @@ struct SearchView: View {
                             Button {
                                 navManager.path.append(NavigationDestination.userDetail(user))
                             } label: {
-                                HStack {
-                                    UserHeader(user: user)
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .foregroundStyle(.secondary)
-                                        .font(.caption)
-                                }
+                                UserHeader(user: user)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .contentShape(.rect)
                             }
                             .buttonStyle(.plain)
+                            .listRowSeparator(.hidden, edges: .top)
+                            .listRowSeparator(.visible, edges: .bottom)
                         }
                     }
                 }
                 .listStyle(.plain)
+                .contentMargins(.top, 5, for: .scrollContent)
                 .overlay {
-                    if model.isLoading {
+                    if model.isLoading, !model.submittedQuery.isEmpty {
                         UniversalProgressView()
                     } else if let error = model.errorMessage {
                         ContentUnavailableView {
                             Label("Search Failed", systemImage: "exclamationmark.magnifyingglass")
                         } description: {
                             Text(error)
-                        } actions: {
-                            Button("Try Again", action: model.submit)
                         }
-                    } else if model.hasSearched, model.tweets.isEmpty, model.users.isEmpty {
+                    } else if model.hasSearched, model.isEmpty {
                         ContentUnavailableView.search(text: model.submittedQuery)
                     } else if !model.hasSearched {
                         ContentUnavailableView("Search X", systemImage: "magnifyingglass", description: Text("Find posts and people on X."))
@@ -53,12 +50,12 @@ struct SearchView: View {
                         Text(scope.rawValue).tag(scope)
                     }
                 }
-                .onSubmit(of: .search, model.submit)
-                .onChange(of: model.scope) { model.submit() }
-                .onChange(of: model.query) {
-                    if model.query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { model.clear() }
+                .onSubmit(of: .search) {
+                    Task { await model.submit() }
                 }
-                .task(id: model.requestID) { await model.load() }
+                .onChange(of: model.scope) {
+                    Task { await model.loadIfNeeded() }
+                }
                 .toolbar {
                     ToolbarItem(placement: .destructiveAction) {
                         Button("Clear Search", systemImage: "eraser", action: model.clear)

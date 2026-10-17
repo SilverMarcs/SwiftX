@@ -10,7 +10,6 @@ final class XSessionStore {
     private(set) var account: XAccount?
     private(set) var credentials: XCredentials?
     private(set) var revision = UUID()
-    private(set) var followingRevision = UUID()
     private(set) var needsSignIn = false
     private(set) var isSigningOut = false
 
@@ -26,10 +25,6 @@ final class XSessionStore {
     }
 
     var isAuthenticated: Bool { account != nil && credentials?.isValid == true }
-
-    func followingDidChange() {
-        followingRevision = UUID()
-    }
 
     func signIn(account: XAccount, credentials: XCredentials) throws {
         guard !isSigningOut else { throw XClientError.signedOut }

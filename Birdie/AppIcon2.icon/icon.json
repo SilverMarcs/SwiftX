@@ -1,0 +1,75 @@
+{
+  "fill" : {
+    "automatic-gradient" : "srgb:0.25490,0.61176,1.00000,1.00000"
+  },
+  "groups" : [
+    {
+      "blend-mode" : "normal",
+      "blur-material" : null,
+      "hidden" : false,
+      "layers" : [
+        {
+          "fill" : {
+            "solid" : "extended-gray:1.00000,1.00000"
+          },
+          "image-name" : "bird-fill.png",
+          "name" : "bird-fill",
+          "position" : {
+            "scale" : 0.94,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "blend-mode" : "normal",
+          "glass" : true,
+          "hidden" : true,
+          "image-name" : "pngwing.com.png",
+          "name" : "pngwing.com",
+          "position" : {
+            "scale" : 0.17,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "blend-mode" : "normal",
+          "fill" : {
+            "solid" : "extended-gray:1.00000,1.00000"
+          },
+          "glass" : true,
+          "hidden" : true,
+          "image-name" : "pngwing.com.png",
+          "name" : "pngwing.com",
+          "position" : {
+            "scale" : 0.17,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "lighting" : "individual",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "specular" : true,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

@@ -31,7 +31,9 @@ struct HomeView: View {
         }
         .listStyle(.plain)
         .refreshable { await refresh() }
-        .task(id: "\(filter.rawValue)-\(session.revision)-\(session.followingRevision)") { await refresh() }
+        .task(id: filter) {
+            await model.loadIfNeeded(filter: filter, sessionRevision: session.revision, isAuthenticated: session.isAuthenticated)
+        }
         .overlay {
             if !session.isAuthenticated {
                 ContentUnavailableView {

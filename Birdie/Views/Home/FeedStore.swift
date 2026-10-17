@@ -17,6 +17,11 @@ final class FeedStore {
     @ObservationIgnored private var sessionRevision: UUID?
     @ObservationIgnored private var consumedCursors: Set<String> = []
 
+    func loadIfNeeded(filter: FeedFilter, sessionRevision: UUID, isAuthenticated: Bool) async {
+        guard tweets.isEmpty || self.filter != filter || self.sessionRevision != sessionRevision else { return }
+        await load(filter: filter, sessionRevision: sessionRevision, isAuthenticated: isAuthenticated)
+    }
+
     func load(filter: FeedFilter, sessionRevision: UUID, isAuthenticated: Bool) async {
         generation = UUID()
         let requestGeneration = generation
