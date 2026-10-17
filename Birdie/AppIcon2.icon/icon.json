@@ -15,7 +15,7 @@
           "image-name" : "bird-fill.png",
           "name" : "bird-fill",
           "position" : {
-            "scale" : 0.94,
+            "scale" : 0.85,
             "translation-in-points" : [
               0,
               0
