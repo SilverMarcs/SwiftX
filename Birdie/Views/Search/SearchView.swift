@@ -45,6 +45,7 @@ struct SearchView: View {
                     }
                 }
                 .searchable(text: $model.query, placement: .toolbarPrincipal, prompt: "Search \(model.scope.rawValue)")
+                .searchPresentationToolbarBehavior(.avoidHidingContent)
                 .searchScopes($model.scope) {
                     ForEach(SearchScope.allCases, id: \.self) { scope in
                         Text(scope.rawValue).tag(scope)
@@ -58,7 +59,7 @@ struct SearchView: View {
                 }
                 .toolbar {
                     ToolbarItem(placement: .destructiveAction) {
-                        Button("Clear Search", systemImage: "eraser", action: model.clear)
+                        Button("Clear", action: model.clear)
                             .disabled(model.query.isEmpty && model.tweets.isEmpty && model.users.isEmpty)
                     }
                 }
