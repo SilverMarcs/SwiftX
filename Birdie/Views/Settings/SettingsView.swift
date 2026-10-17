@@ -24,6 +24,7 @@ struct SettingsView: View {
             XAccountSettingsView()
             VideoPlaybackSettingsView()
             ImageCacheSettingsView()
+            SupportSettingsView()
             #if os(iOS)
             if showAppIconPicker && AppIconStore.supportsAlternateIcons {
                 Section {
