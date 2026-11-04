@@ -12,10 +12,11 @@ struct TweetDetailView: View {
     @State private var replies: [Tweet] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var showingReply = false
 
     var body: some View {
         List {
-            TweetView(tweet: tweet)
+            TweetView(tweet: tweet, onReply: { showingReply = true })
                 .frame(maxWidth: 800)
                 .frame(maxWidth: .infinity)
                 .listRowSeparator(.hidden, edges: .top)
@@ -45,6 +46,11 @@ struct TweetDetailView: View {
         .listStyle(.plain)
         .navigationTitle("Post")
         .toolbarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showingReply) {
+            ReplyComposerView(tweet: tweet) {
+                Task { await loadReplies() }
+            }
+        }
         .task {
             if replies.isEmpty {
                 await loadReplies()

@@ -118,6 +118,19 @@ struct XClient {
         return relationship
     }
 
+    /// Posts a text reply and returns the new post's ID. A write is never replayed.
+    @discardableResult
+    func postReply(to tweetID: Int, text: String) async throws -> Int {
+        let json = try await perform("createTweetMutation", variables: [
+            "tweet_text": text,
+            "reply": ["in_reply_to_tweet_id": String(tweetID), "exclude_reply_user_ids": [String]()]
+        ])
+        guard let create = (json["data"] as? [String: Any])?["create_tweet"] as? [String: Any],
+              let results = create["tweet_results"] as? [String: Any],
+              let id = (results["rest_id"] as? String).flatMap(Int.init) else { throw XClientError.apiError }
+        return id
+    }
+
     private func search(query: String, product: String) async throws -> [XSearchResponse] {
         let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return [] }

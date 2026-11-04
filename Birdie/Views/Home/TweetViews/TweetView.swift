@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TweetView: View {
     let tweet: Tweet
+    var onReply: (() -> Void)?
     @Environment(NavigationPathManager.self) private var navManager
     
     var body: some View {
@@ -16,7 +17,7 @@ struct TweetView: View {
             TweetHeader(tweet: tweet)
             
             if tweet.retweetedTweet == nil {
-                TweetContentView(tweet: tweet, hideHeader: true)
+                TweetContentView(tweet: tweet, hideHeader: true, onReply: onReply)
             }
             
             if let quotedTweet = tweet.quotedTweet {

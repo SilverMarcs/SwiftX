@@ -7,6 +7,14 @@ enum XOperationCatalog {
         "__relay_internal__pv__xclientsfeaturestranslationnoteautotranslationenabledrelayprovider": false
     ]
 
+    /// Relay requires every provided variable declared by the mutation; only the logged-in flag is enabled.
+    private static let createTweetProviders = relayDefaults.merging([
+        "__relay_internal__pv__xclientsfeaturestweetcomponentsgrokanalyzepostrelayprovider": false,
+        "__relay_internal__pv__xclientsfeaturestranslationgroktranslatedpostenabledrelayprovider": false,
+        "__relay_internal__pv__liveeventpostcontextenabledrelayprovider": false,
+        "__relay_internal__pv__sportspostcontextenabledrelayprovider": false
+    ]) { current, _ in current }
+
     private static let articleFieldToggles = ["withArticleRichContentState": false, "withArticlePlainText": false]
 
     static let definitions: [XOperationDefinition] = [
@@ -22,7 +30,9 @@ enum XOperationCatalog {
         .init("SearchByRawQuery", queryID: "mSbI6UIYLPd7b9qkaJ6SAA", relayVariables: relayDefaults, assetPrefixes: ["search-results", "search-"]),
         .init("viewerQuery", queryID: "fJ_6rPf08JjvZdq-D2jACg", relayVariables: relayDefaults, assetPrefixes: ["user-profile-"]),
         .init("followUserMutation", queryID: "m5VXpPA-MH4DH7epCa7hCg", method: "POST", isMutation: true, assetPrefixes: ["follow-user-"]),
-        .init("unfollowUserMutation", queryID: "RjGnpAQuMmcqXSjoCR7t6w", method: "POST", isMutation: true, assetPrefixes: ["unfollow-user-"])
+        .init("unfollowUserMutation", queryID: "RjGnpAQuMmcqXSjoCR7t6w", method: "POST", isMutation: true, assetPrefixes: ["unfollow-user-"]),
+        .init("createTweetMutation", queryID: "1-Q_HG-1HRINbimEaI8MPQ", method: "POST", isMutation: true,
+              relayVariables: createTweetProviders, assetPrefixes: ["media-upload-button-"])
     ]
 
     private static let byName = Dictionary(uniqueKeysWithValues: definitions.map { ($0.name, $0) })

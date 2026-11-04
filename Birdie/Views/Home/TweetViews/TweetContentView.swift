@@ -3,6 +3,8 @@ import SwiftUI
 struct TweetContentView: View {
     let tweet: any TweetContentProtocol
     var hideHeader = false
+    /// Shows a Reply button beside the actions menu when set.
+    var onReply: (() -> Void)?
     @Environment(\.colorScheme) private var colorScheme
     @Environment(NavigationPathManager.self) private var navManager
 
@@ -36,23 +38,42 @@ struct TweetContentView: View {
 
                 Spacer()
 
-                Menu("Post actions", systemImage: "ellipsis") {
-                    Button("@\(tweet.user.username)", systemImage: "person") {
-                        navManager.path.append(NavigationDestination.userDetail(tweet.user))
+                HStack {
+                    if let onReply {
+                        Button(action: onReply) {
+                            // Smaller glyph and no vertical padding, so the menu sets the row height.
+                            Label("Reply", systemImage: "arrowshape.turn.up.left")
+                                .labelStyle(.iconOnly)
+                                .font(.caption)
+                                .frame(maxHeight: .infinity)
+                                .padding(.horizontal, 10)
+                                .background(.background.secondary, in: .capsule)
+                                .contentShape(.capsule)
+                        }
+                        .buttonStyle(.plain)
                     }
 
-                    if let url = tweet.twitterWebUrl {
-                        SwiftUI.Link(destination: url) {
-                            Label("Open in X", systemImage: "arrow.up.right")
+                    Menu("Post actions", systemImage: "ellipsis") {
+                        Button("@\(tweet.user.username)", systemImage: "person") {
+                            navManager.path.append(NavigationDestination.userDetail(tweet.user))
                         }
-                        ShareLink(item: url) {
-                            Label("Share", systemImage: "square.and.arrow.up")
+
+                        if let url = tweet.twitterWebUrl {
+                            SwiftUI.Link(destination: url) {
+                                Label("Open in X", systemImage: "arrow.up.right")
+                            }
+                            ShareLink(item: url) {
+                                Label("Share", systemImage: "square.and.arrow.up")
+                            }
                         }
                     }
+                    .labelStyle(.iconOnly)
+                    .frame(maxHeight: .infinity)
+                    .padding(8)
+                    .background(.background.secondary, in: .capsule)
                 }
-                .labelStyle(.iconOnly)
-                .padding(8)
-                .background(.background.secondary, in: .capsule)
+                // Keeps the Reply and menu capsules the same height.
+                .fixedSize(horizontal: false, vertical: true)
             }
             .labelStyle(CustomLabelStyle())
             .foregroundStyle(.secondary)
