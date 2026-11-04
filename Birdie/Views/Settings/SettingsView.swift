@@ -24,7 +24,7 @@ struct SettingsView: View {
             XAccountSettingsView()
             VideoPlaybackSettingsView()
             ImageCacheSettingsView()
-            SupportSettingsView()
+            // SupportSettingsView()
             #if os(iOS)
             if showAppIconPicker && AppIconStore.supportsAlternateIcons {
                 Section {
@@ -37,7 +37,7 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .navigationTitle("Settings")
-        .toolbarTitleDisplayMode(.inline)
+        .toolbarTitleDisplayMode(.inlineLarge)
         #if os(iOS)
         .navigationDestination(for: SettingsRoute.self) { route in
             switch route {

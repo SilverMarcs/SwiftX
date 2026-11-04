@@ -7,26 +7,27 @@ final class XOperationRegistry {
 
     private var operations: [String: XOperation] = [:]
     private var observedNames = Set<String>()
-    private var refreshedAt: Date?
+    private var successfulRefreshes: [String: Date] = [:]
+    private var failedRefreshes: [String: Date] = [:]
+    private var refreshTask: Task<Set<String>, Never>?
+    private var requestedNames = Set<String>()
+    private var deadline = Date.distantPast
+    private var lastFailedRefresh: Date?
 
-    init() {
-        let relay = Self.relayDefaults
-        let seeds = [
-            XOperation(name: "HomeLatestTimelineQuery", queryID: "Lk_3-p7nX68Uq1VFYo0m0g", relayVariables: relay, isRelay: true),
-            XOperation(name: "HomeTimelineQuery", queryID: "msrNpQ16xpmF5Um0O4Y_Zg", relayVariables: relay, isRelay: true),
-            XOperation(name: "UserByScreenName", queryID: "yvm61GcJCIpqEwe_3RBccw", relayVariables: relay, isRelay: true),
-            XOperation(name: "UserOriginalsTimeline", queryID: "U9W6pwnA7XeTBja_ql4lbw", relayVariables: relay, isRelay: true),
-            XOperation(name: "TweetDetail", queryID: "mw1YqNf95jXRYKKJMGKzgw", relayVariables: relay, isRelay: true),
-            XOperation(name: "SearchByRawQuery", queryID: "mSbI6UIYLPd7b9qkaJ6SAA", relayVariables: relay, isRelay: true),
-            XOperation(name: "UserByRestId", queryID: "xvmVfRLmnr1alc5f2dib0Q"),
-            XOperation(name: "viewerQuery", queryID: "fJ_6rPf08JjvZdq-D2jACg", relayVariables: relay, isRelay: true),
-            XOperation(name: "followUserMutation", queryID: "m5VXpPA-MH4DH7epCa7hCg", method: "POST", isRelay: true),
-            XOperation(name: "unfollowUserMutation", queryID: "RjGnpAQuMmcqXSjoCR7t6w", method: "POST", isRelay: true)
-        ]
-        for operation in seeds { install(operation) }
+    private init() {
+        for definition in XOperationCatalog.definitions {
+            if let id = definition.queryID { install(definition.operation(queryID: id)) }
+        }
     }
 
-    func operation(named name: String) -> XOperation? { operations[Self.canonicalName(name)] }
+    func operation(named name: String) -> XOperation? { operations[XOperationCatalog.canonicalName(name)] }
+
+    /// A rejected route must be rediscovered on the next explicit request, without replaying a write.
+    func invalidateMetadata(for name: String) {
+        let canonical = XOperationCatalog.canonicalName(name)
+        successfulRefreshes[canonical] = nil
+        observedNames.remove(canonical)
+    }
 
     /// An observed signed-in web request takes precedence over public fallback metadata.
     func observe(url: String, body: [String: Any], method: String? = nil) {
@@ -35,77 +36,132 @@ final class XOperationRegistry {
               endpoint.pathComponents.count > graphqlIndex + 2 else { return }
         let queryID = endpoint.pathComponents[graphqlIndex + 1]
         let name = endpoint.pathComponents[graphqlIndex + 2]
-        guard Self.allowedNames.contains(name), Self.isValidID(queryID) else { return }
+        guard let definition = XOperationCatalog.definition(named: name), Self.isValidID(queryID) else { return }
         let query = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)?.queryItems ?? []
-        func object(_ key: String) -> [String: Any] {
+        func object(_ key: String) -> [String: Any]? {
             if let value = body[key] as? [String: Any] { return value }
             let encoded = body[key] as? String ?? query.first(where: { $0.name == key })?.value
-            guard let encoded, let data = encoded.data(using: .utf8),
-                  let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return [:] }
-            return object
+            guard let encoded, let data = encoded.data(using: .utf8) else { return nil }
+            return (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
         }
-        let variables = object("variables")
-        let relayVariables = variables.filter { $0.key.hasPrefix("__relay_internal__pv__") }.compactMapValues { $0 as? Bool }
-        let isRelay = !relayVariables.isEmpty || name == "HomeLatestTimelineQuery" || name == "HomeTimelineQuery"
-            || name == "UserOriginalsTimeline" || name.hasSuffix("Mutation") || name == "viewerQuery"
+        let variables = object("variables") ?? [:]
+        let providers = variables.filter { $0.key.hasPrefix("__relay_internal__pv__") }.compactMapValues { $0 as? Bool }
+        let features = object("features")
+        let isRelay = !providers.isEmpty || (features == nil && definition.isRelay)
         var cleanEndpoint = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)
         cleanEndpoint?.query = nil
         cleanEndpoint?.fragment = nil
-        guard let cleanURL = cleanEndpoint?.url else { return }
-        let operation = XOperation(name: name, queryID: queryID, method: method ?? (body.isEmpty ? "GET" : "POST"),
-                                   features: object("features").compactMapValues { $0 as? Bool },
-                                   relayVariables: relayVariables, endpoint: cleanURL, isRelay: isRelay)
-        install(operation)
-        observedNames.insert(Self.canonicalName(name))
+        guard let cleanURL = cleanEndpoint?.url,
+              method == nil || method == definition.method else { return }
+        install(definition.operation(queryID: queryID, isRelay: isRelay, endpoint: cleanURL,
+                                     features: features?.compactMapValues { $0 as? Bool } ?? [:],
+                                     relayVariables: providers.isEmpty ? nil : providers,
+                                     fieldToggles: object("fieldToggles")?.compactMapValues { $0 as? Bool }))
+        observedNames.insert(definition.canonicalName)
+        successfulRefreshes[definition.canonicalName] = .now
     }
 
-    /// Best-effort discovery from X's public JavaScript. A failed refresh retains known metadata.
-    func refresh() async {
-        guard refreshedAt.map({ Date().timeIntervalSince($0) > 3_600 }) ?? true else { return }
-        guard let root = URL(string: "https://x.com"), let html = await fetch(root) else { return }
-        var pending = Self.assetURLs(in: html, relativeTo: root)
-        var visited = Set<URL>()
-        // Only follow boot scripts and the few routes Birdie uses, with a strict fetch budget.
-        while !pending.isEmpty && visited.count < 24 {
-            if Task.isCancelled { return }
-            let url = pending.removeFirst()
-            guard visited.insert(url).inserted, let script = await fetch(url) else { continue }
-            for operation in Self.operations(in: script) where !observedNames.contains(Self.canonicalName(operation.name)) {
-                install(operation)
+    /// Writes discover metadata before sending once; discovery never performs the write itself.
+    func refresh(for name: String, force: Bool = false) async {
+        guard !Task.isCancelled, let definition = XOperationCatalog.definition(named: name) else { return }
+        let key = definition.canonicalName
+        let currentTime = Date.now
+        guard force || (successfulRefreshes[key].map({ currentTime.timeIntervalSince($0) >= 3_600 }) ?? true) else { return }
+        guard failedRefreshes[key].map({ currentTime.timeIntervalSince($0) >= 60 }) ?? true,
+              lastFailedRefresh.map({ currentTime.timeIntervalSince($0) >= 60 }) ?? true else { return }
+        // An explicit failed-read refresh may replace the metadata captured during login.
+        if force { observedNames.remove(key) }
+        requestedNames.insert(key)
+        if let task = refreshTask {
+            _ = await task.value
+            return
+        }
+        deadline = currentTime.addingTimeInterval(4)
+        let task = Task { @MainActor [self] in
+            let found = await discover()
+            let finishedAt = Date.now
+            for requested in requestedNames {
+                if found.contains(requested) {
+                    successfulRefreshes[requested] = finishedAt
+                    failedRefreshes[requested] = nil
+                } else {
+                    failedRefreshes[requested] = finishedAt
+                }
             }
-            for asset in Self.assetURLs(in: script, relativeTo: url) where !visited.contains(asset) && !pending.contains(asset) {
+            for discovered in found {
+                successfulRefreshes[discovered] = finishedAt
+                failedRefreshes[discovered] = nil
+            }
+            if found.isEmpty { lastFailedRefresh = finishedAt }
+            refreshTask = nil
+            requestedNames = []
+            return found
+        }
+        refreshTask = task
+        _ = await task.value
+    }
+
+    /// Fetches only public bootstrap and relevant route scripts, within a total deadline and asset count.
+    private func discover() async -> Set<String> {
+        guard let root = URL(string: "https://x.com"), let html = await fetchWithinDeadline(root) else { return [] }
+        var pending = Self.assetURLs(in: html, relativeTo: root, requestedNames: requestedNames)
+        var visited = Set<URL>()
+        var found = Set<String>()
+        while !pending.isEmpty && visited.count < 8 && Date.now < deadline {
+            guard !Task.isCancelled else { break }
+            let prefixes = XOperationCatalog.assetPrefixes(for: requestedNames)
+            pending.sort { Self.priority($0, prefixes: prefixes) < Self.priority($1, prefixes: prefixes) }
+            let url = pending.removeFirst()
+            guard visited.insert(url).inserted, let script = await fetchWithinDeadline(url) else { continue }
+            for operation in Self.operations(in: script) {
+                let canonical = XOperationCatalog.canonicalName(operation.name)
+                found.insert(canonical)
+                if !observedNames.contains(canonical) { install(operation) }
+            }
+            if requestedNames.isSubset(of: found) { break }
+            for asset in Self.assetURLs(in: script, relativeTo: url, requestedNames: requestedNames)
+                where !visited.contains(asset) && !pending.contains(asset) {
                 pending.append(asset)
             }
         }
-        refreshedAt = Date()
+        return found
+    }
+
+    private func fetchWithinDeadline(_ url: URL) async -> String? {
+        guard !Task.isCancelled, url.scheme == "https", ["x.com", "abs.twimg.com"].contains(url.host()) else { return nil }
+        let remaining = deadline.timeIntervalSinceNow
+        guard remaining > 0 else { return nil }
+        return await Self.fetch(url, timeout: min(2, remaining))
     }
 
     static func operations(in script: String) -> [XOperation] {
         var result: [XOperation] = []
-        // Relay compiled artifacts embed stable operation metadata in params objects.
         let relayPattern = #"params:\s*\{id:\s*[`\"]([A-Za-z0-9_-]+)[`\"],metadata:\s*\{[^}]*\},name:\s*[`\"]([A-Za-z0-9_]+)[`\"]"#
-        for groups in matches(relayPattern, in: script) where allowedNames.contains(groups[1]) {
-            result.append(XOperation(name: groups[1], queryID: groups[0],
-                                     method: groups[1].hasSuffix("Mutation") ? "POST" : "GET",
-                                     relayVariables: groups[1].hasSuffix("Mutation") ? [:] : relayDefaults, isRelay: true))
+        for groups in matches(relayPattern, in: script) {
+            guard let definition = XOperationCatalog.definition(named: groups[1]) else { continue }
+            result.append(definition.operation(queryID: groups[0], isRelay: true))
         }
-        // Legacy webpack artifacts expose queryId/operationName metadata instead.
         let legacyPattern = #"queryId:\s*[`\"]([A-Za-z0-9_-]+)[`\"],operationName:\s*[`\"]([A-Za-z0-9_]+)[`\"]"#
-        for groups in matches(legacyPattern, in: script) where allowedNames.contains(groups[1]) {
-            result.append(XOperation(name: groups[1], queryID: groups[0], method: groups[1] == "HomeLatestTimeline" ? "POST" : "GET"))
+        for groups in matches(legacyPattern, in: script) {
+            guard let definition = XOperationCatalog.definition(named: groups[1]) else { continue }
+            result.append(definition.operation(queryID: groups[0], isRelay: false))
         }
         return result
     }
 
-    private func install(_ operation: XOperation) { operations[Self.canonicalName(operation.name)] = operation }
+    private func install(_ operation: XOperation) {
+        operations[XOperationCatalog.canonicalName(operation.name)] = operation
+    }
 
-    private func fetch(_ url: URL) async -> String? {
-        guard url.scheme == "https", ["x.com", "abs.twimg.com"].contains(url.host()) else { return nil }
+    private static func fetch(_ url: URL, timeout: TimeInterval) async -> String? {
         var request = URLRequest(url: url)
-        request.timeoutInterval = 12
-        // This session deliberately carries no cookies from the embedded signed-in session.
+        request.timeoutInterval = timeout
+        // Deliberately carries no cookies or cached responses from any signed-in session.
         let configuration = URLSessionConfiguration.ephemeral
         configuration.httpCookieStorage = nil
+        configuration.urlCache = nil
+        configuration.timeoutIntervalForRequest = timeout
+        configuration.timeoutIntervalForResource = timeout
         let session = URLSession(configuration: configuration)
         defer { session.finishTasksAndInvalidate() }
         guard let (data, response) = try? await session.data(for: request),
@@ -113,15 +169,25 @@ final class XOperationRegistry {
         return String(data: data, encoding: .utf8)
     }
 
-    private static func assetURLs(in text: String, relativeTo base: URL) -> [URL] {
+    private static func assetURLs(in text: String, relativeTo base: URL, requestedNames: Set<String>) -> [URL] {
         let pattern = #"[\"'`](https://abs\.twimg\.com/[^\"'`\s]+\.js|\.?\.?/[^\"'`\s]+\.js|assets/[^\"'`\s]+\.js)[\"'`]"#
+        let prefixes = XOperationCatalog.assetPrefixes(for: requestedNames)
+        var seen = Set<URL>()
         return matches(pattern, in: text).compactMap { groups in
-            guard let url = URL(string: groups[0], relativeTo: base)?.absoluteURL,
-                  url.host() == "abs.twimg.com" else { return nil }
-            let name = url.lastPathComponent
-            let prefixes = ["entry-client", "startup-", "home-", "user-posts-", "user-profile-", "_profile-", "conversation-", "UserByScreenName.", "search-results", "search-", "follow-user-", "unfollow-user-"]
-            return prefixes.contains(where: name.hasPrefix) ? url : nil
-        }.sorted { priority($0) < priority($1) }
+            // Vite dependency-map paths start at the bundle root; ./ imports start at the module.
+            let path = groups[0]
+            let directory = base.deletingLastPathComponent()
+            let reference = path.hasPrefix("assets/") && directory.lastPathComponent == "assets"
+                ? directory.deletingLastPathComponent() : base
+            guard let url = URL(string: path, relativeTo: reference)?.absoluteURL,
+                  url.scheme == "https", url.host() == "abs.twimg.com",
+                  prefixes.contains(where: url.lastPathComponent.hasPrefix), seen.insert(url).inserted else { return nil }
+            return url
+        }.sorted { priority($0, prefixes: prefixes) < priority($1, prefixes: prefixes) }
+    }
+
+    private static func priority(_ url: URL, prefixes: [String]) -> Int {
+        prefixes.firstIndex(where: url.lastPathComponent.hasPrefix) ?? prefixes.count
     }
 
     private static func matches(_ pattern: String, in source: String) -> [[String]] {
@@ -131,20 +197,6 @@ final class XOperationRegistry {
         }
     }
 
-    private static func canonicalName(_ name: String) -> String {
-        switch name {
-        case "HomeLatestTimelineQuery": "HomeLatestTimeline"
-        case "HomeTimelineQuery": "HomeTimeline"
-        case "UserOriginalsTimeline": "UserTweets"
-        default: name
-        }
-    }
-
-    private static func priority(_ url: URL) -> Int {
-        let prefixes = ["entry-client", "startup-dynamic", "startup-", "UserByScreenName.", "home-", "user-posts-", "follow-user-", "unfollow-user-", "user-profile-", "_profile-", "conversation-", "search-"]
-        return prefixes.firstIndex(where: url.lastPathComponent.hasPrefix) ?? prefixes.count
-    }
-
     private static func isXAPI(_ url: URL) -> Bool {
         url.scheme == "https" && ["x.com", "api.x.com", "twitter.com", "api.twitter.com"].contains(url.host())
     }
@@ -152,15 +204,4 @@ final class XOperationRegistry {
     private static func isValidID(_ id: String) -> Bool {
         !id.isEmpty && id.allSatisfy { $0.isASCII && ($0.isLetter || $0.isNumber || $0 == "_" || $0 == "-") }
     }
-
-    private static let relayDefaults = [
-        "__relay_internal__pv__xclientsfeaturesappviewerisloggedinrelayprovider": true,
-        "__relay_internal__pv__xclientsfeaturestranslationnoteautotranslationenabledrelayprovider": false
-    ]
-
-    private static let allowedNames: Set<String> = [
-        "HomeLatestTimeline", "HomeLatestTimelineQuery", "HomeTimeline", "HomeTimelineQuery", "UserByRestId", "UserByScreenName",
-        "UserTweets", "UserOriginalsTimeline", "TweetDetail", "SearchByRawQuery", "viewerQuery",
-        "followUserMutation", "unfollowUserMutation"
-    ]
 }

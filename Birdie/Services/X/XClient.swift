@@ -14,7 +14,7 @@ struct XClient {
         configuration.httpCookieStorage = nil
         configuration.urlCache = nil
         configuration.timeoutIntervalForRequest = 30
-        self.session = URLSession(configuration: configuration, delegate: XRedirectPolicy(), delegateQueue: nil)
+        session = URLSession(configuration: configuration, delegate: XRedirectPolicy(), delegateQueue: nil)
     }
 
     func verify(credentials: XCredentials) async throws -> XAccount {
@@ -106,7 +106,7 @@ struct XClient {
         guard userID != sessionStore.account?.id else { throw XClientError.apiError }
         let revision = sessionStore.revision
         let json = try await perform(following ? "followUserMutation" : "unfollowUserMutation",
-                                     variables: ["targetUserId": String(userID)], retryDiscovery: false)
+                                     variables: ["targetUserId": String(userID)])
         let field = following ? "follow_user" : "unfollow_user"
         let expected = following ? "FollowSuccessResult" : "UnfollowSuccessResult"
         guard let result = (json["data"] as? [String: Any])?[field] as? [String: Any],
@@ -136,60 +136,52 @@ struct XClient {
         return pages
     }
 
-    private func perform(_ name: String, variables: [String: Any], credentials override: XCredentials? = nil,
-                         retryDiscovery: Bool = true) async throws -> [String: Any] {
+    private func perform(_ name: String, variables: [String: Any], credentials override: XCredentials? = nil) async throws -> [String: Any] {
         try Task.checkCancellation()
-        guard let operation = registry.operation(named: name) else { throw XClientError.operationUnavailable }
         let revision = sessionStore.revision
         guard let credentials = override ?? sessionStore.credentials, credentials.isValid else { throw XClientError.signedOut }
-        let request = try Self.request(operation: operation, variables: variables, credentials: credentials)
-        let (body, response) = try await session.data(for: request)
-        try Task.checkCancellation()
-        if override == nil, revision != sessionStore.revision { throw CancellationError() }
-        guard let response = response as? HTTPURLResponse else { throw XClientError.invalidResponse }
-        let json = (try? JSONSerialization.jsonObject(with: body)) as? [String: Any]
-        let codes = (json?["errors"] as? [[String: Any]] ?? []).compactMap { $0["code"] as? Int }
-        if response.statusCode == 401 || codes.contains(where: [32, 89, 215, 239].contains) {
-            if override == nil { sessionStore.expire(ifRevision: revision) }
-            throw XClientError.sessionExpired
+        guard var operation = registry.operation(named: name) else { throw XClientError.operationUnavailable }
+        if operation.isMutation {
+            // Refresh public metadata before a write; an uncertain write response is never replayed.
+            await registry.refresh(for: name)
+            try checkSession(revision: revision, usesOverride: override != nil)
+            guard let refreshed = registry.operation(named: name) else { throw XClientError.operationUnavailable }
+            operation = refreshed
         }
-        if response.statusCode == 429 || codes.contains(88) { throw XClientError.rateLimited }
-        if [400, 404].contains(response.statusCode), retryDiscovery {
-            await registry.refresh()
-            try Task.checkCancellation()
-            if override == nil, revision != sessionStore.revision { throw CancellationError() }
-            return try await perform(name, variables: variables, credentials: override, retryDiscovery: false)
+
+        for attempt in 0..<2 {
+            let request = try XGraphQLRequest.make(operation: operation, variables: variables, credentials: credentials)
+            let (body, response) = try await session.data(for: request)
+            try checkSession(revision: revision, usesOverride: override != nil)
+            guard let response = response as? HTTPURLResponse else { throw XClientError.invalidResponse }
+            let json = (try? JSONSerialization.jsonObject(with: body)) as? [String: Any]
+            let codes = (json?["errors"] as? [[String: Any]] ?? []).compactMap { $0["code"] as? Int }
+            if response.statusCode == 401 || codes.contains(where: [32, 89, 215, 239].contains) {
+                if override == nil { sessionStore.expire(ifRevision: revision) }
+                throw XClientError.sessionExpired
+            }
+            if response.statusCode == 429 || codes.contains(88) { throw XClientError.rateLimited }
+            if response.statusCode == 404 { registry.invalidateMetadata(for: name) }
+            if !operation.isMutation, attempt == 0, [400, 404].contains(response.statusCode) {
+                await registry.refresh(for: name, force: true)
+                try checkSession(revision: revision, usesOverride: override != nil)
+                if let refreshed = registry.operation(named: name),
+                   try XGraphQLRequest.make(operation: refreshed, variables: variables, credentials: credentials) != request {
+                    operation = refreshed
+                    continue
+                }
+            }
+            if let code = codes.first { throw XClientError.apiErrorCode(code) }
+            guard (200..<300).contains(response.statusCode) else { throw XClientError.httpStatus(response.statusCode) }
+            guard let json else { throw XClientError.invalidResponse }
+            if let errors = json["errors"] as? [Any], !errors.isEmpty { throw XClientError.apiError }
+            return json
         }
-        guard (200..<300).contains(response.statusCode) else { throw XClientError.httpStatus(response.statusCode) }
-        guard let json else { throw XClientError.invalidResponse }
-        if let errors = json["errors"] as? [Any], !errors.isEmpty { throw XClientError.apiError }
-        return json
+        throw XClientError.invalidResponse
     }
 
-    private static func request(operation: XOperation, variables: [String: Any], credentials: XCredentials) throws -> URLRequest {
-        var variables = variables
-        for (key, value) in operation.relayVariables { variables[key] = value }
-        var payload: [String: Any] = ["variables": variables]
-        if !operation.isRelay {
-            payload["features"] = operation.features
-            payload["fieldToggles"] = ["withArticleRichContentState": false, "withArticlePlainText": false]
-        }
-        var request = URLRequest(url: operation.endpoint, cachePolicy: .reloadIgnoringLocalCacheData)
-        request.httpMethod = operation.method
-        request.httpShouldHandleCookies = false
-        request.allHTTPHeaderFields = credentials.headers
-        if operation.isRelay { request.setValue("Tia", forHTTPHeaderField: "x-twitter-auth-type") }
-        if operation.method == "GET" {
-            var components = URLComponents(url: operation.endpoint, resolvingAgainstBaseURL: false)
-            components?.queryItems = try payload.map { key, value in
-                let encoded = try JSONSerialization.data(withJSONObject: value, options: [.sortedKeys])
-                return URLQueryItem(name: key, value: String(decoding: encoded, as: UTF8.self))
-            }
-            guard let url = components?.url else { throw XClientError.invalidResponse }
-            request.url = url
-        } else {
-            request.httpBody = try JSONSerialization.data(withJSONObject: payload, options: [.sortedKeys])
-        }
-        return request
+    private func checkSession(revision: UUID, usesOverride: Bool) throws {
+        try Task.checkCancellation()
+        if !usesOverride, revision != sessionStore.revision { throw CancellationError() }
     }
 }
