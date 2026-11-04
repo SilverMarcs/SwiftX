@@ -2,7 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var model = FeedStore()
-    @State private var filter: FeedFilter = .recent
+    @AppStorage("feedFilter") private var filter: FeedFilter = .recent
     @State private var showingSignIn = false
     private var session: XSessionStore { .shared }
 
@@ -75,7 +75,7 @@ struct HomeView: View {
                 }
             }
         }
-        .navigationTitle("Feed")
+        .navigationTitle(filter.rawValue)
         .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
