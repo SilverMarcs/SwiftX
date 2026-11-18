@@ -19,7 +19,7 @@ struct VideoView: View {
                 SMVVideo(videoURL: video.variants.first?.url ?? "",
                          thumbnailURL: URL(string: video.thumbnailUrl),
                          autoplay: true,
-                         autoplayDelay: showVideo ? .zero : .milliseconds(500),
+                         autoplayDelay: showVideo ? .zero : .milliseconds(300),
                          muteOnPlay: muteOnPlay,
                          viewer: .custom(itemID: String(tweet.id), feed: makeFeed, open: openViewer))
             } else {
