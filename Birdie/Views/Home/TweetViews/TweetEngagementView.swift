@@ -25,6 +25,8 @@ struct TweetEngagementView: View {
                 Image(systemName: "heart")
             }
             .accessibilityLabel("\(tweet.likeCount) likes")
+
+            TweetBookmarkButton(tweet: tweet)
         }
         .lineLimit(1)
     }

@@ -9,6 +9,8 @@ import SwiftUI
 
 struct MediaView: View {
     let media: Media
+    /// The post the media belongs to; seeds the full-screen video feed.
+    let tweet: any TweetContentProtocol
 
     var body: some View {
         if let photos = media.photos, !photos.isEmpty {
@@ -16,7 +18,7 @@ struct MediaView: View {
         }
 
         if let videos = media.videos, !videos.isEmpty {
-            VideoView(video: videos[0])
+            VideoView(video: videos[0], tweet: tweet)
         }
     }
 }

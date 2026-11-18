@@ -37,7 +37,7 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .navigationTitle("Settings")
-        .toolbarTitleDisplayMode(.inlineLarge)
+        .toolbarTitleDisplayMode(DeviceLayout.settingsTitleDisplayMode)
         #if os(iOS)
         .navigationDestination(for: SettingsRoute.self) { route in
             switch route {

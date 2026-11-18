@@ -10,4 +10,5 @@ import Foundation
 enum NavigationDestination: Hashable {
     case tweetDetail(Tweet)
     case userDetail(User)
+    case settings
 }

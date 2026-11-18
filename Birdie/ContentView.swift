@@ -15,9 +15,16 @@ struct ContentView: View {
                     .id(XSessionStore.shared.revision)
             }
 
-            Tab("Settings", systemImage: "gear") {
-                NavigationStack {
-                    SettingsView()
+            Tab("Saved", systemImage: "bookmark") {
+                SavedTab()
+                    .id(XSessionStore.shared.revision)
+            }
+
+            if DeviceLayout.usesSidebar {
+                Tab("Settings", systemImage: "gear") {
+                    NavigationStack {
+                        SettingsView()
+                    }
                 }
             }
 
@@ -31,6 +38,9 @@ struct ContentView: View {
         .tabBarMinimizeBehavior(.onScrollDown)
         #endif
         .tabViewSearchActivation(.searchTabSelection)
+        .task(id: XSessionStore.shared.revision) {
+            await XBookmarkStore.shared.primeIfNeeded()
+        }
         .environment(\.openURL, OpenURLAction { url in
             if isYouTubeURL(url) {
                 return .systemAction(prefersInApp: false) // Open in YouTube app

@@ -76,6 +76,7 @@ struct Retweet: Codable, Hashable, Identifiable {
     let source: String?
     let sourceUrl: String?
     let sourceLabel: String? // Twitter Web App // Twitter for iPhone
+    let isBookmarked: Bool?
 
     var parsedContent: String {
         String.parseContent(rawContent)
@@ -119,6 +120,7 @@ struct Tweet: Hashable, Codable, Identifiable {
     let source: String?
     let sourceUrl: String?
     let sourceLabel: String?
+    let isBookmarked: Bool?
 
     var parsedContent: String {
         String.parseContent(rawContent)
@@ -153,12 +155,14 @@ struct Tweet: Hashable, Codable, Identifiable {
         self.source = retweet.source
         self.sourceUrl = retweet.sourceUrl
         self.sourceLabel = retweet.sourceLabel
+        self.isBookmarked = retweet.isBookmarked
     }
 }
 
 // Protocol to unify Tweet and Retweet data access
 protocol TweetContentProtocol {
     var id: Int { get }
+    var isBookmarked: Bool? { get }
     var user: User { get }
     var date: Date { get }
     var rawContent: String { get }

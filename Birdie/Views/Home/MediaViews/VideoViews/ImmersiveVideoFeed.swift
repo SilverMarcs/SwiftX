@@ -1,0 +1,59 @@
+import Foundation
+import SwiftMediaViewer
+
+/// Feeds the full-screen video viewer from X's immersive timeline, one page at a time.
+/// Item IDs are post IDs, which the page overlay uses for its Save button.
+///
+/// The viewer creates a fresh feed each time it opens, so cursors never leak between
+/// presentations and nothing is fetched until the viewer asks for more.
+@MainActor
+final class ImmersiveVideoFeed: SMVVideoFeed {
+    private let pinnedTweetID: Int
+    private let sessionRevision = XSessionStore.shared.revision
+    private var cursor: String?
+    private var consumedCursors = Set<String>()
+    private var seenIDs: Set<Int>
+    private var hasEnded = false
+
+    /// - Parameter pinnedTweetID: The opened post, whose video is page 0.
+    init(pinnedTweetID: Int) {
+        self.pinnedTweetID = pinnedTweetID
+        seenIDs = [pinnedTweetID]
+    }
+
+    func nextVideos() async throws -> [SMVVideoItem] {
+        // Pages can hold only already-seen or non-video posts, so keep going a little.
+        for _ in 0..<3 {
+            guard !hasEnded, sessionRevision == XSessionStore.shared.revision else { return [] }
+            let page = try await XClient.shared.fetchImmersiveVideos(pinnedTweetID: pinnedTweetID, cursor: cursor)
+            if let current = cursor { consumedCursors.insert(current) }
+            if let next = page.nextCursor, !next.isEmpty, !consumedCursors.contains(next) {
+                cursor = next
+            } else {
+                hasEnded = true
+            }
+            let items = page.tweets.compactMap(item(for:))
+            if !items.isEmpty { return items }
+        }
+        return []
+    }
+
+    private func item(for tweet: Tweet) -> SMVVideoItem? {
+        let post: any TweetContentProtocol
+        if let retweeted = tweet.retweetedTweet { post = retweeted } else { post = tweet }
+        guard seenIDs.insert(post.id).inserted,
+              let video = post.media?.videos?.first,
+              let url = Self.playbackURL(for: video) else { return nil }
+        XBookmarkStore.shared.recordKnownState(of: post)
+        return SMVVideoItem(id: String(post.id), url: url,
+                            thumbnailURL: URL(string: video.thumbnailUrl),
+                            title: "Video by \(post.user.displayname)")
+    }
+
+    /// Prefers the adaptive HLS stream, falling back to the best MP4.
+    static func playbackURL(for video: Video) -> URL? {
+        let hls = video.variants.first { $0.contentType == "application/x-mpegURL" }
+        let mp4 = video.variants.filter { $0.contentType == "video/mp4" }.max { ($0.bitrate ?? 0) < ($1.bitrate ?? 0) }
+        return (hls ?? mp4 ?? video.variants.first).flatMap { URL(string: $0.url) }
+    }
+}

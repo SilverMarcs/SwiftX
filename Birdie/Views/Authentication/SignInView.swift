@@ -2,8 +2,14 @@ import SwiftUI
 import WebKit
 
 struct SignInView: View {
-    @State private var controller = XLoginController()
+    @State private var controller: XLoginController
     @Environment(\.dismiss) private var dismiss
+
+    /// - Parameter activatesAccount: Whether the account signed in here becomes the active one.
+    ///   Adding a second account leaves the current one active.
+    init(activatesAccount: Bool = true) {
+        _controller = State(initialValue: XLoginController(activatesAccountOnSignIn: activatesAccount))
+    }
 
     var body: some View {
         NavigationStack {

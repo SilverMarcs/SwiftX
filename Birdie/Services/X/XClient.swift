@@ -149,7 +149,7 @@ struct XClient {
         return pages
     }
 
-    private func perform(_ name: String, variables: [String: Any], credentials override: XCredentials? = nil) async throws -> [String: Any] {
+    func perform(_ name: String, variables: [String: Any], credentials override: XCredentials? = nil) async throws -> [String: Any] {
         try Task.checkCancellation()
         let revision = sessionStore.revision
         guard let credentials = override ?? sessionStore.credentials, credentials.isValid else { throw XClientError.signedOut }

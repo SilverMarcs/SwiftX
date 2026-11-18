@@ -12,7 +12,8 @@ final class XLoginController: NSObject, WKScriptMessageHandler, WKHTTPCookieStor
     private(set) var didSignIn = false
 
     @ObservationIgnored private let contentController: WKUserContentController
-    @ObservationIgnored private let cookieStore = XSessionStore.websiteDataStore.httpCookieStore
+    @ObservationIgnored private let cookieStore: WKHTTPCookieStore
+    @ObservationIgnored private let activatesAccountOnSignIn: Bool
     @ObservationIgnored private var isActive = false
     @ObservationIgnored private var generation = UUID()
     @ObservationIgnored private var bearer: String?
@@ -28,10 +29,15 @@ final class XLoginController: NSObject, WKScriptMessageHandler, WKHTTPCookieStor
     // Return to the feed after sign-in.
     private static let signInURL = URL(string: "https://x.com/i/jf/onboarding/web?mode=login&redirect_after_login=%2Fhome")
 
-    override init() {
+    /// - Parameter activatesAccountOnSignIn: Whether the signed-in account becomes the active one.
+    init(activatesAccountOnSignIn: Bool = true) {
         let contentController = WKUserContentController()
+        // Each attempt starts clean, so adding an account can't pick up another account's cookies.
+        let websiteDataStore = WKWebsiteDataStore.nonPersistent()
         var configuration = WebPage.Configuration()
-        configuration.websiteDataStore = XSessionStore.websiteDataStore
+        configuration.websiteDataStore = websiteDataStore
+        cookieStore = websiteDataStore.httpCookieStore
+        self.activatesAccountOnSignIn = activatesAccountOnSignIn
         configuration.userContentController = contentController
         #if os(iOS)
         // Use a Safari-compatible identity for X's iOS web client.
@@ -166,7 +172,7 @@ final class XLoginController: NSObject, WKScriptMessageHandler, WKHTTPCookieStor
                     return
                 }
                 failureTitle = "Couldn't Save X Session"
-                try XSessionStore.shared.signIn(account: account, credentials: credentials)
+                try XSessionStore.shared.signIn(account: account, credentials: credentials, makeActive: activatesAccountOnSignIn)
                 didSignIn = true
             } catch {
                 guard isActive, generation == expectedGeneration, !Task.isCancelled,

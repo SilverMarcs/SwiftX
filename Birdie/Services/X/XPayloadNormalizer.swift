@@ -35,6 +35,8 @@ enum XPayloadNormalizer {
             legacy["verified"] = (object["verification"] as? [String: Any])?["verified"] ?? legacy["verified"]
             object["legacy"] = legacy
         case "Tweet":
+            let perspective = object["perspective"] as? [String: Any] ?? [:]
+            legacy["bookmarked"] = perspective["bookmarked"] ?? object["bookmarked"] ?? legacy["bookmarked"]
             let details = object["details"] as? [String: Any] ?? [:]
             legacy["full_text"] = details["full_text"] ?? legacy["full_text"]
             if let milliseconds = details["created_at_ms"] as? NSNumber {

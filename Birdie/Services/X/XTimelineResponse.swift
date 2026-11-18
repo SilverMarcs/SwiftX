@@ -67,6 +67,8 @@ struct XTimelineResponse {
 
     private static func instructions(in json: [String: Any]) -> [[String: Any]]? {
         let paths = [
+            ["data", "bookmark_timeline_v2", "timeline", "instructions"],
+            ["data", "immersive_viewer_explore_mixer_timeline", "timeline", "instructions"],
             ["data", "home", "home_timeline_urt", "instructions"],
             ["data", "home_timeline", "home_timeline_urt", "instructions"],
             ["data", "user", "result", "timeline_v2", "timeline", "instructions"],

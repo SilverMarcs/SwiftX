@@ -15,6 +15,13 @@ enum XOperationCatalog {
         "__relay_internal__pv__sportspostcontextenabledrelayprovider": false
     ]) { current, _ in current }
 
+    /// Bookmark and immersive timelines declare this full provider set; Relay rejects a missing one.
+    private static let timelineProviders = createTweetProviders.merging([
+        "__relay_internal__pv__replydownvoteenabledrelayprovider": false,
+        "__relay_internal__pv__postctafetchenabledrelayprovider": false,
+        "__relay_internal__pv__timelineuserbioautotranslationrelayprovider": false
+    ]) { current, _ in current }
+
     private static let articleFieldToggles = ["withArticleRichContentState": false, "withArticlePlainText": false]
 
     static let definitions: [XOperationDefinition] = [
@@ -31,6 +38,10 @@ enum XOperationCatalog {
         .init("viewerQuery", queryID: "fJ_6rPf08JjvZdq-D2jACg", relayVariables: relayDefaults, assetPrefixes: ["user-profile-"]),
         .init("followUserMutation", queryID: "m5VXpPA-MH4DH7epCa7hCg", method: "POST", isMutation: true, assetPrefixes: ["follow-user-"]),
         .init("unfollowUserMutation", queryID: "RjGnpAQuMmcqXSjoCR7t6w", method: "POST", isMutation: true, assetPrefixes: ["unfollow-user-"]),
+        .init("BookmarkTimeline", queryID: "tBDOyYfnuB07j_kX4_KvqA", relayVariables: timelineProviders, assetPrefixes: ["bookmarks-", "bookmark-timelines-"]),
+        .init("BookmarkAdd", queryID: "9559L3Eb62SZndMSVHIeNw", method: "POST", isMutation: true, assetPrefixes: ["bookmark-", "misinfo-engagement-nudge-"]),
+        .init("BookmarkDelete", queryID: "jTTS9lZmxUq-eYwmY8pHiA", method: "POST", isMutation: true, assetPrefixes: ["bookmark-", "misinfo-engagement-nudge-"]),
+        .init("immersiveTimelineQuery", queryID: "Ry4qg8jYC_SUwpLc8sUZGw", relayVariables: timelineProviders, assetPrefixes: ["immersive-"]),
         .init("createTweetMutation", queryID: "1-Q_HG-1HRINbimEaI8MPQ", method: "POST", isMutation: true,
               relayVariables: createTweetProviders, assetPrefixes: ["media-upload-button-"])
     ]

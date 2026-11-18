@@ -19,8 +19,11 @@ struct HomeTab: View {
                         TweetDetailView(tweet: tweet)
                     case .userDetail(let user):
                         UserDetailView(user: user)
+                    case .settings:
+                        SettingsView()
                     }
                 }
+                .birdieVideoViewerDestination()
         }
         .environment(navManager)
     }

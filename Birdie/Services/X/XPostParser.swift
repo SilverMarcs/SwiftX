@@ -130,7 +130,8 @@ struct XPostParser {
             inReplyToUser: inReplyToUser,
             source: source,
             sourceUrl: sourceUrl,
-            sourceLabel: sourceLabel
+            sourceLabel: sourceLabel,
+            isBookmarked: obj["bookmarked"] as? Bool
         )
 
         if asRetweet {
@@ -226,7 +227,8 @@ struct XPostParser {
                 }
                 let duration = (entry["video_info"] as? [String: Any])?["duration_millis"] as? Int ?? 0
                 let views = (entry["mediaStats"] as? [String: Any])?["viewCount"] as? Int
-                videos.append(Video(thumbnailUrl: thumb, variants: parsedVariants, duration: duration, views: views))
+                videos.append(Video(thumbnailUrl: thumb, variants: parsedVariants, duration: duration, views: views,
+                                    aspectRatio: Self.aspectRatio(of: entry)))
             case "animated_gif":
                 let thumb = entry["media_url_https"] as? String ?? ""
                 if let url = ((entry["video_info"] as? [String: Any])?["variants"] as? [[String: Any]])?.first?["url"] as? String {
@@ -410,6 +412,26 @@ struct XPostParser {
     }
 }
 
+extension XPostParser {
+    /// A video's width divided by its height, from `original_info` or `video_info.aspect_ratio`.
+    static func aspectRatio(of entry: [String: Any]) -> Double? {
+        func ratio(_ width: Any?, _ height: Any?) -> Double? {
+            guard let width = (width as? NSNumber)?.doubleValue,
+                  let height = (height as? NSNumber)?.doubleValue,
+                  width > 0, height > 0 else { return nil }
+            return width / height
+        }
+        if let info = entry["original_info"] as? [String: Any],
+           let value = ratio(info["width"], info["height"]) {
+            return value
+        }
+        if let pair = (entry["video_info"] as? [String: Any])?["aspect_ratio"] as? [Any], pair.count == 2 {
+            return ratio(pair[0], pair[1])
+        }
+        return nil
+    }
+}
+
 private struct TweetPayload {
     let id: Int
     let url: String
@@ -435,6 +457,7 @@ private struct TweetPayload {
     let source: String?
     let sourceUrl: String?
     let sourceLabel: String?
+    let isBookmarked: Bool?
 }
 
 private extension Tweet {
@@ -463,6 +486,7 @@ private extension Tweet {
         self.source = payload.source
         self.sourceUrl = payload.sourceUrl
         self.sourceLabel = payload.sourceLabel
+        self.isBookmarked = payload.isBookmarked
     }
 }
 
@@ -490,6 +514,7 @@ private extension Retweet {
         self.source = tweet.source
         self.sourceUrl = tweet.sourceUrl
         self.sourceLabel = tweet.sourceLabel
+        self.isBookmarked = tweet.isBookmarked
     }
 
     init(from payload: TweetPayload) {
@@ -515,6 +540,7 @@ private extension Retweet {
         self.source = payload.source
         self.sourceUrl = payload.sourceUrl
         self.sourceLabel = payload.sourceLabel
+        self.isBookmarked = payload.isBookmarked
     }
 }
 

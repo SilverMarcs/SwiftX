@@ -86,6 +86,8 @@ struct HomeView: View {
                                 .tag(option)
                         }
                     }
+
+                    SettingsMenuButton()
                 } label: {
                     Label(filter.rawValue, systemImage: "line.3.horizontal.decrease")
                 }

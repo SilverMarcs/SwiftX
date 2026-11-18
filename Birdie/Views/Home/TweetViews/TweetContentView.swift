@@ -30,7 +30,7 @@ struct TweetContentView: View {
             }
 
             if let media = tweet.media {
-                MediaView(media: media)
+                MediaView(media: media, tweet: tweet)
             }
 
             HStack {

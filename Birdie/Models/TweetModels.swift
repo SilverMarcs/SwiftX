@@ -32,6 +32,8 @@ struct Video: Codable {
     let variants: [VideoVariant]
     let duration: Int
     let views: Int?
+    /// Width divided by height, from X's media metadata. `nil` when X omits it.
+    let aspectRatio: Double?
 }
 
 // MARK: - VideoVariant
