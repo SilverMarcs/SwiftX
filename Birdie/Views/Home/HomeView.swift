@@ -8,7 +8,7 @@ struct HomeView: View {
 
     var body: some View {
         List {
-            TweetItemsView(tweets: model.tweets)
+            TweetItemsView(tweets: model.tweets, onAppear: XSeenPosts.shared.markSeen)
                 .frame(maxWidth: 800)
                 .frame(maxWidth: .infinity)
 

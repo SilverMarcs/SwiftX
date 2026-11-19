@@ -44,7 +44,11 @@ struct XClient {
         }
         if let cursor { variables["cursor"] = cursor }
         else { variables["requestContext"] = "launch" }
-        return try XTimelineResponse(json: await perform(operation, variables: variables)).page
+        let seen = XSeenPosts.shared.pending()
+        if !seen.isEmpty { variables["seenTweetIds"] = seen }
+        let page = try XTimelineResponse(json: await perform(operation, variables: variables)).page
+        XSeenPosts.shared.remove(seen)
+        return page
     }
 
     func fetchProfile(userID: Int, username: String? = nil) async throws -> XProfile {

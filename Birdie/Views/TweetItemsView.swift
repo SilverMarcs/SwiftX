@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TweetItemsView: View {
     let tweets: [Tweet]
+    var onAppear: @MainActor (Tweet) -> Void = { _ in }
     @Environment(NavigationPathManager.self) private var navManager
     
     var body: some View {
@@ -19,6 +20,7 @@ struct TweetItemsView: View {
                 TweetView(tweet: tweet)
             }
             .buttonStyle(.plain)
+            .onAppear { onAppear(tweet) }
             .listRowSeparator(.visible, edges: .bottom)
             .listRowSeparator(.hidden, edges: .top)
             .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
