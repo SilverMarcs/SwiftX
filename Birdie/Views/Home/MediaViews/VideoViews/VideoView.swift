@@ -15,7 +15,7 @@ struct VideoView: View {
                 // Loads at once over X's poster frame, so the video starts on the
                 // thumbnail and takes over in place. Autoplay waits briefly so
                 // videos flicked past don't start playing.
-                SMVVideo(videoURL: video.variants.first?.url ?? "",
+                SMVVideo(videoURL: video.playbackVariant?.url ?? "",
                          thumbnailURL: URL(string: video.thumbnailUrl),
                          autoplay: true,
                          autoplayDelay: showVideo ? .zero : .milliseconds(300),

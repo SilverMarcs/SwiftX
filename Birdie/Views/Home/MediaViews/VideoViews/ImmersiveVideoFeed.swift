@@ -43,17 +43,10 @@ final class ImmersiveVideoFeed: SMVVideoFeed {
         if let retweeted = tweet.retweetedTweet { post = retweeted } else { post = tweet }
         guard seenIDs.insert(post.id).inserted,
               let video = post.media?.videos?.first,
-              let url = Self.playbackURL(for: video) else { return nil }
+              let url = video.playbackURL else { return nil }
         XBookmarkStore.shared.recordKnownState(of: post)
         return SMVVideoItem(id: String(post.id), url: url,
                             thumbnailURL: URL(string: video.thumbnailUrl),
                             title: "Video by \(post.user.displayname)")
-    }
-
-    /// Prefers the adaptive HLS stream, falling back to the best MP4.
-    static func playbackURL(for video: Video) -> URL? {
-        let hls = video.variants.first { $0.contentType == "application/x-mpegURL" }
-        let mp4 = video.variants.filter { $0.contentType == "video/mp4" }.max { ($0.bitrate ?? 0) < ($1.bitrate ?? 0) }
-        return (hls ?? mp4 ?? video.variants.first).flatMap { URL(string: $0.url) }
     }
 }
