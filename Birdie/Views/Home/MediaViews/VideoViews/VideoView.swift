@@ -8,7 +8,6 @@ struct VideoView: View {
     let video: Video
     let tweet: any TweetContentProtocol
     @State private var showVideo = false
-    @Environment(NavigationPathManager.self) private var navManager
 
     var body: some View {
         Group {
@@ -21,7 +20,9 @@ struct VideoView: View {
                          autoplay: true,
                          autoplayDelay: showVideo ? .zero : .milliseconds(300),
                          muteOnPlay: muteOnPlay,
-                         viewer: .custom(itemID: String(tweet.id), feed: makeFeed, open: openViewer))
+                         viewer: .custom(itemID: String(tweet.id), scrubber: .withControls, feed: makeFeed) { page in
+                             VideoPageOverlay(page: page)
+                         })
             } else {
                 Button(action: play) {
                     CachedAsyncImage(url: URL(string: video.thumbnailUrl), targetSize: 600)
@@ -57,14 +58,10 @@ struct VideoView: View {
         showVideo = true
     }
 
+    /// Called each time the full-screen viewer opens.
     private func makeFeed() -> any SMVVideoFeed {
-        ImmersiveVideoFeed(pinnedTweetID: tweet.id)
-    }
-
-    /// The viewer is a page on this tab's stack; its zoom and back gestures close it.
-    private func openViewer(_ route: SMVVideoViewerRoute) {
         // The overlay looks the post up by ID, so keep what this payload knows.
         XBookmarkStore.shared.recordKnownState(of: tweet)
-        navManager.path.append(route)
+        return ImmersiveVideoFeed(pinnedTweetID: tweet.id)
     }
 }

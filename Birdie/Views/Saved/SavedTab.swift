@@ -16,7 +16,6 @@ struct SavedTab: View {
                         SettingsView()
                     }
                 }
-                .birdieVideoViewerDestination()
         }
         .environment(navManager)
     }

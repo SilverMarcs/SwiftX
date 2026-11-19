@@ -22,7 +22,6 @@ struct SearchTab: View {
                         SettingsView()
                     }
                 }
-                .birdieVideoViewerDestination()
         }
         .environment(navManager)
     }

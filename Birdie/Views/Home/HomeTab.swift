@@ -23,7 +23,6 @@ struct HomeTab: View {
                         SettingsView()
                     }
                 }
-                .birdieVideoViewerDestination()
         }
         .environment(navManager)
     }
