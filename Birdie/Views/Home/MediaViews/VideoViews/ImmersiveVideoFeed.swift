@@ -11,17 +11,15 @@ final class ImmersiveVideoFeed: SMVVideoFeed {
     private let pinnedTweetID: Int
     private var cursor: String?
     private var consumedCursors = Set<String>()
-    private var seenIDs: Set<Int>
     private var hasEnded = false
 
     /// - Parameter pinnedTweetID: The opened post, whose video is page 0.
     init(pinnedTweetID: Int) {
         self.pinnedTweetID = pinnedTweetID
-        seenIDs = [pinnedTweetID]
     }
 
     func nextVideos() async throws -> [SMVVideoItem] {
-        // Pages can hold only already-seen or non-video posts, so keep going a little.
+        // Pages can hold only non-video posts, so keep going a little.
         for _ in 0..<3 {
             guard !hasEnded else { return [] }
             let page = try await XClient.shared.fetchImmersiveVideos(pinnedTweetID: pinnedTweetID, cursor: cursor)
@@ -40,9 +38,7 @@ final class ImmersiveVideoFeed: SMVVideoFeed {
     private func item(for tweet: Tweet) -> SMVVideoItem? {
         let post: any TweetContentProtocol
         if let retweeted = tweet.retweetedTweet { post = retweeted } else { post = tweet }
-        guard seenIDs.insert(post.id).inserted,
-              !XSeenPosts.shared.hasSeenVideo(id: String(post.id)),
-              let video = post.media?.videos?.first,
+        guard let video = post.media?.videos?.first,
               let url = video.playbackURL else { return nil }
         XBookmarkStore.shared.recordKnownState(of: post)
         return SMVVideoItem(id: String(post.id), url: url,

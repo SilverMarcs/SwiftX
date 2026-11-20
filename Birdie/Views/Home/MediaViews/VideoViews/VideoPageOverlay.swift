@@ -31,7 +31,7 @@ struct VideoPageOverlay: View {
             }
         }
         .onChange(of: page.isCurrent, initial: true) { _, isCurrent in
-            if isCurrent { XSeenPosts.shared.markVideoSeen(id: page.item.id) }
+            if isCurrent { XSeenPosts.shared.markSeen(id: page.item.id) }
         }
     }
 }
