@@ -54,7 +54,6 @@ final class SearchStore {
         let session = XSessionStore.shared
         let searchScope = scope
         guard session.isAuthenticated, !loadingScopes.contains(searchScope) else { return }
-        let revision = session.revision
         loadingScopes.insert(searchScope)
         errors[searchScope] = nil
         defer { loadingScopes.remove(searchScope) }
@@ -63,15 +62,15 @@ final class SearchStore {
             switch searchScope {
             case .tweets:
                 let results = try await XClient.shared.searchTweets(query: searchQuery)
-                guard session.revision == revision, submittedQuery == searchQuery else { return }
+                guard submittedQuery == searchQuery else { return }
                 tweets = results
             case .users:
                 let results = try await XClient.shared.searchUsers(query: searchQuery)
-                guard session.revision == revision, submittedQuery == searchQuery else { return }
+                guard submittedQuery == searchQuery else { return }
                 users = results
             }
         } catch {
-            guard session.revision == revision, submittedQuery == searchQuery else { return }
+            guard submittedQuery == searchQuery else { return }
             errors[searchScope] = error.localizedDescription
         }
     }

@@ -108,7 +108,6 @@ struct XClient {
 
     func setFollowing(userID: Int, following: Bool, username: String? = nil) async throws -> XRelationship {
         guard userID != sessionStore.account?.id else { throw XClientError.apiError }
-        let revision = sessionStore.revision
         let json = try await perform(following ? "followUserMutation" : "unfollowUserMutation",
                                      variables: ["targetUserId": String(userID)])
         let field = following ? "follow_user" : "unfollow_user"
@@ -116,7 +115,6 @@ struct XClient {
         guard let result = (json["data"] as? [String: Any])?[field] as? [String: Any],
               result["__typename"] as? String == expected else { throw XClientError.apiError }
         try Task.checkCancellation()
-        guard revision == sessionStore.revision else { throw CancellationError() }
         // Protected accounts may return a request instead of an immediate follow.
         let relationship = try await fetchProfile(userID: userID, username: username).relationship
         return relationship
@@ -155,13 +153,14 @@ struct XClient {
 
     func perform(_ name: String, variables: [String: Any], credentials override: XCredentials? = nil) async throws -> [String: Any] {
         try Task.checkCancellation()
-        let revision = sessionStore.revision
+        // A request stays with the account it started on, even if the user switches meanwhile.
+        let accountID = override == nil ? sessionStore.activeAccountID : nil
         guard let credentials = override ?? sessionStore.credentials, credentials.isValid else { throw XClientError.signedOut }
         guard var operation = registry.operation(named: name) else { throw XClientError.operationUnavailable }
         if operation.isMutation {
             // Refresh public metadata before a write; an uncertain write response is never replayed.
             await registry.refresh(for: name)
-            try checkSession(revision: revision, usesOverride: override != nil)
+            try Task.checkCancellation()
             guard let refreshed = registry.operation(named: name) else { throw XClientError.operationUnavailable }
             operation = refreshed
         }
@@ -169,19 +168,19 @@ struct XClient {
         for attempt in 0..<2 {
             let request = try XGraphQLRequest.make(operation: operation, variables: variables, credentials: credentials)
             let (body, response) = try await session.data(for: request)
-            try checkSession(revision: revision, usesOverride: override != nil)
+            try Task.checkCancellation()
             guard let response = response as? HTTPURLResponse else { throw XClientError.invalidResponse }
             let json = (try? JSONSerialization.jsonObject(with: body)) as? [String: Any]
             let codes = (json?["errors"] as? [[String: Any]] ?? []).compactMap { $0["code"] as? Int }
             if response.statusCode == 401 || codes.contains(where: [32, 89, 215, 239].contains) {
-                if override == nil { sessionStore.expire(ifRevision: revision) }
+                if let accountID { sessionStore.expire(accountID: accountID, credentials: credentials) }
                 throw XClientError.sessionExpired
             }
             if response.statusCode == 429 || codes.contains(88) { throw XClientError.rateLimited }
             if response.statusCode == 404 { registry.invalidateMetadata(for: name) }
             if !operation.isMutation, attempt == 0, [400, 404].contains(response.statusCode) {
                 await registry.refresh(for: name, force: true)
-                try checkSession(revision: revision, usesOverride: override != nil)
+                try Task.checkCancellation()
                 if let refreshed = registry.operation(named: name),
                    try XGraphQLRequest.make(operation: refreshed, variables: variables, credentials: credentials) != request {
                     operation = refreshed
@@ -195,10 +194,5 @@ struct XClient {
             return json
         }
         throw XClientError.invalidResponse
-    }
-
-    private func checkSession(revision: UUID, usesOverride: Bool) throws {
-        try Task.checkCancellation()
-        if !usesOverride, revision != sessionStore.revision { throw CancellationError() }
     }
 }

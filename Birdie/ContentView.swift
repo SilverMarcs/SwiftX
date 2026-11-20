@@ -12,12 +12,10 @@ struct ContentView: View {
         TabView {
             Tab("Feed", systemImage: "bird") {
                 HomeTab()
-                    .id(XSessionStore.shared.revision)
             }
 
             Tab("Saved", systemImage: "bookmark") {
                 SavedTab()
-                    .id(XSessionStore.shared.revision)
             }
 
             if DeviceLayout.usesSidebar {
@@ -30,7 +28,6 @@ struct ContentView: View {
 
             Tab("Search", systemImage: "magnifyingglass", role: .search) {
                 SearchTab()
-                    .id(XSessionStore.shared.revision)
             }
         }
         .tabViewStyle(.sidebarAdaptable)
@@ -38,7 +35,7 @@ struct ContentView: View {
         .tabBarMinimizeBehavior(.onScrollDown)
         #endif
         .tabViewSearchActivation(.searchTabSelection)
-        .task(id: XSessionStore.shared.revision) {
+        .task(id: XSessionStore.shared.activeAccountID) {
             await XBookmarkStore.shared.primeIfNeeded()
         }
         .environment(\.openURL, OpenURLAction { url in

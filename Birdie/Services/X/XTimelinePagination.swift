@@ -23,8 +23,8 @@ struct XTimelinePagination {
         self.nextCursor = nonempty(nextCursor).flatMap { consumedCursors.contains($0) ? nil : $0 }
     }
 
-    func isCurrent(_ expectedGeneration: UUID, sessionRevision: UUID?) -> Bool {
-        generation == expectedGeneration && sessionRevision == XSessionStore.shared.revision && !Task.isCancelled
+    func isCurrent(_ expectedGeneration: UUID) -> Bool {
+        generation == expectedGeneration && !Task.isCancelled
     }
 
     static func uniqueItems<Item: Identifiable>(_ incoming: [Item], excluding existing: [Item] = []) -> [Item] {

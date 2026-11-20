@@ -15,7 +15,9 @@ final class XProfileStore {
     private(set) var relationshipErrorMessage: String?
 
     @ObservationIgnored private let initialUser: User
-    @ObservationIgnored private var sessionRevision: UUID?
+    /// The account `relationship` was loaded for. After switching accounts, following
+    /// stays disabled until a refresh loads the new account's relationship.
+    private var relationshipAccountID: Int?
     @ObservationIgnored private var requestID = UUID()
 
     init(user: User) {
@@ -30,7 +32,7 @@ final class XProfileStore {
 
     var canChangeFollowing: Bool {
         let session = XSessionStore.shared
-        return session.isAuthenticated && session.revision == sessionRevision
+        return session.isAuthenticated && session.activeAccountID == relationshipAccountID
             && !isOwnAccount && relationship != nil && profileErrorMessage == nil && !isLoading && !isMutating
     }
 
@@ -47,11 +49,7 @@ final class XProfileStore {
 
     func load() async {
         let session = XSessionStore.shared
-        let revision = session.revision
-        if sessionRevision != session.revision {
-            invalidate()
-            sessionRevision = session.revision
-        }
+        let accountID = session.activeAccountID
         guard session.isAuthenticated, !isLoading, !isMutating else { return }
         let id = UUID()
         requestID = id
@@ -62,21 +60,22 @@ final class XProfileStore {
 
         do {
             let profile = try await XClient.shared.fetchProfile(userID: user.id, username: user.username)
-            guard isCurrent(id, revision: revision) else { return }
+            guard isCurrent(id) else { return }
             self.profile = profile
             relationship = profile.relationship
+            relationshipAccountID = accountID
             relationshipErrorMessage = nil
         } catch {
-            guard isCurrent(id, revision: revision), !(error is CancellationError) else { return }
+            guard isCurrent(id), !(error is CancellationError) else { return }
             profileErrorMessage = error.localizedDescription
         }
 
         do {
             let result = try await XClient.shared.fetchUserTweets(userID: user.id, username: user.username)
-            guard isCurrent(id, revision: revision) else { return }
+            guard isCurrent(id) else { return }
             tweets = result
         } catch {
-            guard isCurrent(id, revision: revision), !(error is CancellationError) else { return }
+            guard isCurrent(id), !(error is CancellationError) else { return }
             tweetsErrorMessage = error.localizedDescription
         }
     }
@@ -84,7 +83,6 @@ final class XProfileStore {
     func toggleFollowing() async {
         guard canChangeFollowing, let relationship else { return }
         let id = requestID
-        let revision = XSessionStore.shared.revision
         let shouldFollow = !relationship.isFollowing && !relationship.isRequested
         isMutating = true
         relationshipErrorMessage = nil
@@ -92,28 +90,15 @@ final class XProfileStore {
 
         do {
             let result = try await XClient.shared.setFollowing(userID: user.id, following: shouldFollow, username: user.username)
-            guard isCurrent(id, revision: revision) else { return }
+            guard isCurrent(id) else { return }
             self.relationship = result
         } catch {
-            guard isCurrent(id, revision: revision), !(error is CancellationError) else { return }
+            guard isCurrent(id), !(error is CancellationError) else { return }
             relationshipErrorMessage = error.localizedDescription
         }
     }
 
-    private func invalidate() {
-        requestID = UUID()
-        isLoading = false
-        isMutating = false
-        relationshipErrorMessage = nil
-        profile = nil
-        relationship = nil
-        tweets = []
-        profileErrorMessage = nil
-        tweetsErrorMessage = nil
-    }
-
-    private func isCurrent(_ id: UUID, revision: UUID) -> Bool {
-        let session = XSessionStore.shared
-        return requestID == id && session.revision == revision && session.isAuthenticated && !Task.isCancelled
+    private func isCurrent(_ id: UUID) -> Bool {
+        requestID == id && !Task.isCancelled
     }
 }

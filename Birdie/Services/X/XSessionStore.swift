@@ -9,7 +9,6 @@ final class XSessionStore {
 
     private var collection: XSessionCollection
     @ObservationIgnored private let defaults = UserDefaults.standard
-    private(set) var revision = UUID()
     private(set) var isSigningOut = false
 
     private static let keychainKey = "x.sessions.v2"
@@ -63,15 +62,15 @@ final class XSessionStore {
         if makeActive || updated.activeAccountID == nil { updated.activeAccountID = account.id }
         try Self.save(updated)
         clearExpiration(accountID: account.id)
-        let changesActiveSession = updated.activeAccountID != collection.activeAccountID || updated.activeAccountID == account.id
         collection = updated
-        if changesActiveSession { resetSessionRevision() }
         for key in ["x.cookieHeader", "x.authorizationBearer", "x.guestToken"] {
             KeychainManager.shared.delete(key: key)
         }
         for key in ["x.listId", "x.userAgent"] { UserDefaults.standard.removeObject(forKey: key) }
     }
 
+    /// Only changes which account later requests use. Nothing on screen reloads;
+    /// each list keeps what it shows until it's refreshed.
     func switchAccount(to accountID: Int) throws {
         guard !isSigningOut,
               let record = collection.records.first(where: { $0.account.id == accountID }),
@@ -81,7 +80,6 @@ final class XSessionStore {
         updated.activeAccountID = accountID
         try Self.save(updated)
         collection = updated
-        resetSessionRevision()
     }
 
     func removeAccount(id accountID: Int) throws {
@@ -95,19 +93,17 @@ final class XSessionStore {
         try Self.save(updated)
         clearExpiration(accountID: accountID)
         collection = updated
-        if removesActiveAccount { resetSessionRevision() }
     }
 
-    func expire(ifRevision expected: UUID) {
-        guard revision == expected,
-              let index = collection.records.firstIndex(where: { $0.account.id == activeAccountID }) else { return }
-        let accountID = collection.records[index].account.id
+    /// Marks an account signed out after X rejected these credentials. A newer sign-in is kept.
+    func expire(accountID: Int, credentials: XCredentials) {
+        guard let index = collection.records.firstIndex(where: { $0.account.id == accountID }),
+              collection.records[index].credentials == credentials else { return }
         // A non-secret invalidation marker also prevents reuse if Keychain saving fails.
         let expired = expiredAccountIDs.union([accountID])
         defaults.set(Array(expired), forKey: Self.expiredAccountsKey)
         collection.records[index].credentials = nil
         try? Self.save(collection)
-        resetSessionRevision()
     }
 
     func signOut() async {
@@ -116,11 +112,6 @@ final class XSessionStore {
         defer { isSigningOut = false }
         // Keep this compatibility entry point; the Accounts screen reports removal errors.
         try? removeAccount(id: activeAccountID)
-    }
-
-    private func resetSessionRevision() {
-        revision = UUID()
-        URLCache.shared.removeAllCachedResponses()
     }
 
     private var expiredAccountIDs: Set<Int> {

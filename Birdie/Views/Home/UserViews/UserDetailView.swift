@@ -65,9 +65,7 @@ struct UserDetailView: View {
         .listStyle(.plain)
         .navigationTitle(store.user.displayname)
         .toolbarTitleDisplayMode(.inline)
-        .task(id: XSessionStore.shared.revision) {
-            await store.load()
-        }
+        .task { await store.load() }
         .refreshable { await store.load() }
     }
 }

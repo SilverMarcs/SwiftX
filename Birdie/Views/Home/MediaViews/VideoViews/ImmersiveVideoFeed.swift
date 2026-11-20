@@ -9,7 +9,6 @@ import SwiftMediaViewer
 @MainActor
 final class ImmersiveVideoFeed: SMVVideoFeed {
     private let pinnedTweetID: Int
-    private let sessionRevision = XSessionStore.shared.revision
     private var cursor: String?
     private var consumedCursors = Set<String>()
     private var seenIDs: Set<Int>
@@ -24,7 +23,7 @@ final class ImmersiveVideoFeed: SMVVideoFeed {
     func nextVideos() async throws -> [SMVVideoItem] {
         // Pages can hold only already-seen or non-video posts, so keep going a little.
         for _ in 0..<3 {
-            guard !hasEnded, sessionRevision == XSessionStore.shared.revision else { return [] }
+            guard !hasEnded else { return [] }
             let page = try await XClient.shared.fetchImmersiveVideos(pinnedTweetID: pinnedTweetID, cursor: cursor)
             if let current = cursor { consumedCursors.insert(current) }
             if let next = page.nextCursor, !next.isEmpty, !consumedCursors.contains(next) {

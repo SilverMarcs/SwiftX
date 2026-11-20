@@ -14,20 +14,19 @@ final class FeedStore {
 
     @ObservationIgnored private var generation = UUID()
     @ObservationIgnored private var filter: FeedFilter?
-    @ObservationIgnored private var sessionRevision: UUID?
     @ObservationIgnored private var consumedCursors: Set<String> = []
 
-    func loadIfNeeded(filter: FeedFilter, sessionRevision: UUID, isAuthenticated: Bool) async {
-        guard tweets.isEmpty || self.filter != filter || self.sessionRevision != sessionRevision else { return }
-        await load(filter: filter, sessionRevision: sessionRevision, isAuthenticated: isAuthenticated)
+    /// Switching accounts keeps the loaded feed until pull to refresh.
+    func loadIfNeeded(filter: FeedFilter, isAuthenticated: Bool) async {
+        guard tweets.isEmpty || self.filter != filter || !isAuthenticated else { return }
+        await load(filter: filter, isAuthenticated: isAuthenticated)
     }
 
-    func load(filter: FeedFilter, sessionRevision: UUID, isAuthenticated: Bool) async {
+    func load(filter: FeedFilter, isAuthenticated: Bool) async {
         generation = UUID()
         let requestGeneration = generation
-        let changedContext = self.filter != filter || self.sessionRevision != sessionRevision
+        let changedContext = self.filter != filter
         self.filter = filter
-        self.sessionRevision = sessionRevision
         isLoadingMore = false
         errorMessage = nil
         paginationErrorMessage = nil

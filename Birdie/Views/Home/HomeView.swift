@@ -31,8 +31,9 @@ struct HomeView: View {
         }
         .listStyle(.plain)
         .refreshable { await refresh() }
-        .task(id: filter) {
-            await model.loadIfNeeded(filter: filter, sessionRevision: session.revision, isAuthenticated: session.isAuthenticated)
+        // Also reruns on signing in or out, never on switching accounts.
+        .task(id: [filter.rawValue, String(session.isAuthenticated)]) {
+            await model.loadIfNeeded(filter: filter, isAuthenticated: session.isAuthenticated)
         }
         .overlay {
             if !session.isAuthenticated {
@@ -98,7 +99,7 @@ struct HomeView: View {
     }
 
     private func refresh() async {
-        await model.load(filter: filter, sessionRevision: session.revision, isAuthenticated: session.isAuthenticated)
+        await model.load(filter: filter, isAuthenticated: session.isAuthenticated)
     }
 }
 

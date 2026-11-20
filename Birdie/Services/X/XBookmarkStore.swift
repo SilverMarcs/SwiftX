@@ -10,8 +10,11 @@ final class XBookmarkStore {
     private(set) var states: [Int: Bool] = [:]
     private(set) var pendingIDs: Set<Int> = []
     private(set) var changeRevision = UUID()
-    private var sessionRevision: UUID?
-    @ObservationIgnored private var primedRevision: UUID?
+    /// The account `states` and `pendingIDs` describe.
+    private var accountID: Int?
+    @ObservationIgnored private var primedAccountIDs = Set<Int>()
+
+    private var activeAccountID: Int? { XSessionStore.shared.activeAccountID }
 
     func isBookmarked(_ tweet: any TweetContentProtocol) -> Bool {
         isBookmarked(id: tweet.id, fallback: tweet.isBookmarked)
@@ -25,18 +28,18 @@ final class XBookmarkStore {
     /// Keeps a saved state a payload reported, for later lookups by ID alone.
     func recordKnownState(of tweet: any TweetContentProtocol) {
         guard let known = tweet.isBookmarked, state(for: tweet.id) == nil,
-              !pendingIDs.contains(tweet.id) else { return }
-        resetIfNeeded(XSessionStore.shared.revision)
+              !isPending(tweet.id) else { return }
+        resetIfNeeded()
         states[tweet.id] = known
     }
 
     func state(for id: Int) -> Bool? {
-        guard sessionRevision == XSessionStore.shared.revision else { return nil }
+        guard accountID == activeAccountID else { return nil }
         return states[id]
     }
 
     func isPending(_ id: Int) -> Bool {
-        sessionRevision == XSessionStore.shared.revision && pendingIDs.contains(id)
+        accountID == activeAccountID && pendingIDs.contains(id)
     }
 
     func toggle(_ tweet: any TweetContentProtocol) async throws {
@@ -44,26 +47,23 @@ final class XBookmarkStore {
     }
 
     func toggle(id: Int, fallback: Bool? = nil) async throws {
-        let session = XSessionStore.shared
-        guard session.isAuthenticated else { throw XClientError.signedOut }
-        resetIfNeeded(session.revision)
+        guard XSessionStore.shared.isAuthenticated else { throw XClientError.signedOut }
+        resetIfNeeded()
         guard !pendingIDs.contains(id) else { return }
-        let expectedRevision = session.revision
+        let expectedAccountID = accountID
         let previous = isBookmarked(id: id, fallback: fallback)
         let saved = !previous
         states[id] = saved
         changeRevision = UUID()
         pendingIDs.insert(id)
         defer {
-            if sessionRevision == expectedRevision { pendingIDs.remove(id) }
+            if accountID == expectedAccountID { pendingIDs.remove(id) }
         }
 
         do {
             try await XClient.shared.setBookmarked(tweetID: id, bookmarked: saved)
-            try Task.checkCancellation()
-            guard expectedRevision == session.revision else { throw CancellationError() }
         } catch {
-            guard expectedRevision == session.revision else { throw CancellationError() }
+            guard accountID == expectedAccountID else { throw error }
             states[id] = previous
             changeRevision = UUID()
             throw error
@@ -71,33 +71,31 @@ final class XBookmarkStore {
     }
 
     /// The Saved endpoint establishes membership even when a row omits perspective.
-    func recordSaved(_ tweets: [Tweet], sessionRevision: UUID, ifUnchangedSince expectedChange: UUID) {
-        guard sessionRevision == XSessionStore.shared.revision, changeRevision == expectedChange else { return }
-        resetIfNeeded(sessionRevision)
+    func recordSaved(_ tweets: [Tweet], accountID requestAccountID: Int?, ifUnchangedSince expectedChange: UUID) {
+        guard requestAccountID == activeAccountID, changeRevision == expectedChange else { return }
+        resetIfNeeded()
         for tweet in tweets where !pendingIDs.contains(tweet.id) {
             states[tweet.id] = true
         }
     }
 
-    /// Most timelines omit a post's saved state, so learn the most recently saved posts once per session.
+    /// Most timelines omit a post's saved state, so learn each account's most recently saved posts once.
     func primeIfNeeded() async {
-        let session = XSessionStore.shared
-        guard session.isAuthenticated, primedRevision != session.revision else { return }
-        let expectedRevision = session.revision
-        primedRevision = expectedRevision
+        guard XSessionStore.shared.isAuthenticated, let requestAccountID = activeAccountID,
+              primedAccountIDs.insert(requestAccountID).inserted else { return }
         let expectedChange = changeRevision
         var cursor: String?
-        for _ in 0..<5 {
+        for _ in 0..<5 where activeAccountID == requestAccountID {
             guard let page = try? await XClient.shared.fetchBookmarks(cursor: cursor) else { return }
-            recordSaved(page.tweets, sessionRevision: expectedRevision, ifUnchangedSince: expectedChange)
+            recordSaved(page.tweets, accountID: requestAccountID, ifUnchangedSince: expectedChange)
             guard let next = page.nextCursor, !next.isEmpty, next != cursor, !page.tweets.isEmpty else { return }
             cursor = next
         }
     }
 
-    private func resetIfNeeded(_ expectedRevision: UUID) {
-        guard sessionRevision != expectedRevision else { return }
-        sessionRevision = expectedRevision
+    private func resetIfNeeded() {
+        guard accountID != activeAccountID else { return }
+        accountID = activeAccountID
         states = [:]
         pendingIDs = []
     }

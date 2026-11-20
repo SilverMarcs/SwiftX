@@ -77,7 +77,6 @@ struct SearchView: View {
         }
         .navigationTitle("Search")
         .toolbarTitleDisplayMode(.inlineLarge)
-        .onChange(of: XSessionStore.shared.revision) { model.clear() }
         .sheet(isPresented: $showsSignIn) { SignInView() }
     }
 }

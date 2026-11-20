@@ -41,7 +41,8 @@ struct SavedPostsView: View {
                 }
             }
             .refreshable { await model.load() }
-            .task(id: session.revision) { await model.load() }
+            // Runs on first appearance and on signing in or out, never on switching accounts.
+            .task(id: session.isAuthenticated) { await model.loadIfNeeded() }
             .overlay {
                 SavedPostsStatusView(model: model, isEmpty: tweets.isEmpty,
                                      signIn: signIn, retry: retry)
