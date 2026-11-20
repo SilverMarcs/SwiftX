@@ -11,22 +11,27 @@ struct VideoPageOverlay: View {
     private var bookmarks: XBookmarkStore { .shared }
 
     var body: some View {
-        if page.isShowingControls, let postID = Int(page.item.id) {
-            let isSaved = bookmarks.isBookmarked(id: postID)
-            Button(isSaved ? "Unsave Post" : "Save Post",
-                   systemImage: isSaved ? "bookmark.fill" : "bookmark") {
-                Task { try? await bookmarks.toggle(id: postID) }
+        Group {
+            if page.isShowingControls, let postID = Int(page.item.id) {
+                let isSaved = bookmarks.isBookmarked(id: postID)
+                Button(isSaved ? "Unsave Post" : "Save Post",
+                       systemImage: isSaved ? "bookmark.fill" : "bookmark") {
+                    Task { try? await bookmarks.toggle(id: postID) }
+                }
+                .labelStyle(.iconOnly)
+                .contentTransition(.symbolEffect(.replace))
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .controlSize(.large)
+                // Dark glass in light mode too, over the video's black backdrop.
+                .environment(\.colorScheme, .dark)
+                .disabled(bookmarks.isPending(postID) || !XSessionStore.shared.isAuthenticated)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                .transition(.opacity)
             }
-            .labelStyle(.iconOnly)
-            .contentTransition(.symbolEffect(.replace))
-            .buttonStyle(.glass)
-            .buttonBorderShape(.circle)
-            .controlSize(.large)
-            // Dark glass in light mode too, over the video's black backdrop.
-            .environment(\.colorScheme, .dark)
-            .disabled(bookmarks.isPending(postID) || !XSessionStore.shared.isAuthenticated)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-            .transition(.opacity)
+        }
+        .onChange(of: page.isCurrent, initial: true) { _, isCurrent in
+            if isCurrent { XSeenPosts.shared.markVideoSeen(id: page.item.id) }
         }
     }
 }

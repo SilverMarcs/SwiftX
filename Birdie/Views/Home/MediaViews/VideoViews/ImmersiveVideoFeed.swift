@@ -41,6 +41,7 @@ final class ImmersiveVideoFeed: SMVVideoFeed {
         let post: any TweetContentProtocol
         if let retweeted = tweet.retweetedTweet { post = retweeted } else { post = tweet }
         guard seenIDs.insert(post.id).inserted,
+              !XSeenPosts.shared.hasSeenVideo(id: String(post.id)),
               let video = post.media?.videos?.first,
               let url = video.playbackURL else { return nil }
         XBookmarkStore.shared.recordKnownState(of: post)
